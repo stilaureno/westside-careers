@@ -1,5 +1,23 @@
 import { createClient } from '@/lib/supabase/server';
-import type { Applicant, DashboardSummary, StageRoadmapItem } from '@/types';
+import type { Applicant, DashboardSummary, StageRoadmapItem, PositionSummary, StageSummary, GenderByPosition } from '@/types';
+
+function emptyPositionSummary(): PositionSummary {
+  return { total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0 };
+}
+
+function emptyStageSummary(): StageSummary {
+  return { taken: 0, pending: 0, passed: 0, failed: 0 };
+}
+
+function emptyGenderByPosition(): GenderByPosition {
+  return {
+    dealerNonExpMale: 0, dealerNonExpFemale: 0,
+    dealerExpMale: 0, dealerExpFemale: 0,
+    pitSupervisorMale: 0, pitSupervisorFemale: 0,
+    pitManagerMale: 0, pitManagerFemale: 0,
+    operationsManagerMale: 0, operationsManagerFemale: 0,
+  };
+}
 
 export function computeAge(birthdate: string): number {
   const dob = new Date(birthdate);
@@ -83,9 +101,10 @@ export async function getDashboardSummary(
 ): Promise<DashboardSummary> {
   const supabase = await createClient();
 
+  // Query all applicants
   let query = supabase
     .from('applicants')
-    .select('application_status, current_stage, position_applied, gender, birthdate');
+    .select('application_status, current_stage, position_applied, gender, birthdate, experience_level');
 
   if (startDate) {
     query = query.gte('created_at', startDate);
@@ -97,24 +116,51 @@ export async function getDashboardSummary(
   const { data: rows, error } = await query;
 
   if (error || !rows) {
-    return { total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0, byPosition: {}, byGender: {}, byAgeBand: {} };
+    return {
+      total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0,
+      byPosition: {}, byGender: {}, byAgeBand: {},
+      dealer: emptyPositionSummary(), pitSupervisor: emptyPositionSummary(),
+      pitManager: emptyPositionSummary(), operationsManager: emptyPositionSummary(),
+      mathExam: emptyStageSummary(), tableTest: emptyStageSummary(),
+      genderByPosition: emptyGenderByPosition(),
+      age20s: 0, age30s: 0, age40s: 0, age50Plus: 0,
+    };
   }
 
   const summary: DashboardSummary = {
     total: rows.length,
-    pending: 0,
-    ongoing: 0,
-    qualified: 0,
-    reprofile: 0,
-    pooling: 0,
-    failed: 0,
+    pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0,
     byPosition: {},
     byGender: { Male: 0, Female: 0 },
     byAgeBand: {},
+    dealer: emptyPositionSummary(),
+    pitSupervisor: emptyPositionSummary(),
+    pitManager: emptyPositionSummary(),
+    operationsManager: emptyPositionSummary(),
+    mathExam: emptyStageSummary(),
+    tableTest: emptyStageSummary(),
+    genderByPosition: emptyGenderByPosition(),
+    age20s: 0, age30s: 0, age40s: 0, age50Plus: 0,
   };
+
+  // Query stage results for math/table test stats
+  const { data: stageRows } = await supabase
+    .from('stage_results')
+    .select('reference_no, stage_name, result_status');
+  const stageMap: Record<string, Record<string, string>> = {};
+  stageRows?.forEach((s) => {
+    if (!stageMap[s.reference_no]) stageMap[s.reference_no] = {};
+    stageMap[s.reference_no][s.stage_name] = s.result_status || '';
+  });
 
   rows.forEach((row) => {
     const status = row.application_status || 'Pending';
+    const pos = row.position_applied || 'Unknown';
+    const exp = row.experience_level || 'Non-Experienced';
+    const gender = row.gender || 'Unknown';
+    const age = computeAge(row.birthdate);
+
+    // Count status
     if (status === 'Pending') summary.pending++;
     else if (status === 'Ongoing') summary.ongoing++;
     else if (status === 'Passed' || status === 'Completed') summary.qualified++;
@@ -122,18 +168,86 @@ export async function getDashboardSummary(
     else if (status === 'For Pooling') summary.pooling++;
     else if (status === 'Failed' || status === 'Not Recommended') summary.failed++;
 
-    const pos = row.position_applied || 'Unknown';
+    // byPosition
     summary.byPosition[pos] = (summary.byPosition[pos] || 0) + 1;
 
-    const gender = row.gender || 'Unknown';
+    // byGender
     if (gender === 'Male' || gender === 'Female') {
       summary.byGender[gender] = (summary.byGender[gender] || 0) + 1;
     }
 
-    const age = computeAge(row.birthdate);
+    // byAgeBand (standard)
     const band = age < 25 ? '18-24' : age < 35 ? '25-34' : age < 45 ? '35-44' : '45+';
     summary.byAgeBand[band] = (summary.byAgeBand[band] || 0) + 1;
+
+    // New age bands (20s, 30s, 40s, 50+)
+    if (age >= 20 && age < 30) summary.age20s++;
+    else if (age >= 30 && age < 40) summary.age30s++;
+    else if (age >= 40 && age < 50) summary.age40s++;
+    else if (age >= 50) summary.age50Plus++;
+
+    // Position breakdowns
+    let posSummary: PositionSummary;
+    if (pos === 'Dealer') posSummary = summary.dealer;
+    else if (pos === 'Pit Supervisor') posSummary = summary.pitSupervisor;
+    else if (pos === 'Pit Manager') posSummary = summary.pitManager;
+    else if (pos === 'Operations Manager') posSummary = summary.operationsManager;
+    else return;
+
+    posSummary.total++;
+    if (status === 'Pending') posSummary.pending++;
+    else if (status === 'Ongoing') posSummary.ongoing++;
+    else if (status === 'Passed' || status === 'Completed') posSummary.qualified++;
+    else if (status === 'Reprofile') posSummary.reprofile++;
+    else if (status === 'For Pooling') posSummary.pooling++;
+    else if (status === 'Failed' || status === 'Not Recommended') posSummary.failed++;
+
+    // Gender by position
+    if (pos === 'Dealer') {
+      if (exp === 'Experienced Dealer') {
+        if (gender === 'Male') summary.genderByPosition.dealerExpMale++;
+        else if (gender === 'Female') summary.genderByPosition.dealerExpFemale++;
+      } else {
+        if (gender === 'Male') summary.genderByPosition.dealerNonExpMale++;
+        else if (gender === 'Female') summary.genderByPosition.dealerNonExpFemale++;
+      }
+    } else if (pos === 'Pit Supervisor') {
+      if (gender === 'Male') summary.genderByPosition.pitSupervisorMale++;
+      else if (gender === 'Female') summary.genderByPosition.pitSupervisorFemale++;
+    } else if (pos === 'Pit Manager') {
+      if (gender === 'Male') summary.genderByPosition.pitManagerMale++;
+      else if (gender === 'Female') summary.genderByPosition.pitManagerFemale++;
+    } else if (pos === 'Operations Manager') {
+      if (gender === 'Male') summary.genderByPosition.operationsManagerMale++;
+      else if (gender === 'Female') summary.genderByPosition.operationsManagerFemale++;
+    }
   });
+
+  // Compute math exam and table test stats from stage results
+  const applicantsWithStages = new Set(Object.keys(stageMap));
+  applicantsWithStages.forEach((refNo) => {
+    const stages = stageMap[refNo];
+    const mathResult = stages['Math Exam'];
+    const tableResult = stages['Table Test'];
+
+    if (mathResult) {
+      summary.mathExam.taken++;
+      if (mathResult === 'Passed') summary.mathExam.passed++;
+      else if (mathResult === 'Failed') summary.mathExam.failed++;
+      else summary.mathExam.pending++;
+    }
+    if (tableResult) {
+      summary.tableTest.taken++;
+      if (tableResult === 'Passed') summary.tableTest.passed++;
+      else if (tableResult === 'Failed') summary.tableTest.failed++;
+      else summary.tableTest.pending++;
+    }
+  });
+
+  // For applicants who haven't taken these stages yet, count as pending
+  const dealerApplicants = rows.filter(r => r.position_applied === 'Dealer').length;
+  summary.mathExam.pending = Math.max(0, dealerApplicants - summary.mathExam.taken);
+  summary.tableTest.pending = Math.max(0, dealerApplicants - summary.tableTest.taken);
 
   return summary;
 }

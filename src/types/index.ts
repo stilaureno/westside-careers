@@ -165,4 +165,49 @@ export interface DashboardSummary {
   byPosition: Record<string, number>;
   byGender: Record<string, number>;
   byAgeBand: Record<string, number>;
+  // Position breakdowns
+  dealer: PositionSummary;
+  pitSupervisor: PositionSummary;
+  pitManager: PositionSummary;
+  operationsManager: PositionSummary;
+  // Stage-specific stats
+  mathExam: StageSummary;
+  tableTest: StageSummary;
+  // Gender by position
+  genderByPosition: GenderByPosition;
+  // Age bands
+  age20s: number;
+  age30s: number;
+  age40s: number;
+  age50Plus: number;
+}
+
+export interface PositionSummary {
+  total: number;
+  pending: number;
+  ongoing: number;
+  qualified: number;
+  reprofile: number;
+  pooling: number;
+  failed: number;
+}
+
+export interface StageSummary {
+  taken: number;
+  pending: number;
+  passed: number;
+  failed: number;
+}
+
+export interface GenderByPosition {
+  dealerNonExpMale: number;
+  dealerNonExpFemale: number;
+  dealerExpMale: number;
+  dealerExpFemale: number;
+  pitSupervisorMale: number;
+  pitSupervisorFemale: number;
+  pitManagerMale: number;
+  pitManagerFemale: number;
+  operationsManagerMale: number;
+  operationsManagerFemale: number;
 }
