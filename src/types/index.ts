@@ -112,6 +112,7 @@ export interface QuestionnaireQuestion {
   id?: string;
   set_name: string;
   question_no: number;
+  questionNo?: number;
   question: string;
   option_a: string;
   option_b: string;

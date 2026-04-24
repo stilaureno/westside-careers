@@ -267,7 +267,7 @@ export async function submitExam(
   let score = 0;
 
   questions.forEach((q) => {
-    const chosen = submittedAnswers[q.question_no?.toString() || ''];
+    const chosen = submittedAnswers[q.questionNo?.toString() || ''];
     if (chosen && chosen.toUpperCase() === q.correctChoiceKey?.toUpperCase()) {
       score++;
     }
