@@ -321,9 +321,9 @@ export default function ExamPage() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <img
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238b1e2d'/%3E%3Ctext x='50' y='60' font-size='40' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EWC%3C/text%3E%3C/svg%3E"
-            alt="Logo"
-            style={{ maxWidth: '80px', margin: '0 auto 12px', display: 'block', borderRadius: '12px' }}
+            src="/WESTSIDE%20LOGO%20COLORED.png"
+            alt="Westside Resort logo"
+            style={{ width: '220px', maxWidth: '100%', margin: '0 auto 16px', display: 'block' }}
           />
           <h1 style={{ fontSize: '22px', color: '#8b1e2d', marginBottom: '6px' }}>Math Proficiency Exam</h1>
           <p style={{ fontSize: '14px', color: '#6b7280' }}>
