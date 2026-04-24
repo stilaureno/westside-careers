@@ -63,8 +63,14 @@ export function shuffleChoices(question: QuestionnaireQuestion): QuestionnaireQu
     { key: 'D', text: question.option_d },
   ];
   const shuffledChoices = shuffleArray(choices);
+  
+  // Normalize strings for comparison (remove commas, trim, etc. if needed, 
+  // but at least trim and normalize whitespace)
+  const normalize = (s: string) => s.replace(/\s+/g, ' ').trim();
+  const correctText = normalize(question.correct_answer);
+
   const correctChoiceKey = shuffledChoices.find(
-    (c) => c.text === question.correct_answer
+    (c) => normalize(c.text) === correctText
   )?.key || 'A';
 
   return {

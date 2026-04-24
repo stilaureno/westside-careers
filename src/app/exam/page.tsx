@@ -11,15 +11,12 @@ function getExamErrorMessage(error: string): string {
   if (error === 'notEligible') {
     return 'You are not eligible for the math exam at this time.';
   }
-
   if (error === 'initialScreeningRequired') {
     return 'You must complete Initial Screening before taking the math exam.';
   }
-
   if (error === 'alreadyTaken') {
     return 'You have already taken this exam.';
   }
-
   return error;
 }
 
@@ -46,7 +43,6 @@ export default function ExamPage() {
     if (saveRef.current) clearInterval(saveRef.current);
   }, []);
 
-  // Update answersRef whenever answers state changes
   useEffect(() => {
     answersRef.current = answers;
   }, [answers]);
@@ -115,7 +111,6 @@ export default function ExamPage() {
       await startExam(data.referenceNo);
     } catch (err) {
       setMessage({ text: 'An unexpected error occurred.', type: 'error' });
-    } finally {
       setLoading(false);
     }
   }
@@ -180,10 +175,7 @@ export default function ExamPage() {
 
   async function forceFinish(reason: string) {
     stopTimers();
-    
-    // Use latest answers from Ref
     const currentAnswers = answersRef.current;
-
     const res = await fetch(`/api/exam`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -201,11 +193,23 @@ export default function ExamPage() {
   }
 
   async function submitExam() {
-    stopTimers();
-    
-    // Use latest answers from Ref
-    const currentAnswers = answersRef.current;
+    // Check for unanswered questions
+    const unanswered = questions.find(q => !answers[q.question_no.toString()]);
+    if (unanswered) {
+      const confirmed = window.confirm(`You still have ${questions.length - Object.keys(answers).length} unanswered questions. Are you sure you want to submit?`);
+      if (!confirmed) {
+        const el = document.getElementById(`question-${unanswered.question_no}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.boxShadow = '0 0 0 3px #8b1e2d';
+          setTimeout(() => { el.style.boxShadow = '0 10px 30px rgba(15,23,42,.06)'; }, 2000);
+        }
+        return;
+      }
+    }
 
+    stopTimers();
+    const currentAnswers = answersRef.current;
     const res = await fetch(`/api/exam`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -273,7 +277,7 @@ export default function ExamPage() {
         <div style={{
           background: '#fff', borderRadius: '20px', padding: '20px 28px', marginBottom: '20px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', maxWidth: '720px',
-          boxShadow: '0 10px 30px rgba(15,23,42,.06)',
+          boxShadow: '0 10px 30px rgba(15,23,42,.06)', position: 'sticky', top: '20px', zIndex: 10
         }}>
           <div>
             <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Time Remaining</p>
@@ -292,9 +296,10 @@ export default function ExamPage() {
 
         <div style={{ width: '100%', maxWidth: '720px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {questions.map((q) => (
-            <div key={q.question_no} style={{
+            <div key={q.question_no} id={`question-${q.question_no}`} style={{
               background: '#fff', borderRadius: '18px', padding: '20px 24px',
               boxShadow: '0 10px 30px rgba(15,23,42,.06)',
+              transition: 'all 0.3s ease'
             }}>
               <p style={{ fontSize: '14px', fontWeight: '700', color: '#8b1e2d', marginBottom: '10px' }}>
                 Question {q.question_no}
