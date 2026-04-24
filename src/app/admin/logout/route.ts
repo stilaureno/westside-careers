@@ -1,12 +1,7 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
-  return NextResponse.redirect(new URL('/admin/login', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'));
-}
-
 export async function POST() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  return NextResponse.redirect(new URL('/admin/login', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'));
+  const response = NextResponse.redirect(new URL('/admin/login', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'));
+  response.cookies.set('admin_session', '', { path: '/', maxAge: 0 });
+  return response;
 }
