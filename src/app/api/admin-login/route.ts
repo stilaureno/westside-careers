@@ -25,16 +25,17 @@ export async function POST(request: Request) {
     // Success - set cookie in response
     const response = NextResponse.json({ success: true });
     
-    // Set cookie - use secure settings for production
-    const isProduction = request.headers.get('host')?.includes('vercel.app') || 
-                        request.headers.get('host')?.includes('westside-careers');
+    // Detect production environment
+    const host = request.headers.get('host') || '';
+    const isProduction = host.includes('vercel.app') || host.includes('westside-careers');
     
+    // Set cookie - Vercel handles cookie domain automatically
     response.cookies.set('admin_session', 'authenticated', {
       path: '/',
       maxAge: 60 * 60 * 24, // 24 hours
       httpOnly: true,
       sameSite: 'lax',
-      ...(isProduction ? { domain: '.vercel.app' } : {}),
+      secure: isProduction,
     });
 
     return response;

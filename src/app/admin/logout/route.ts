@@ -7,11 +7,12 @@ export async function POST(request: Request) {
   
   const response = NextResponse.redirect(new URL('/admin/login', baseUrl));
   
-  // Clear cookie with matching settings
+  // Clear cookie - Vercel handles cookie domain automatically
   response.cookies.set('admin_session', '', { 
     path: '/', 
     maxAge: 0,
-    ...(isProduction ? { domain: '.vercel.app' } : {}),
+    sameSite: 'lax',
+    secure: isProduction,
   });
   
   return response;
