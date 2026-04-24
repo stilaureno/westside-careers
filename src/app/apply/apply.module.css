@@ -1,0 +1,293 @@
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #08111f 0%, #0d1a2f 26%, #10213b 58%, #0a1424 100%);
+  padding: 18px 14px calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.hero {
+  text-align: center;
+  padding: 16px 10px 20px;
+}
+
+.heroTitle {
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 2.3rem);
+  margin: 0 0 6px;
+}
+
+.heroSubtitle {
+  color: #b7c6df;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 22px;
+  box-shadow: 0 18px 42px rgba(4, 12, 24, 0.34);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.formCard {
+  padding: 20px 16px 22px;
+}
+
+.successWrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #08111f 0%, #0d1a2f 26%, #10213b 58%, #0a1424 100%);
+  padding: 18px 14px calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+.successCard {
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  padding: 28px 20px;
+}
+
+.successIcon {
+  font-size: 44px;
+  margin-bottom: 14px;
+}
+
+.successTitle {
+  color: #163a70;
+  font-size: clamp(1.5rem, 4vw, 1.75rem);
+  margin: 0 0 8px;
+}
+
+.successText {
+  color: #555;
+  margin: 0 0 16px;
+}
+
+.referenceBox {
+  background: #ecfdf3;
+  border: 1px solid #86efac;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.referenceLabel {
+  color: #166534;
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.referenceValue {
+  color: #166534;
+  font-size: clamp(1.2rem, 4.6vw, 1.5rem);
+  font-weight: 700;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.successHint {
+  color: #888;
+  font-size: 13px;
+  margin: 0 0 20px;
+}
+
+.section {
+  margin-bottom: 22px;
+}
+
+.sectionTitle {
+  color: #163a70;
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+}
+
+.message {
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+
+.messageError {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.messageSuccess {
+  background: #ecfdf3;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.compactGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.control {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #d8dfeb;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 16px;
+  color: #1f2937;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  appearance: none;
+}
+
+.control:focus {
+  outline: none;
+  border-color: #163a70;
+  box-shadow: 0 0 0 3px rgba(22, 58, 112, 0.14);
+}
+
+.control::placeholder {
+  color: #9ca3af;
+}
+
+.gameHint {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 10px;
+}
+
+.gameGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gameOption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  background: #fff;
+  color: #1f2937;
+  font-weight: 500;
+  touch-action: manipulation;
+  user-select: none;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.gameOptionSelected {
+  border-color: #163a70;
+  background: #f0f4ff;
+  color: #163a70;
+  font-weight: 700;
+}
+
+.gameCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #163a70;
+  flex: 0 0 auto;
+}
+
+.button {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.primaryButton {
+  background: #163a70;
+  color: #fff;
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.linkButton {
+  background: #163a70;
+  color: #fff;
+}
+
+.footerLinkWrap {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.footerLink {
+  color: #6b7280;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+@media (min-width: 700px) {
+  .page {
+    padding: 20px;
+  }
+
+  .hero {
+    margin-bottom: 6px;
+    padding: 20px;
+  }
+
+  .formCard {
+    padding: 28px;
+  }
+
+  .successCard {
+    padding: 40px;
+  }
+
+  .gridTwo {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .compactGrid {
+    gap: 8px;
+  }
+
+  .gameGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
