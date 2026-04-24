@@ -32,16 +32,16 @@ export async function middleware(request: NextRequest) {
   const isLoginRoute = pathname === '/admin/login';
   const isAdminRoute = pathname.startsWith('/admin');
 
-  // If trying to access admin but not logged in, redirect to login
+  // If not logged in and trying to access admin (except login page), redirect to login
   if (isAdminRoute && !isLoginRoute && !adminSession) {
     console.log('Redirecting to login - no session');
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  // If already logged in and trying to access login, redirect to dashboard
+  // If already logged in and trying to access login, redirect to admin landing
   if (isLoginRoute && adminSession) {
-    console.log('Redirecting to dashboard - has session');
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    console.log('Redirecting to admin - has session');
+    return NextResponse.redirect(new URL('/admin', request.url));
   }
 
   console.log('Allowing through');

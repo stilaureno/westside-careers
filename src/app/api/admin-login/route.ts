@@ -22,7 +22,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Invalid password' }, { status: 401 });
     }
 
-    return NextResponse.json({ success: true });
+    // Success - set cookie in response
+    const response = NextResponse.json({ success: true });
+    response.cookies.set('admin_session', 'authenticated', {
+      path: '/',
+      maxAge: 60 * 60 * 24, // 24 hours
+      httpOnly: true,
+      sameSite: 'lax',
+      // For Vercel production, also set domain for proper cookie sharing
+      ...(process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('vercel') && {
+        domain: '.vercel.app',
+      }),
+    });
+
+    return response;
   } catch (err) {
     return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
   }

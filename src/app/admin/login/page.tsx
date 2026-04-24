@@ -28,9 +28,9 @@ export default function LoginPage() {
       return;
     }
 
-    // Set session cookie
-    document.cookie = 'admin_session=authenticated; path=/; max-age=86400';
-    router.push('/admin/dashboard');
+    // Cookie is now set server-side in the API response
+    // Redirect to admin (landing page for the new SPA layout)
+    router.push('/admin');
     setLoading(false);
   }
 
