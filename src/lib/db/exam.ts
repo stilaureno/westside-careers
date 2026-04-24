@@ -242,11 +242,25 @@ export async function submitExam(
 
   const { data: attempt } = await supabase
     .from('math_exam_results')
-    .select('questions_json, answers_json')
+    .select('questions_json, answers_json, attempt_status, score, status, termination_reason')
     .eq('reference_no', referenceNo)
     .single();
 
   if (!attempt) return { success: false, error: 'Exam not found' };
+
+  if (attempt.attempt_status !== 'IN_PROGRESS') {
+    return {
+      success: true,
+      data: {
+        score: attempt.score,
+        passingScore: PASSING_SCORE,
+        maxScore: MAX_MATH_EXAM_SCORE,
+        passed: attempt.status === 'Passed',
+        terminationReason: attempt.termination_reason,
+        previousResult: true
+      }
+    };
+  }
 
   const questions = attempt.questions_json as (QuestionnaireQuestion & { choices: { key: string; text: string }[]; correctChoiceKey: string })[];
   const submittedAnswers = { ...(attempt.answers_json || {}), ...answers };

@@ -29,6 +29,7 @@ export default function ExamPage() {
   const [applicant, setApplicant] = useState<any>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const answersRef = useRef<Record<string, string>>({});
   const [remaining, setRemaining] = useState(EXAM_DURATION_MINUTES * 60);
   const [startedAt, setStartedAt] = useState('');
   const [result, setResult] = useState<any>(null);
@@ -44,6 +45,11 @@ export default function ExamPage() {
     if (heartbeatRef.current) clearInterval(heartbeatRef.current);
     if (saveRef.current) clearInterval(saveRef.current);
   }, []);
+
+  // Update answersRef whenever answers state changes
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
 
   useEffect(() => {
     if (view !== 'exam') return;
@@ -62,7 +68,7 @@ export default function ExamPage() {
       window.removeEventListener('blur', handleBlur);
       stopTimers();
     };
-  }, [view, refInput]);
+  }, [view, stopTimers]);
 
   async function verifyAndStart() {
     if (!refInput.trim()) {
@@ -72,41 +78,46 @@ export default function ExamPage() {
     setLoading(true);
     setMessage(null);
 
-    const res = await fetch(`/api/exam`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'getInfo', referenceNo: refInput.trim() }),
-    });
-
-    if (!res.ok) {
-      setMessage({ text: 'Failed to verify reference number.', type: 'error' });
-      setLoading(false);
-      return;
-    }
-
-    const data = await res.json();
-
-    if (data.error) {
-      setMessage({ text: getExamErrorMessage(data.error), type: 'error' });
-      setLoading(false);
-      return;
-    }
-
-    if (data.alreadyTaken) {
-      setResult({
-        score: data.previousResult?.score,
-        passed: data.previousResult?.status === 'Passed',
-        terminationReason: 'Previously taken',
-        previousResult: true,
+    try {
+      const res = await fetch(`/api/exam`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getInfo', referenceNo: refInput.trim() }),
       });
-      setView('result');
-      setLoading(false);
-      return;
-    }
 
-    setApplicant(data);
-    await startExam(data.referenceNo);
-    setLoading(false);
+      if (!res.ok) {
+        setMessage({ text: 'Failed to verify reference number.', type: 'error' });
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.error) {
+        setMessage({ text: getExamErrorMessage(data.error), type: 'error' });
+        setLoading(false);
+        return;
+      }
+
+      if (data.alreadyTaken) {
+        setResult({
+          score: data.previousResult?.score,
+          passed: data.previousResult?.status === 'Passed',
+          terminationReason: data.previousResult?.termination_reason || 'Previously taken',
+          previousResult: true,
+        });
+        setView('result');
+        setLoading(false);
+        return;
+      }
+
+      setApplicant(data);
+      await startExam(data.referenceNo);
+    } catch (err) {
+      setMessage({ text: 'An unexpected error occurred.', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function startExam(referenceNo: string) {
@@ -118,6 +129,16 @@ export default function ExamPage() {
     const data = await res.json();
 
     if (!data.success) {
+      if (data.error === 'alreadyTaken' && data.data) {
+        setResult({
+          score: data.data.score,
+          passed: data.data.status === 'Passed',
+          terminationReason: data.data.termination_reason || 'Previously taken',
+          previousResult: true,
+        });
+        setView('result');
+        return;
+      }
       setMessage({ text: getExamErrorMessage(data.error || 'Failed to start exam.'), type: 'error' });
       return;
     }
@@ -126,6 +147,7 @@ export default function ExamPage() {
     setStartedAt(data.data.startedAt);
     setRemaining(data.data.duration);
     setAnswers({});
+    answersRef.current = {};
     setView('exam');
 
     timerRef.current = setInterval(() => {
@@ -151,24 +173,27 @@ export default function ExamPage() {
       await fetch(`/api/exam`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'saveProgress', referenceNo, answers }),
+        body: JSON.stringify({ action: 'saveProgress', referenceNo, answers: answersRef.current }),
       });
     }, 15000);
   }
 
   async function forceFinish(reason: string) {
     stopTimers();
-    setView('result');
+    
+    // Use latest answers from Ref
+    const currentAnswers = answersRef.current;
 
     const res = await fetch(`/api/exam`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'submit', referenceNo: refInput, answers, reason }),
+      body: JSON.stringify({ action: 'submit', referenceNo: refInput, answers: currentAnswers, reason }),
     });
     const data = await res.json();
     if (data.success) {
       setResult(data.data);
     }
+    setView('result');
   }
 
   function handleAnswer(questionNo: string, choiceKey: string) {
@@ -177,11 +202,14 @@ export default function ExamPage() {
 
   async function submitExam() {
     stopTimers();
+    
+    // Use latest answers from Ref
+    const currentAnswers = answersRef.current;
 
     const res = await fetch(`/api/exam`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'submit', referenceNo: refInput, answers, reason: 'SUBMIT' }),
+      body: JSON.stringify({ action: 'submit', referenceNo: refInput, answers: currentAnswers, reason: 'SUBMIT' }),
     });
     const data = await res.json();
     if (data.success) {
