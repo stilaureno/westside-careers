@@ -24,15 +24,17 @@ export async function POST(request: Request) {
 
     // Success - set cookie in response
     const response = NextResponse.json({ success: true });
+    
+    // Set cookie - use secure settings for production
+    const isProduction = request.headers.get('host')?.includes('vercel.app') || 
+                        request.headers.get('host')?.includes('westside-careers');
+    
     response.cookies.set('admin_session', 'authenticated', {
       path: '/',
       maxAge: 60 * 60 * 24, // 24 hours
       httpOnly: true,
       sameSite: 'lax',
-      // For Vercel production, also set domain for proper cookie sharing
-      ...(process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('vercel') && {
-        domain: '.vercel.app',
-      }),
+      ...(isProduction ? { domain: '.vercel.app' } : {}),
     });
 
     return response;
