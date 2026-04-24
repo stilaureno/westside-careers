@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {},
+  // Keep default (server) for SSR with Supabase
 };
 
 export default nextConfig;
