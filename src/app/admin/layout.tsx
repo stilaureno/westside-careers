@@ -36,8 +36,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const cookies = document.cookie.split('; ').find(c => c.startsWith(ADMIN_SESSION_COOKIE + '='));
-    if (!cookies || !cookies.includes('authenticated')) {
+    const cookieStr = document.cookie;
+    const hasValidSession = cookieStr.includes(ADMIN_SESSION_COOKIE + '=authenticated');
+    if (!hasValidSession) {
       router.replace('/admin/login');
     } else {
       setIsAuthorized(true);
