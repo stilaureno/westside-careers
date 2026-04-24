@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { renderFormattedMessage } from '@/components/formatted-message';
 import { getApplicant, updateStage } from '@/lib/actions/admin';
 import type { Applicant } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -193,7 +194,11 @@ export default function ApplicantDetailPage({ params }: { params: Promise<{ refe
                     color: s.result_status === 'Passed' ? '#166534' : '#991b1b',
                   }}>{s.result_status}</span>
                 </div>
-                {s.remarks && <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0' }}>{s.remarks}</p>}
+                {s.remarks && (
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0' }}>
+                    {renderFormattedMessage(s.remarks)}
+                  </p>
+                )}
                 <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>{s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}</p>
               </div>
             )) : (
@@ -341,7 +346,9 @@ export default function ApplicantDetailPage({ params }: { params: Promise<{ refe
           <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px', color: '#1f2937' }}>Notifications</h3>
           {notifications.map((n: any) => (
             <div key={n.id} style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #f3f4f6' }}>
-              <p style={{ fontSize: '13px', color: '#1f2937', margin: 0 }}>{n.notification_message}</p>
+              <p style={{ fontSize: '13px', color: '#1f2937', margin: 0 }}>
+                {renderFormattedMessage(n.notification_message)}
+              </p>
               <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>
                 {n.stage_name} &middot; {n.result_status} &middot; {n.created_at ? new Date(n.created_at).toLocaleString() : ''}
               </p>

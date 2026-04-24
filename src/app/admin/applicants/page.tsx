@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import type { Applicant, StageRoadmapItem } from '@/types';
 import Link from 'next/link';
@@ -215,7 +216,7 @@ export default function ApplicantsPage() {
                     {app.finalInterviewResult}
                   </td>
                   <td style={{ padding: '8px 12px', color: '#6b7280', maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                    {app.remarks || '-'}
+                    {renderFormattedMessage(app.remarks)}
                   </td>
                 </tr>
               ))}
