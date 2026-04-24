@@ -1,0 +1,530 @@
+applicant_id,reference_no,stage_name,stage_sequence,result_status,current_stage_label,height_cm,weight_kg,bmi_value,bmi_result,color_blind_result,visible_tattoo,invisible_tattoo,sweaty_palm_result,score,passing_score,max_score,remarks,evaluated_by,evaluated_at
+AID-CB94C4F6,APP-20260414093142,Initial Screening,1,Passed,Math Exam,178,80,25.25,Passed,Passed,No,Yes,,,,,,Marx,4/14/2026 15:49:45
+AID-70795C43,APP-20260414093213,Initial Screening,1,Passed,Math Exam,167,63,22.59,Passed,Passed,No,No,,,,,,HR,4/14/2026 9:43:16
+AID-428D22E2,APP-20260414093131,Math Exam,2,Passed,Table Test,180,70,21.6,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/14/2026 13:42:49
+AID-6504021F,APP-20260414093332,Initial Screening,1,Passed,Math Exam,177,77,24.58,Passed,Passed,Yes,No,,,,,,HR,4/14/2026 13:51:17
+AID-77B4FB14,APP-20260414093227,Initial Screening,1,Passed,Math Exam,160,65,25.39,Passed,Passed,No,No,,,,,,HR,4/14/2026 9:45:07
+AID-CB94C4F6,APP-20260414093142,Math Exam,2,Passed,Table Test,178,80,25.25,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Marx,4/14/2026 15:50:09
+AID-F6542F90,APP-20260414093214,Math Exam,2,Passed,Table Test,171,80,27.36,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Marx,4/14/2026 16:25:27
+AID-09F06749,APP-20260414093427,Math Exam,2,Passed,Table Test,57,180,554.02,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Exam window lost focus,Marx,4/14/2026 15:58:05
+AID-3D6925DF,APP-20260414093031,Initial Screening,1,Passed,Math Exam,172,78,26.37,Passed,Passed,No,Yes,,,,,,HR,4/14/2026 9:47:04
+AID-20B27FD6,APP-20260414093223,Math Exam,2,Passed,Table Test,160,62,24.22,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 9:47:23
+AID-68261810,APP-20260414093139,Math Exam,2,Passed,Table Test,170,65,22.49,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/14/2026 13:23:10
+AID-94A79124,APP-20260414093414,Math Exam,2,Passed,Table Test,160,59,23.05,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Exam window lost focus,Jason,4/14/2026 16:01:28
+AID-2D3BCB5B,APP-20260414093424,Initial Screening,1,Passed,Math Exam,173,77,25.73,Passed,Passed,No,Yes,,,,,,HR,4/14/2026 9:47:31
+AID-6504021F,APP-20260414093332,Math Exam,2,Passed,Final Interview,177,77,24.58,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/14/2026 13:51:36
+AID-2D3BCB5B,APP-20260414093424,Math Exam,2,Passed,Table Test,173,77,25.73,,,,,,8,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 9:48:25
+AID-1C4AEAB2,APP-20260414093137,Math Exam,2,Passed,Table Test,170,64,22.15,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 9:48:37
+AID-49E503A6,APP-20260414093255,Initial Screening,1,Passed,Math Exam,180.34,78,23.98,Passed,Passed,No,Yes,,,,,,HR,4/14/2026 9:49:31
+AID-3D6925DF,APP-20260414093031,Math Exam,2,Passed,Final Interview,172,78,26.37,,,,,,9,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 9:51:28
+AID-77B4FB14,APP-20260414093227,Math Exam,2,Passed,Table Test,160,65,25.39,,,,,,9,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 9:52:38
+AID-E9A3C908,APP-20260414093202,Math Exam,2,Passed,Table Test,54,57,195.47,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/14/2026 13:46:42
+AID-70795C43,APP-20260414093213,Math Exam,2,Passed,Table Test,167,63,22.59,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 9:58:09
+AID-49E503A6,APP-20260414093255,Math Exam,2,Passed,Final Interview,180.34,78,23.98,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 10:29:52
+AID-77B4FB14,APP-20260414093227,Table Test,3,Passed,Final Interview,160,65,25.39,,,,,,,,,,Anthony,4/14/2026 11:06:29
+AID-2D3BCB5B,APP-20260414093424,Table Test,3,Passed,Final Interview,173,77,25.73,,,,,,,,,,Jek,4/14/2026 11:08:04
+AID-68261810,APP-20260414093139,Table Test,3,Passed,Final Interview,170,65,22.49,,,,,,,,,,HR,4/14/2026 13:44:20
+AID-E9A3C908,APP-20260414093202,Table Test,3,Passed,Final Interview,54,57,195.47,,,,,,,,,,HR,4/14/2026 13:47:05
+AID-70795C43,APP-20260414093213,Table Test,3,Passed,Final Interview,167,63,22.59,,,,,,,,,,Jek,4/14/2026 11:22:29
+AID-428D22E2,APP-20260414093131,Table Test,3,Passed,Final Interview,180,70,21.6,,,,,,,,,,HR,4/14/2026 13:43:12
+AID-CB94C4F6,APP-20260414093142,Table Test,3,Passed,Final Interview,178,80,25.25,,,,,,,,,,Marx,4/14/2026 15:50:44
+AID-F6542F90,APP-20260414093214,Table Test,3,Passed,Final Interview,171,80,27.36,,,,,,,,,,Marx,4/14/2026 13:48:16
+AID-94A79124,APP-20260414093414,Table Test,3,Passed,Final Interview,160,59,23.05,,,,,,,,,,Jason,4/14/2026 16:02:00
+AID-1C4AEAB2,APP-20260414093137,Table Test,3,Passed,Final Interview,170,64,22.15,,,,,,,,,,Jason,4/14/2026 11:38:52
+AID-20B27FD6,APP-20260414093223,Table Test,3,Passed,Final Interview,160,62,24.22,,,,,,,,,,Joseph,4/14/2026 11:43:07
+AID-09F06749,APP-20260414093427,Table Test,3,Passed,Final Interview,57,180,554.02,,,,,,,,,,Marx,4/14/2026 15:58:25
+AID-77B4FB14,APP-20260414093227,Final Interview,4,Passed,Completed,160,65,25.39,,,,,Passed,,,,With 2 major games. Can communicate well. Passed table test and final interview.,HR,4/14/2026 12:41:57
+AID-49E503A6,APP-20260414093255,Final Interview,3,Passed,Completed,180.34,78,23.98,,,,,Passed,,,,"Fit as dealer, meets the requirements.",HR,4/14/2026 12:44:58
+AID-2D3BCB5B,APP-20260414093424,Final Interview,4,Passed,Completed,173,77,25.73,,,,,Passed,,,,Experience dealer. Good personality.,HR,4/14/2026 12:47:05
+AID-70795C43,APP-20260414093213,Final Interview,4,Passed,Completed,167,63,22.59,,,,,Passed,,,,Experienced dealer. Fit for the position.,HR,4/14/2026 12:51:35
+AID-F6542F90,APP-20260414093214,Final Interview,4,Passed,Completed,171,80,27.36,,,,,Passed,,,,Fit for the position as experienced dealer,Gina,4/14/2026 13:48:32
+AID-428D22E2,APP-20260414093131,Final Interview,4,Not Recommended,Completed,180,70,21.6,,,,,Passed,,,,Work in City of Dreams before.,HR,4/14/2026 13:43:32
+AID-E9A3C908,APP-20260414093202,Final Interview,4,Passed,Completed,54,57,195.47,,,,,Passed,,,,Experience dealer. Have a nice smile and good enthusiasm.,HR,4/14/2026 13:47:20
+AID-09F06749,APP-20260414093427,Final Interview,4,Passed,Completed,57,180,554.02,,,,,Passed,,,,Knowledgeable and very inquisitive.,Jason,4/14/2026 15:59:03
+AID-09F06749,APP-20260414093427,Initial Screening,1,Passed,Math Exam,57,180,554.02,Passed,Passed,No,No,,,,,,HR,4/14/2026 13:42:19
+AID-E9A3C908,APP-20260414093202,Initial Screening,1,Passed,Math Exam,54,57,195.47,Passed,Passed,No,No,,,,,,HR,4/14/2026 13:11:39
+AID-428D22E2,APP-20260414093131,Initial Screening,1,Passed,Math Exam,180,70,21.6,Passed,Passed,No,No,,,,,,HR,4/14/2026 13:13:32
+AID-F6542F90,APP-20260414093214,Initial Screening,1,Passed,Math Exam,171,80,27.36,Passed,Passed,No,No,,,,,,Marx,4/14/2026 13:14:41
+AID-68261810,APP-20260414093139,Final Interview,4,Not Recommended,Completed,170,65,22.49,,,,,Passed,,,,Previous job in City of Dreams.,HR,4/14/2026 13:44:42
+AID-68261810,APP-20260414093139,Initial Screening,1,Passed,Math Exam,170,65,22.49,Passed,Passed,No,No,,,,,,HR,4/14/2026 13:22:11
+AID-CB94C4F6,APP-20260414093142,Final Interview,4,Not Recommended,Completed,178,80,25.25,,,,,Passed,,,,Not suitable for the position,Edison,4/14/2026 15:52:50
+AID-6504021F,APP-20260414093332,Final Interview,3,Passed,Completed,177,77,24.58,,,,,Passed,,,,MB and TH games ready to deal. Passed.,HR,4/14/2026 13:51:51
+AID-94A79124,APP-20260414093414,Final Interview,4,Passed,Completed,160,59,23.05,,,,,Passed,,,,Suited for experience dealer position.,Gina,4/14/2026 16:02:38
+AID-94A79124,APP-20260414093414,Initial Screening,1,Passed,Math Exam,160,59,23.05,Passed,Passed,Yes,No,,,,,,Jason,4/14/2026 16:00:45
+AID-1C4AEAB2,APP-20260414093137,Final Interview,4,Not Recommended,Completed,170,64,22.15,,,,,Passed,,,,Not confident work at COD,HR,4/14/2026 13:32:44
+AID-3D6925DF,APP-20260414093031,Final Interview,3,Not Recommended,Completed,172,78,26.37,,,,,Passed,,,,Not suitable worked at COD,HR,4/14/2026 13:35:20
+AID-C33D5C6C,APP-20260414133936,Initial Screening,1,Passed,Math Exam,160,60,23.44,Passed,Passed,No,No,,,,,,Gina,4/14/2026 13:47:08
+AID-7F61B697,APP-20260414133944,Initial Screening,1,Passed,Math Exam,163,53,19.95,Passed,Passed,No,No,,,,,,Gina,4/14/2026 13:48:09
+AID-80D2D93E,APP-20260414134232,Initial Screening,1,Passed,Math Exam,160.02,56,21.87,Passed,Passed,No,No,,,,,,Gina,4/14/2026 13:49:05
+AID-20B27FD6,APP-20260414093223,Final Interview,4,Passed,Completed,160,62,24.22,,,,,Passed,,,,NEED A LITTLE REFRESHER BUT STILL CONSIDERED AS EXPERIENCED. PASSED.,HR,4/14/2026 13:50:03
+AID-AFE16958,APP-20260414133922,Math Exam,2,Passed,Table Test,175,91,29.71,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:52:10
+AID-7F61B697,APP-20260414133944,Math Exam,2,Passed,Table Test,163,53,19.95,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:52:14
+AID-F50BFEE1,APP-20260414133956,Math Exam,2,Passed,Table Test,174,68,22.46,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:52:36
+AID-3C568AAE,APP-20260414134027,Initial Screening,1,Passed,Math Exam,165,48,17.63,Passed,Passed,No,No,,,,,,Maribeth Vida,4/14/2026 15:31:24
+AID-0ABA8458,APP-20260414133935,Initial Screening,1,Passed,Math Exam,16.56,72,2625.5,Passed,Passed,No,No,,,,,,Gina,4/14/2026 13:53:43
+AID-BBAA70F4,APP-20260414133930,Math Exam,2,Passed,Final Interview,160,75,29.3,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:53:45
+AID-9CC364E8,APP-20260414133954,Math Exam,2,Passed,Table Test,180,95,29.32,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:53:55
+AID-C33D5C6C,APP-20260414133936,Math Exam,2,Passed,Table Test,160,60,23.44,,,,,,9,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:54:23
+AID-BE39C212,APP-20260414134036,Initial Screening,1,Passed,Math Exam,52,54,199.7,Passed,Passed,No,No,,,,,,Gina,4/14/2026 13:54:32
+AID-A0AD0E52,APP-20260414133846,Math Exam,2,Passed,Table Test,172,83,28.06,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:54:39
+AID-01DC1954,APP-20260414134102,Math Exam,2,Passed,Final Interview,170,70,24.22,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:54:51
+AID-AAE6F7AF,APP-20260414134319,Math Exam,2,Passed,Table Test,177,78,24.9,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Jason,4/14/2026 16:17:45
+AID-AAE6F7AF,APP-20260414134319,Initial Screening,1,Passed,Math Exam,177,78,24.9,Passed,Passed,No,No,,,,,,Gina,4/14/2026 16:07:23
+AID-22FF8DD9,APP-20260414134430,Initial Screening,1,Passed,Math Exam,160,59,23.05,Passed,Passed,No,No,,,,,,Jason,4/14/2026 15:42:45
+AID-0ABA8458,APP-20260414133935,Math Exam,2,Passed,Table Test,16.56,72,2625.5,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:57:04
+AID-22FF8DD9,APP-20260414134430,Math Exam,2,Passed,Final Interview,160,59,23.05,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Jason Reyes,4/14/2026 15:50:20
+AID-3C568AAE,APP-20260414134027,Math Exam,2,Passed,Table Test,165,48,17.63,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Maribeth Vida,4/14/2026 15:33:04
+AID-0886A54D,APP-20260414134055,Math Exam,2,Passed,Final Interview,170,75,25.95,,,,,,8,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:57:43
+AID-80D2D93E,APP-20260414134232,Math Exam,2,Passed,Table Test,160.02,56,21.87,,,,,,9,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:57:50
+AID-BE39C212,APP-20260414134036,Math Exam,2,Failed,Final Interview,52,54,199.7,,,,,,5,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/14/2026 13:59:42
+AID-3C568AAE,APP-20260414134027,Table Test,3,Passed,Final Interview,165,48,17.63,,,,,,,,,,Maribeth Vida,4/14/2026 15:33:18
+AID-3C568AAE,APP-20260414134027,Final Interview,4,Passed,Completed,165,48,17.63,,,,,Passed,,,,"Did not render, just gave birth and it was pandemic time when she did the immediate resignation - Jek Miclat",Maribeth Vida,4/14/2026 15:33:48
+AID-01DC1954,APP-20260414134102,Final Interview,3,Passed,Completed,170,70,24.22,,,,,Passed,,,,,HR,4/14/2026 15:08:44
+AID-9CC364E8,APP-20260414133954,Table Test,3,Passed,Final Interview,180,95,29.32,,,,,,,,,,HR,4/14/2026 15:09:38
+AID-A0AD0E52,APP-20260414133846,Table Test,3,Passed,Final Interview,172,83,28.06,,,,,,,,,,HR,4/14/2026 15:10:16
+AID-A0AD0E52,APP-20260414133846,Final Interview,4,Passed,Completed,172,83,28.06,,,,,Passed,,,,,HR,4/14/2026 15:10:48
+AID-BBAA70F4,APP-20260414133930,Final Interview,3,Passed,Completed,160,75,29.3,,,,,Passed,,,,Experienced Dealer with good smile and good knowledge with games,Marx Rebadulla,4/14/2026 15:10:53
+AID-9CC364E8,APP-20260414133954,Final Interview,4,Passed,Completed,180,95,29.32,,,,,Passed,,,,"Experience dealer, meets the requirements needed to the said position - Marx",HR,4/14/2026 15:11:30
+AID-AFE16958,APP-20260414133922,Table Test,3,Passed,Final Interview,175,91,29.71,,,,,,,,,,joseph patiam,4/14/2026 15:14:32
+AID-AFE16958,APP-20260414133922,Final Interview,4,Passed,Completed,175,91,29.71,,,,,Passed,,,,Accepted as experience dealer - Jek Miclat,joseph patiam,4/14/2026 15:15:25
+AID-22FF8DD9,APP-20260414134430,Final Interview,3,Passed,Completed,160,59,23.05,,,,,Passed,,,,knows how to handle customer complaints - Jason,Jason Reyes,4/14/2026 15:50:47
+AID-7F61B697,APP-20260414133944,Table Test,3,Passed,Final Interview,163,53,19.95,,,,,,,,,,joseph patiam,4/14/2026 15:22:17
+AID-7F61B697,APP-20260414133944,Final Interview,4,Passed,Completed,163,53,19.95,,,,,Passed,,,,"Experienced  dealer, meets the requirements. - Marx",joseph patiam,4/14/2026 15:23:22
+AID-0886A54D,APP-20260414134055,Final Interview,3,Passed,Completed,170,75,25.95,,,,,Passed,,,,"Accepted as a NEW DEALER, with 1 major game only. - Jek Miclat",Maribeth Vida,4/14/2026 15:26:15
+AID-0ABA8458,APP-20260414133935,Table Test,3,Passed,Final Interview,16.56,72,2625.5,,,,,,,,,,Joan Gasis,4/14/2026 15:36:35
+AID-AAE6F7AF,APP-20260414134319,Final Interview,4,Passed,Completed,177,78,24.9,,,,,Passed,,,,Experienced dealer wit good personality,Jason,4/14/2026 15:36:39
+AID-0ABA8458,APP-20260414133935,Final Interview,4,Passed,Completed,16.56,72,2625.5,,,,,Passed,,,,Suitable for the position,Marx Rebadulla,4/14/2026 15:41:36
+AID-80D2D93E,APP-20260414134232,Table Test,3,Passed,Final Interview,160.02,56,21.87,,,,,,,,,,Maribeth Vida,4/14/2026 15:47:50
+AID-C33D5C6C,APP-20260414133936,Table Test,3,Passed,Final Interview,160,60,23.44,,,,,,,,,,Anthony Garido,4/14/2026 15:47:59
+AID-C33D5C6C,APP-20260414133936,Final Interview,4,Passed,Completed,160,60,23.44,,,,,Passed,,,,Passed as experience dealer,Marx,4/14/2026 15:48:56
+AID-80D2D93E,APP-20260414134232,Final Interview,4,Passed,Completed,160.02,56,21.87,,,,,Passed,,,,Knows how to handle customer concerns,Jason Reyes,4/14/2026 15:49:28
+AID-F50BFEE1,APP-20260414133956,Table Test,3,Passed,Final Interview,174,68,22.46,,,,,,,,,,Maribeth Vida,4/14/2026 15:54:00
+AID-F50BFEE1,APP-20260414133956,Final Interview,4,Passed,Completed,174,68,22.46,,,,,Passed,,,,Recommended as experience dealer.,Jek Miclat,4/14/2026 15:55:36
+AID-BE39C212,APP-20260414134036,Final Interview,3,Passed,Completed,52,54,199.7,,,,,Passed,,,,"NEW DEALER, with 1 major game - Passed",Marx,4/14/2026 15:57:07
+AID-AAE6F7AF,APP-20260414134319,Table Test,3,Passed,Final Interview,177,78,24.9,,,,,,,,,,Jason,4/14/2026 16:18:21
+AID-8B3AF4CE,APP-20260415093815,Math Exam,2,Passed,Final Interview,170,80,27.68,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,adrianne,4/15/2026 12:27:19
+AID-6F38AE85,APP-20260415093415,Math Exam,2,Passed,Final Interview,170,70,24.22,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Joan,4/15/2026 10:49:29
+AID-E61F6F19,APP-20260415093441,Math Exam,2,Passed,Table Test,167,55,19.72,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Exam window lost focus,joseph,4/15/2026 10:57:34
+AID-D2760006,APP-20260415093435,Math Exam,2,Passed,Final Interview,168,68,24.09,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,francis,4/15/2026 14:05:57
+AID-66CE3404,APP-20260415093503,Math Exam,2,Passed,Final Interview,163.5,80,29.93,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Maribeth,4/15/2026 10:46:33
+AID-04FAD7DA,APP-20260415093334,Math Exam,2,Passed,Table Test,175.26,90,29.3,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Brent,4/15/2026 11:21:53
+AID-4E3C6BEC,APP-20260415093420,Math Exam,2,Passed,Table Test,172,75,25.35,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,gino,4/15/2026 10:53:32
+AID-DE8D1AD8,APP-20260415093429,Math Exam,2,Passed,Final Interview,160.2,68.5,26.69,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Denduy,4/20/2026 16:23:55
+AID-D1457C5A,APP-20260415093353,Math Exam,2,Passed,Table Test,160,58,22.66,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,gino,4/15/2026 12:21:11
+AID-CB72CFD8,APP-20260415093619,Math Exam,2,Passed,Final Interview,170,60,20.76,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,adrianne,4/15/2026 11:02:24
+AID-BC66AD0E,APP-20260415093448,Math Exam,2,Passed,Table Test,180,82,25.31,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Marx,4/15/2026 14:01:23
+AID-81119EC0,APP-20260415093412,Math Exam,2,Passed,Table Test,170,92,31.83,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,francis,4/15/2026 11:14:02
+AID-2D4664D9,APP-20260415093413,Math Exam,2,Passed,Table Test,163,65,24.46,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Marx REbadulla,4/22/2026 9:27:39
+AID-830724C0,APP-20260415094021,Math Exam,2,Passed,Final Interview,170,65,22.49,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Gino,4/15/2026 12:17:13
+AID-66CE3404,APP-20260415093503,Final Interview,3,Passed,Completed,163.5,80,29.93,,,,,Passed,,,,Considered as non experience. Qualified for dealer position.,Maribeth,4/15/2026 10:47:08
+AID-66CE3404,APP-20260415093503,Initial Screening,1,Passed,Math Exam,163.5,80,29.93,Passed,Passed,No,No,,,,,,Claudette,4/15/2026 10:45:55
+AID-6F38AE85,APP-20260415093415,Final Interview,3,Passed,Completed,170,70,24.22,,,,,Passed,,,,Presentable and fit to be a new dealer.,Marx,4/15/2026 10:49:58
+AID-6F38AE85,APP-20260415093415,Initial Screening,1,Passed,Math Exam,170,70,24.22,Passed,Passed,Yes,No,,,,,,Marx,4/15/2026 10:49:08
+AID-4E3C6BEC,APP-20260415093420,Table Test,3,Passed,Final Interview,172,75,25.35,,,,,,,,,,gino,4/15/2026 10:53:53
+AID-4E3C6BEC,APP-20260415093420,Final Interview,4,Not Recommended,Completed,172,75,25.35,,,,,Passed,,,,Not suitable,Marx,4/15/2026 10:54:13
+AID-4E3C6BEC,APP-20260415093420,Initial Screening,1,Passed,Math Exam,172,75,25.35,Passed,Passed,No,No,,,,,,Marx,4/15/2026 10:53:04
+AID-E61F6F19,APP-20260415093441,Table Test,3,Passed,Final Interview,167,55,19.72,,,,,,,,,,joseph,4/15/2026 10:57:50
+AID-E61F6F19,APP-20260415093441,Final Interview,4,Passed,Completed,167,55,19.72,,,,,Passed,,,,Knows how to handle customer issues and knows how to provide good customer service.,Jason,4/15/2026 10:58:08
+AID-E61F6F19,APP-20260415093441,Initial Screening,1,Passed,Math Exam,167,55,19.72,Passed,Passed,No,No,,,,,,jason,4/15/2026 10:57:05
+AID-CB72CFD8,APP-20260415093619,Final Interview,3,Passed,Completed,170,60,20.76,,,,,Passed,,,,He is qualified for the position as dealer.,claudette,4/15/2026 11:03:08
+AID-CB72CFD8,APP-20260415093619,Initial Screening,1,Passed,Math Exam,170,60,20.76,Passed,Passed,No,No,,,,,,claudette,4/15/2026 11:01:51
+AID-2D4664D9,APP-20260415093413,Table Test,3,Passed,Final Interview,163,65,24.46,,,,,,,,,,Marx REbadulla,4/22/2026 9:28:20
+AID-2D4664D9,APP-20260415093413,Final Interview,4,Not Recommended,Completed,163,65,24.46,,,,,Passed,,,,not suitable,Marx REbadulla,4/22/2026 9:49:42
+AID-2D4664D9,APP-20260415093413,Initial Screening,1,Passed,Math Exam,163,65,24.46,Passed,Passed,No,No,,,,,,Marx REbadulla,4/22/2026 9:27:15
+AID-81119EC0,APP-20260415093412,Table Test,3,Passed,Final Interview,170,92,31.83,,,,,,,,,,francis,4/15/2026 11:15:04
+AID-81119EC0,APP-20260415093412,Final Interview,4,Passed,Completed,170,92,31.83,,,,,Passed,,,,Knows how to handle customer issues and knows the importance of customer service.,Jason,4/15/2026 11:15:35
+AID-81119EC0,APP-20260415093412,Initial Screening,1,Passed,Math Exam,170,92,31.83,Passed,Passed,No,No,,,,,,francis,4/15/2026 11:12:11
+AID-04FAD7DA,APP-20260415093334,Table Test,3,Passed,Final Interview,175.26,90,29.3,,,,,,,,,,Brent,4/15/2026 11:43:13
+AID-04FAD7DA,APP-20260415093334,Final Interview,4,Passed,Completed,175.26,90,29.3,,,,,Passed,,,,"Passed, Experience dealer with good hand skills",Marx,4/15/2026 11:44:09
+AID-04FAD7DA,APP-20260415093334,Initial Screening,1,Passed,Math Exam,175.26,90,29.3,Passed,Passed,Yes,No,,,,,,Brent,4/15/2026 11:21:17
+AID-830724C0,APP-20260415094021,Final Interview,3,Passed,Completed,170,65,22.49,,,,,Passed,,,,"For new  dealer only, Blackjack was not dealt by the applicant.",Jason,4/15/2026 12:17:39
+AID-830724C0,APP-20260415094021,Initial Screening,1,Passed,Math Exam,170,65,22.49,Passed,Passed,No,No,,,,,,Jason,4/15/2026 12:16:11
+AID-D1457C5A,APP-20260415093353,Table Test,3,Passed,Final Interview,160,58,22.66,,,,,,,,,,gino,4/15/2026 12:21:44
+AID-D1457C5A,APP-20260415093353,Final Interview,4,Passed,Completed,160,58,22.66,,,,,Passed,,,,Recommended for hiring,Maricel,4/15/2026 12:22:09
+AID-D1457C5A,APP-20260415093353,Initial Screening,1,Passed,Math Exam,160,58,22.66,Passed,Passed,No,No,,,,,,maricel,4/15/2026 12:20:41
+AID-8B3AF4CE,APP-20260415093815,Initial Screening,1,Passed,Math Exam,170,80,27.68,Passed,Passed,No,No,,,,,,Dionisio,4/15/2026 12:26:53
+AID-8B3AF4CE,APP-20260415093815,Final Interview,3,Passed,Completed,170,80,27.68,,,,,Passed,,,,Recommended for non experience  dealer,Dionisio,4/15/2026 12:27:56
+AID-DE8D1AD8,APP-20260415093429,Final Interview,3,Passed,Completed,160.2,68.5,26.69,,,,,Passed,,,,Qualified for the position,Denduy,4/20/2026 16:24:16
+AID-DE8D1AD8,APP-20260415093429,Initial Screening,1,Passed,Math Exam,160.2,68.5,26.69,Passed,Passed,No,No,,,,,,Denduy,4/20/2026 16:23:35
+AID-BC66AD0E,APP-20260415093448,Table Test,3,Passed,Final Interview,180,82,25.31,,,,,,,,,,Marx,4/15/2026 14:01:53
+AID-BC66AD0E,APP-20260415093448,Final Interview,4,Passed,Completed,180,82,25.31,,,,,Passed,,,,Passed. experience dealer  good to go.,Marx,4/15/2026 14:02:18
+AID-BC66AD0E,APP-20260415093448,Initial Screening,1,Passed,Math Exam,180,82,25.31,Passed,Passed,Yes,No,,,,,,Marx,4/15/2026 14:01:01
+AID-D2760006,APP-20260415093435,Final Interview,3,Passed,Completed,168,68,24.09,,,,,Passed,,,,recommended for new dealer,dionisio,4/15/2026 14:06:44
+AID-D2760006,APP-20260415093435,Initial Screening,1,Passed,Math Exam,168,68,24.09,Passed,Passed,Yes,No,,,,,,francis,4/15/2026 14:05:18
+AID-17838069,APP-20260415135805,Initial Screening,1,Passed,Math Exam,160,55,21.48,Passed,Passed,No,No,,,,,,dionisio,4/15/2026 14:08:09
+AID-58946CEA,APP-20260415135755,Math Exam,2,Passed,Final Interview,175,72,23.51,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,adrianne,4/15/2026 15:44:55
+AID-EF654B93,APP-20260415140105,Initial Screening,1,Passed,Math Exam,172,68,22.99,Passed,Passed,No,No,,,,,,dionisio,4/15/2026 14:09:08
+AID-D6476EF3,APP-20260415140551,Initial Screening,1,Passed,Math Exam,179,82,25.59,Passed,Passed,No,No,,,,,,brent,4/15/2026 15:38:43
+AID-E03BAE9C,APP-20260415135828,Math Exam,2,Passed,Table Test,142,59,29.26,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Marx,4/15/2026 15:15:28
+AID-2EFC92D6,APP-20260415140049,Initial Screening,1,Passed,Math Exam,162,60,22.86,Passed,Passed,No,No,,,,,,dionisio,4/15/2026 14:10:46
+AID-D947FA04,APP-20260415135906,Math Exam,2,Passed,Table Test,170,66,22.84,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Jek,4/15/2026 16:10:26
+AID-2EFC92D6,APP-20260415140049,Math Exam,2,Passed,Table Test,162,60,22.86,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/15/2026 14:10:55
+AID-17838069,APP-20260415135805,Math Exam,2,Passed,Table Test,160,55,21.48,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/15/2026 14:11:19
+AID-6568BDB6,APP-20260415135713,Math Exam,2,Passed,Table Test,178,77,24.3,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Marx,4/15/2026 15:34:36
+AID-F1E11D83,APP-20260415140036,Math Exam,2,Passed,Table Test,163,64,24.09,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,anthony,4/15/2026 15:50:26
+AID-DBB31447,APP-20260415135830,Math Exam,2,Passed,Table Test,169,70,24.51,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,dionisio,4/15/2026 16:06:54
+AID-B827896C,APP-20260415135952,Math Exam,2,Passed,Final Interview,173,62,20.72,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,gino,4/15/2026 15:41:54
+AID-9A96E816,APP-20260415135705,Math Exam,2,Passed,Table Test,167,79,28.33,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Maribeth,4/15/2026 16:25:58
+AID-31C9AD73,APP-20260415140009,Initial Screening,1,Passed,Math Exam,169,55,19.26,Passed,Passed,No,No,,,,,,HR,4/22/2026 9:40:02
+AID-E1CCD9F7,APP-20260415140005,Math Exam,2,Passed,Table Test,162.56,59,22.33,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Maricel,4/15/2026 15:23:12
+AID-11F07FBE,APP-20260415135923,Math Exam,2,Passed,Table Test,175,90,29.39,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,anthony,4/15/2026 15:59:32
+AID-54231BB2,APP-20260415135848,Math Exam,2,Passed,Final Interview,165.1,60,22.01,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Gino,4/15/2026 16:19:07
+AID-D6476EF3,APP-20260415140551,Math Exam,2,Passed,Table Test,179,82,25.59,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,brent,4/15/2026 15:39:01
+AID-31C9AD73,APP-20260415140009,Math Exam,2,Passed,Table Test,169,55,19.26,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/22/2026 9:40:15
+AID-EF654B93,APP-20260415140105,Math Exam,2,Passed,Final Interview,172,68,22.99,,,,,,9,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/15/2026 14:16:26
+AID-345F10ED,APP-20260415135903,Math Exam,2,Passed,Table Test,174,71,23.45,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,joseph,4/15/2026 15:28:30
+AID-E0CCB7A0,APP-20260415135943,Math Exam,2,Passed,Final Interview,161,63,24.3,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,adrianne,4/15/2026 16:14:32
+AID-E03BAE9C,APP-20260415135828,Table Test,3,Passed,Final Interview,142,59,29.26,,,,,,,,,,Marx,4/15/2026 15:15:59
+AID-E03BAE9C,APP-20260415135828,Final Interview,4,Not Recommended,Completed,142,59,29.26,,,,,Passed,,,,Not Suitable,Marx,4/15/2026 15:16:32
+AID-E03BAE9C,APP-20260415135828,Initial Screening,1,Passed,Math Exam,142,59,29.26,Passed,Passed,Yes,No,,,,,,Marx,4/15/2026 15:15:01
+AID-E1CCD9F7,APP-20260415140005,Table Test,3,Passed,Final Interview,162.56,59,22.33,,,,,,,,,,marx,4/15/2026 15:23:34
+AID-E1CCD9F7,APP-20260415140005,Final Interview,4,Passed,Completed,162.56,59,22.33,,,,,Passed,,,,"Good calculations, skills & knowledge on acquired games. recommended for hiring",maricel,4/15/2026 15:24:00
+AID-E1CCD9F7,APP-20260415140005,Initial Screening,1,Passed,Math Exam,162.56,59,22.33,Passed,Passed,Yes,No,,,,,,Maricel,4/15/2026 15:22:37
+AID-345F10ED,APP-20260415135903,Table Test,3,Passed,Final Interview,174,71,23.45,,,,,,,,,,joseph,4/15/2026 15:28:46
+AID-345F10ED,APP-20260415135903,Final Interview,4,Passed,Completed,174,71,23.45,,,,,Passed,,,,Qualified for new  dealer. dealt BJ for 3 weeks only,claudette,4/15/2026 15:29:15
+AID-345F10ED,APP-20260415135903,Initial Screening,1,Passed,Math Exam,174,71,23.45,Passed,Passed,No,No,,,,,,claudette,4/15/2026 15:28:01
+AID-31C9AD73,APP-20260415140009,Table Test,3,Passed,Final Interview,169,55,19.26,,,,,,,,,,HR,4/22/2026 9:40:30
+AID-31C9AD73,APP-20260415140009,Final Interview,4,Not Recommended,Completed,169,55,19.26,,,,,Passed,,,,did not render 1 month notice prior resignation,HR,4/22/2026 9:40:48
+AID-6568BDB6,APP-20260415135713,Table Test,3,Passed,Final Interview,178,77,24.3,,,,,,,,,,addrianne,4/15/2026 15:35:44
+AID-6568BDB6,APP-20260415135713,Final Interview,4,Passed,Completed,178,77,24.3,,,,,Passed,,,,"Experienced dealer, Great addition to the team.",MArx,4/15/2026 15:36:26
+AID-6568BDB6,APP-20260415135713,Initial Screening,1,Passed,Math Exam,178,77,24.3,Passed,Passed,No,No,,,,,,Marx,4/15/2026 15:34:04
+AID-D6476EF3,APP-20260415140551,Table Test,3,Passed,Final Interview,179,82,25.59,,,,,,,,,,brent,4/15/2026 15:39:17
+AID-D6476EF3,APP-20260415140551,Final Interview,4,Passed,Completed,179,82,25.59,,,,,Passed,,,,knows how to handle customer related concerns.,Json,4/15/2026 15:39:35
+AID-B827896C,APP-20260415135952,Final Interview,3,Passed,Completed,173,62,20.72,,,,,Passed,,,,Qualified as non experience dealer position,claudette,4/15/2026 15:42:16
+AID-B827896C,APP-20260415135952,Initial Screening,1,Passed,Math Exam,173,62,20.72,Passed,Passed,Yes,No,,,,,,claudette,4/15/2026 15:41:21
+AID-58946CEA,APP-20260415135755,Final Interview,3,Passed,Completed,175,72,23.51,,,,,Passed,,,,knows how  to handle customer related issues/concerns,Jason,4/15/2026 15:45:40
+AID-58946CEA,APP-20260415135755,Initial Screening,1,Passed,Math Exam,175,72,23.51,Passed,Passed,Yes,No,,,,,,Jason,4/15/2026 15:44:23
+AID-F1E11D83,APP-20260415140036,Table Test,3,Passed,Final Interview,163,64,24.09,,,,,,,,,,anthony,4/15/2026 15:50:42
+AID-F1E11D83,APP-20260415140036,Final Interview,4,Passed,Completed,163,64,24.09,,,,,Passed,,,,"Good at math calculations, knowledge on game rules. recommended for experience dealer.",Maricel,4/15/2026 15:51:01
+AID-F1E11D83,APP-20260415140036,Initial Screening,1,Passed,Math Exam,163,64,24.09,Passed,Passed,No,No,,,,,,Maricel,4/15/2026 15:50:07
+AID-2EFC92D6,APP-20260415140049,Table Test,3,Passed,Final Interview,162,60,22.86,,,,,,,,,,Joan / Brent,4/15/2026 15:51:55
+AID-2EFC92D6,APP-20260415140049,Final Interview,4,Passed,Completed,162,60,22.86,,,,,Passed,,,,recommended for experience dealer,Dionisio,4/15/2026 15:57:00
+AID-11F07FBE,APP-20260415135923,Table Test,3,Passed,Final Interview,175,90,29.39,,,,,,,,,,anthony,4/15/2026 15:59:52
+AID-11F07FBE,APP-20260415135923,Final Interview,4,Passed,Completed,175,90,29.39,,,,,Passed,,,,Meet the requirements needed,Marx,4/15/2026 16:00:13
+AID-11F07FBE,APP-20260415135923,Initial Screening,1,Passed,Math Exam,175,90,29.39,Passed,Passed,Yes,No,,,,,,Marx,4/15/2026 15:59:16
+AID-DBB31447,APP-20260415135830,Table Test,3,Passed,Final Interview,169,70,24.51,,,,,,,,,,dionisio,4/15/2026 16:07:19
+AID-DBB31447,APP-20260415135830,Final Interview,4,Passed,Completed,169,70,24.51,,,,,Passed,,,,Qualified for the position,claudette,4/15/2026 16:07:56
+AID-DBB31447,APP-20260415135830,Initial Screening,1,Passed,Math Exam,169,70,24.51,Passed,Passed,Yes,No,,,,,,claudette,4/15/2026 16:05:18
+AID-D947FA04,APP-20260415135906,Table Test,3,Passed,Final Interview,170,66,22.84,,,,,,,,,,maribeth,4/15/2026 16:10:46
+AID-D947FA04,APP-20260415135906,Final Interview,4,Passed,Completed,170,66,22.84,,,,,Passed,,,,Recommended as experience dealer,Jek,4/15/2026 16:11:03
+AID-D947FA04,APP-20260415135906,Initial Screening,1,Passed,Math Exam,170,66,22.84,Passed,Passed,Yes,No,,,,,,Jek,4/15/2026 16:10:05
+AID-E0CCB7A0,APP-20260415135943,Final Interview,3,Passed,Completed,161,63,24.3,,,,,Passed,,,,Recommended for new dealer,Dionisio,4/15/2026 16:15:02
+AID-E0CCB7A0,APP-20260415135943,Initial Screening,1,Passed,Math Exam,161,63,24.3,Passed,Passed,Yes,No,,,,,,Dionisio,4/15/2026 16:14:07
+AID-EF654B93,APP-20260415140105,Final Interview,3,Passed,Completed,172,68,22.99,,,,,Passed,,,,Qualified for new position (dealer),Jek,4/15/2026 16:16:33
+AID-54231BB2,APP-20260415135848,Final Interview,3,Passed,Completed,165.1,60,22.01,,,,,Passed,,,,Knows how to handle customer related issues,Jason,4/15/2026 16:19:36
+AID-54231BB2,APP-20260415135848,Initial Screening,1,Passed,Math Exam,165.1,60,22.01,Passed,Passed,No,No,,,,,,Jason,4/15/2026 16:18:47
+AID-17838069,APP-20260415135805,Table Test,3,Passed,Final Interview,160,55,21.48,,,,,,,,,,Brent / Joan,4/15/2026 16:20:32
+AID-17838069,APP-20260415135805,Final Interview,4,Passed,Completed,160,55,21.48,,,,,Passed,,,,Qualified for experience dealer position,Claudette,4/15/2026 16:21:26
+AID-9A96E816,APP-20260415135705,Table Test,3,Passed,Final Interview,167,79,28.33,,,,,,,,,,Maribeth,4/15/2026 16:26:14
+AID-9A96E816,APP-20260415135705,Final Interview,4,Passed,Completed,167,79,28.33,,,,,Passed,,,,with NCC - recommended for experience dealer,Dionisio,4/15/2026 16:26:53
+AID-9A96E816,APP-20260415135705,Initial Screening,1,Passed,Math Exam,167,79,28.33,Passed,Passed,Yes,No,,,,,,Maribeth,4/15/2026 16:25:36
+AID-830724C0,APP-20260415094021,Table Test,3,Passed,Final Interview,170,65,22.49,,,,,,,,,,HR,4/19/2026 19:56:10
+AID-D1E62209,APP-20260419192736,Initial Screening,1,Passed,Math Exam,160,57,22.27,Passed,Passed,No,No,,,,,,HR,4/19/2026 19:28:34
+AID-D1E62209,APP-20260419192736,Math Exam,2,Passed,Table Test,160,57,22.27,,,,,,9,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/19/2026 19:31:36
+AID-D1E62209,APP-20260419192736,Table Test,3,Passed,Final Interview,160,57,22.27,,,,,,,,,,HR,4/19/2026 19:32:16
+AID-D1E62209,APP-20260419192736,Final Interview,4,Passed,Completed,160,57,22.27,,,,,Passed,,,,Testing,HR,4/19/2026 19:33:01
+AID-830724C0,APP-20260415094021,Final Interview,4,Passed,Completed,170,65,22.49,,,,,Passed,,,,,HR,4/19/2026 19:56:25
+AID-830724C0,APP-20260415094021,Initial Screening,1,Passed,Math Exam,170,65,22.49,Passed,Passed,Yes,Yes,,,,,,HR,4/19/2026 19:55:33
+AID-C20FAEE0,APP-20260419195823,Initial Screening,1,Passed,Math Exam,150,50,22.22,Passed,Passed,Yes,Yes,,,,,,HR,4/20/2026 9:33:42
+AID-C20FAEE0,APP-20260419195823,Math Exam,2,Passed,Final Interview,150,50,22.22,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 9:29:10
+AID-C20FAEE0,APP-20260419195823,Final Interview,3,Passed,Completed,150,50,22.22,,,,,Passed,,,,Perfect,HR,4/20/2026 9:29:32
+AID-FC774ADE,APP-20260420102810,Initial Screening,1,Passed,Math Exam,167,68,24.38,Passed,Passed,No,Yes,,,,,,Maricel Zalvidea,4/20/2026 11:18:40
+AID-86668767,APP-20260420102933,Initial Screening,1,Passed,Math Exam,157,50,20.28,Passed,Passed,No,Yes,,,,,,Adrianne Z.,4/20/2026 13:51:15
+AID-A5413617,APP-20260420102835,Initial Screening,1,Passed,Math Exam,177,67,21.39,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/20/2026 11:14:46
+AID-D12D36EE,APP-20260420102904,Initial Screening,1,Passed,Math Exam,156,55,22.6,Passed,Passed,No,No,,,,,,HR,4/20/2026 10:41:43
+AID-86668767,APP-20260420102933,Math Exam,2,Passed,Table Test,157,50,20.28,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Adrianne Z.,4/20/2026 13:52:06
+AID-1B5A53E5,APP-20260420102615,Initial Screening,1,Passed,Math Exam,167,60,21.51,Passed,Passed,No,Yes,,,,,,HR,4/20/2026 11:21:33
+AID-A5413617,APP-20260420102835,Math Exam,2,Passed,Final Interview,177,67,21.39,,,,,,,,,,Dionisio V Duyao Jr,4/20/2026 11:19:17
+AID-FC774ADE,APP-20260420102810,Math Exam,2,Passed,Final Interview,167,68,24.38,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Maricel Zalvidea,4/20/2026 11:19:04
+AID-D12D36EE,APP-20260420102904,Math Exam,2,Failed,Table Test,156,55,22.6,,,,,,0,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Exam window lost focus,Math Exam System,4/20/2026 10:46:36
+AID-1B5A53E5,APP-20260420102615,Math Exam,2,Passed,Final Interview,167,60,21.51,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 11:21:59
+AID-A5413617,APP-20260420102835,Final Interview,3,Passed,Completed,177,67,21.39,,,,,Passed,,,,he is willingly to work in Westside Resort,Dionisio V Duyao Jr,4/20/2026 11:19:47
+AID-1B5A53E5,APP-20260420102615,Final Interview,3,Passed,Completed,167,60,21.51,,,,,Passed,,,,Has ideas about chips because of her junket roller background. Fit as a new dealer.,HR,4/20/2026 11:23:33
+AID-1E0CB758,APP-20260420105859,Initial Screening,1,Passed,Math Exam,170,67,23.18,Passed,Passed,No,No,,,,,,HR,4/20/2026 11:01:45
+AID-A67CA16B,APP-20260420105646,Initial Screening,1,Passed,Math Exam,174,90,29.73,Passed,Passed,No,No,,,,,,HR,4/20/2026 11:07:06
+AID-1E0CB758,APP-20260420105859,Math Exam,2,Passed,Final Interview,170,67,23.18,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Exam window lost focus,Math Exam System,4/20/2026 11:09:22
+AID-A67CA16B,APP-20260420105646,Math Exam,2,Passed,Final Interview,174,90,29.73,,,,,,8,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/20/2026 11:11:24
+AID-FC774ADE,APP-20260420102810,Final Interview,3,Passed,Completed,167,68,24.38,,,,,Passed,,,,"Slightly sweaty palms, has basic communication skills and possesses positive attitude.",Maricel Zalvidea,4/20/2026 12:11:42
+AID-1E0CB758,APP-20260420105859,Final Interview,3,Passed,Completed,170,67,23.18,,,,,Passed,,,,Passed and qualified,Pia Tarroza,4/20/2026 11:19:35
+AID-A67CA16B,APP-20260420105646,Final Interview,3,Passed,Completed,174,90,29.73,,,,,Passed,,,,Can start anytime - Passed,Jacquelin A. Miclat,4/20/2026 11:19:43
+AID-F775AE09,APP-20260420112903,Initial Screening,1,Passed,Math Exam,156,45,18.49,Passed,Passed,No,No,,,,,,HR,4/20/2026 11:33:41
+AID-35613E71,APP-20260420112842,Initial Screening,1,Passed,Math Exam,160,60,23.44,Passed,Passed,No,No,,,,,,Jacquelin A. Miclat,4/20/2026 11:50:25
+AID-B004A0BF,APP-20260420112937,Initial Screening,1,Passed,Math Exam,160,58,22.66,Passed,Passed,No,No,,,,,,Denduy,4/20/2026 15:20:40
+AID-35613E71,APP-20260420112842,Math Exam,2,Passed,Final Interview,160,60,23.44,,,,,,,,,,HR,4/20/2026 12:10:23
+AID-F775AE09,APP-20260420112903,Math Exam,2,Failed,Final Interview,156,45,18.49,,,,,,6,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Exam window lost focus,Math Exam System,4/20/2026 11:42:15
+AID-B004A0BF,APP-20260420112937,Math Exam,2,Passed,Final Interview,160,58,22.66,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Denduy,4/20/2026 15:21:09
+AID-6FCDBC85,APP-20260420114057,Initial Screening,1,Passed,Math Exam,160,40,15.62,Passed,Passed,No,No,,,,,,Jacquelin A. Miclat,4/20/2026 12:17:06
+AID-8E60B711,APP-20260420114054,Initial Screening,1,Failed,Math Exam,158,49,19.63,Passed,Passed,Yes,Yes,,,,,,Maricel Zalvidea,4/20/2026 12:37:42
+AID-7E4BB23A,APP-20260420113927,Initial Screening,1,Passed,Math Exam,153,40,17.09,Passed,Passed,No,Yes,,,,,,HR,4/20/2026 13:18:32
+AID-35613E71,APP-20260420112842,Final Interview,3,Passed,Completed,160,60,23.44,,,,,Passed,,,,Graduating in June. Passed!,HR,4/20/2026 12:10:45
+AID-6FCDBC85,APP-20260420114057,Math Exam,2,Passed,Final Interview,160,40,15.62,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Denduy,4/20/2026 15:17:23
+AID-B004A0BF,APP-20260420112937,Final Interview,3,Passed,Completed,160,58,22.66,,,,,Passed,,,,Cy has the positive attitude to be part of Westside,Denduy,4/20/2026 15:21:30
+AID-7E4BB23A,APP-20260420113927,Math Exam,2,Passed,Final Interview,153,40,17.09,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 13:18:48
+AID-6FCDBC85,APP-20260420114057,Final Interview,3,Passed,Completed,160,40,15.62,,,,,Passed,,,,She can express herself and has knowledge in terms of customer service. She also provided examples in handling customer related concerns/complaints.,Jason,4/20/2026 15:18:00
+AID-7E4BB23A,APP-20260420113927,Final Interview,3,Reprofile,Completed,153,40,17.09,,,,,Passed,,,,Did not meet the minimum height requirement for a dealer.,HR,4/20/2026 13:19:01
+AID-F775AE09,APP-20260420112903,Final Interview,3,Passed,Completed,156,45,18.49,,,,,Passed,,,,For polishing and review of her math knowledge.,Pia Tarroza,4/20/2026 12:03:31
+AID-8E60B711,APP-20260420114054,Math Exam,2,Passed,Final Interview,158,49,19.63,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Time limit reached,Maricel Zalvidea,4/20/2026 12:38:02
+AID-D12D36EE,APP-20260420102904,Table Test,3,Passed,Final Interview,156,55,22.6,,,,,,,,,,HR,4/20/2026 12:09:44
+AID-D12D36EE,APP-20260420102904,Final Interview,4,Passed,Completed,156,55,22.6,,,,,Passed,,,,"Math Exam= 46/50
+She knows how to handle customer related concerns/issues properly.",HR,4/20/2026 12:13:10
+AID-8E60B711,APP-20260420114054,Final Interview,3,Reprofile,Completed,158,49,19.63,,,,,Passed,,,,"Math Exam retake: Failed (27/50) Retake
+For reprofile (administrative position, card room)",Maricel Zalvidea,4/20/2026 12:39:29
+AID-C082B5A0,APP-20260420121629,Math Exam,2,Passed,Final Interview,168,90,31.89,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Jacquelin A. Miclat,4/20/2026 15:04:46
+AID-1726BB34,APP-20260420121103,Math Exam,2,Passed,Final Interview,172,75,25.35,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 13:51:43
+AID-EFEFA6B1,APP-20260420120933,Math Exam,2,Passed,Final Interview,162.56,49,18.54,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Denduy,4/20/2026 15:16:02
+AID-B53D2EAD,APP-20260420121130,Math Exam,2,Passed,Final Interview,166,65,23.59,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Pia Tarroza,4/20/2026 14:17:40
+AID-5BA5ADA5,APP-20260420121218,Math Exam,2,Passed,Final Interview,160,63,24.61,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: AUTO_SUBMITTED | Reason: Exam window lost focus,Maricel Zalvidea,4/20/2026 14:19:59
+AID-71898DCB,APP-20260420122131,Math Exam,2,Passed,Final Interview,162,50,19.05,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 14:07:45
+AID-B7CE18B5,APP-20260420121308,Math Exam,2,Passed,Final Interview,160,80,31.25,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 14:25:20
+AID-D6B0D74D,APP-20260420121252,Math Exam,2,Passed,Final Interview,174,90,29.73,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Jek,4/21/2026 8:55:04
+AID-642149F2,APP-20260420121120,Math Exam,2,Passed,Final Interview,156,46,18.9,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Denduy,4/20/2026 15:12:41
+AID-EE9E59C9,APP-20260420121039,Math Exam,2,Passed,Final Interview,157,52,21.1,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Dionisio V Duyao Jr,4/20/2026 13:59:38
+AID-BEBDA67F,APP-20260420121748,Math Exam,2,Passed,Final Interview,168,65,23.03,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/21/2026 8:25:45
+AID-7EB086A1,APP-20260420121415,Math Exam,2,Passed,Final Interview,165.1,60,22.01,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 14:38:40
+AID-81C91427,APP-20260420121417,Math Exam,2,Passed,Final Interview,154.94,45,18.74,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,jason,4/21/2026 8:56:55
+AID-301A4336,APP-20260420121433,Math Exam,2,Passed,Final Interview,161,54,20.83,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 14:45:59
+AID-A365C04D,APP-20260420121705,Math Exam,2,Passed,Final Interview,180,78,24.07,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 14:07:01
+AID-EB1F0C72,APP-20260420121015,Math Exam,2,Passed,Final Interview,171,95,32.49,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,HR,4/20/2026 14:20:27
+AID-9F9D6C1B,APP-20260420121138,Math Exam,2,Passed,Final Interview,1.65,53,194674.01,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Pia Tarroza,4/20/2026 14:36:47
+AID-7B93CBE0,APP-20260420121202,Math Exam,2,Passed,Final Interview,158,50,20.03,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Jacquelin a. Miclat,4/20/2026 14:01:30
+AID-7F94B7C7,APP-20260420120504,Math Exam,2,Passed,Final Interview,54,53,181.76,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Maricel Zalvidea,4/20/2026 14:41:31
+AID-86668767,APP-20260420102933,Table Test,3,Passed,Final Interview,157,50,20.28,,,,,,,,,,Adrianne Z.,4/20/2026 13:52:27
+AID-86668767,APP-20260420102933,Final Interview,4,Passed,Completed,157,50,20.28,,,,,Passed,,,,Can start anytime.  Accepted as experienced dealer.,Adrianne Z.,4/20/2026 13:52:54
+AID-1726BB34,APP-20260420121103,Final Interview,3,Reprofile,Completed,172,75,25.35,,,,,Passed,,,,"Color blind test failed, not recommended to be a dealer.",HR,4/20/2026 13:52:03
+AID-1726BB34,APP-20260420121103,Initial Screening,1,Passed,Math Exam,172,75,25.35,Passed,Failed,No,Yes,,,,,,HR,4/20/2026 13:50:01
+AID-D6B0D74D,APP-20260420121252,Final Interview,3,Passed,Completed,174,90,29.73,,,,,Passed,,,,He has experience in handling customer related concerns/issues.,jason,4/21/2026 8:55:27
+AID-EE9E59C9,APP-20260420121039,Final Interview,3,Passed,Completed,157,52,21.1,,,,,Passed,,,,Sarah willingly to be part of the company,Dionisio V Duyao Jr,4/20/2026 13:59:53
+AID-EE9E59C9,APP-20260420121039,Initial Screening,1,Passed,Math Exam,157,52,21.1,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/20/2026 13:58:48
+AID-7B93CBE0,APP-20260420121202,Final Interview,3,Passed,Completed,158,50,20.03,,,,,Passed,,,,Passed - Recommended for dealer position,Jacquelin a. Miclat,4/20/2026 14:01:49
+AID-7B93CBE0,APP-20260420121202,Initial Screening,1,Passed,Math Exam,158,50,20.03,Passed,Passed,No,No,,,,,,Jacquelin a. Miclat,4/20/2026 14:01:17
+AID-A365C04D,APP-20260420121705,Final Interview,3,Reprofile,Completed,180,78,24.07,,,,,Failed,,,,"Color blind and has sweaty palms, not recommended to be a dealer.",HR,4/20/2026 14:07:22
+AID-71898DCB,APP-20260420122131,Final Interview,3,Passed,Completed,162,50,19.05,,,,,Passed,,,,"She knows how to handle customer related concerns/issues.
+- Jason Reyes",HR,4/20/2026 14:07:59
+AID-A365C04D,APP-20260420121705,Initial Screening,1,Passed,Math Exam,180,78,24.07,Passed,Failed,No,Yes,,,,,,HR,4/20/2026 14:06:44
+AID-71898DCB,APP-20260420122131,Initial Screening,1,Passed,Math Exam,162,50,19.05,Passed,Passed,No,No,,,,,,HR,4/20/2026 14:07:28
+AID-C082B5A0,APP-20260420121629,Final Interview,3,Passed,Completed,168,90,31.89,,,,,Passed,,,,Mark has positive attitude to be part of the company,Dionisio V Duyao Jr.,4/20/2026 15:05:21
+AID-B53D2EAD,APP-20260420121130,Final Interview,3,Passed,Completed,166,65,23.59,,,,,Passed,,,,"Check NCC if it's waived as claimed, otherwise she is qualified for the position.",Pia Tarroza,4/20/2026 14:17:56
+AID-C082B5A0,APP-20260420121629,Initial Screening,1,Passed,Math Exam,168,90,31.89,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/20/2026 14:17:38
+AID-B53D2EAD,APP-20260420121130,Initial Screening,1,Passed,Math Exam,166,65,23.59,Passed,Passed,Yes,No,,,,,,Pia Tarroza,4/20/2026 14:17:23
+AID-5BA5ADA5,APP-20260420121218,Final Interview,3,Passed,Completed,160,63,24.61,,,,,Passed,,,,"Math retake: 45,
+basic communication skills, positive attitude",Maricel Zalvidea,4/20/2026 14:20:34
+AID-EB1F0C72,APP-20260420121015,Final Interview,3,Passed,Completed,171,95,32.49,,,,,Passed,,,,"Junket roller on current job, advantage of being a dealer.",HR,4/20/2026 14:21:02
+AID-5BA5ADA5,APP-20260420121218,Initial Screening,1,Passed,Math Exam,160,63,24.61,Passed,Passed,No,No,,,,,,Maricel Zalvidea,4/20/2026 14:19:03
+AID-BEBDA67F,APP-20260420121748,Final Interview,3,Passed,Completed,168,65,23.03,,,,,Passed,,,,Graduating in July but willing to start anytime - Passed,Jek,4/21/2026 8:26:22
+AID-EB1F0C72,APP-20260420121015,Initial Screening,1,Passed,Math Exam,171,95,32.49,Passed,Passed,No,Yes,,,,,,HR,4/20/2026 14:20:09
+AID-B7CE18B5,APP-20260420121308,Final Interview,3,Passed,Completed,160,80,31.25,,,,,Passed,,,,"She is currently employed as as Dealer in Solaire, she knows the importance of customer service in this kind of work.
+- Jason Reyes",HR,4/20/2026 14:25:42
+AID-B7CE18B5,APP-20260420121308,Initial Screening,1,Passed,Math Exam,160,80,31.25,Passed,Passed,No,No,,,,,,HR,4/20/2026 14:25:01
+AID-9F9D6C1B,APP-20260420121138,Final Interview,3,Reprofile,Completed,1.65,53,194674.01,,,,,Passed,,,,Did not meet the height requirement & math exam. For reprofiling to IT dept,Pia Tarroza,4/20/2026 14:37:26
+AID-EFEFA6B1,APP-20260420120933,Final Interview,3,Passed,Completed,162.56,49,18.54,,,,,Passed,,,,to be part of the company ASAP,Denduy,4/20/2026 15:16:19
+AID-81C91427,APP-20260420121417,Final Interview,3,Reprofile,Completed,154.94,45,18.74,,,,,Passed,,,,Reprofiled as card room staff due to height requirement of the company - not met,jason,4/21/2026 8:57:12
+AID-EFEFA6B1,APP-20260420120933,Initial Screening,1,Passed,Math Exam,162.56,49,18.54,Passed,Passed,No,No,,,,,,Denduy,4/20/2026 15:15:36
+AID-9F9D6C1B,APP-20260420121138,Initial Screening,1,Passed,Math Exam,1.65,53,194674.01,Passed,Passed,No,No,,,,,,Pia Tarroza,4/20/2026 14:36:29
+AID-7F94B7C7,APP-20260420120504,Final Interview,3,Passed,Completed,54,53,181.76,,,,,Passed,,,,"Math exam retake: 45/50
+*Junker roller before, has experience interacting with patrons. Recommended for hiring.",Maricel Zalvidea,4/20/2026 14:41:44
+AID-7EB086A1,APP-20260420121415,Final Interview,3,Passed,Completed,165.1,60,22.01,,,,,Passed,,,,"She knows how to handle customer related concerns/issues properly.
+- Jason Reyes",HR,4/20/2026 14:37:18
+AID-7EB086A1,APP-20260420121415,Initial Screening,1,Passed,Math Exam,165.1,60,22.01,Passed,Passed,No,No,,,,,,HR,4/20/2026 14:38:02
+AID-7F94B7C7,APP-20260420120504,Initial Screening,1,Passed,Math Exam,54,53,181.76,Passed,Passed,No,No,,,,,,Maricel Zalvidea,4/20/2026 14:41:15
+AID-301A4336,APP-20260420121433,Final Interview,3,Passed,Completed,161,54,20.83,,,,,Passed,,,,"Motivated person, has a good smile; fit to be a dealer.",HR,4/20/2026 14:47:04
+AID-642149F2,APP-20260420121120,Final Interview,3,Passed,Completed,156,46,18.9,,,,,Passed,,,,she has the positive attitude to work in our company. Recommended for  table games.,Denduy,4/20/2026 15:13:01
+AID-301A4336,APP-20260420121433,Initial Screening,1,Passed,Math Exam,161,54,20.83,Passed,Passed,No,Yes,,,,,,HR,4/20/2026 14:45:40
+AID-642149F2,APP-20260420121120,Initial Screening,1,Passed,Math Exam,156,46,18.9,Passed,Passed,No,No,,,,,,Denduy,4/20/2026 15:12:06
+AID-71A2C093,APP-20260420121027,Initial Screening,1,Passed,Math Exam,157.48,65,26.21,Passed,Passed,No,Yes,,,,,,Jacquelin A. Miclat,4/20/2026 14:48:07
+AID-71A2C093,APP-20260420121027,Math Exam,2,Passed,Final Interview,157.48,65,26.21,,,,,,,,,,Jacquelin A. Miclat,4/20/2026 14:49:01
+AID-F9F8FD6D,APP-20260420123411,Initial Screening,1,Passed,Math Exam,170,73,224.68,Passed,Passed,No,Yes,,,,,,HR,4/20/2026 15:02:06
+AID-F9F8FD6D,APP-20260420123411,Math Exam,2,Passed,Final Interview,170,73,224.68,,,,,,,,,,HR,4/20/2026 15:02:22
+AID-F9F8FD6D,APP-20260420123411,Final Interview,3,Passed,Completed,170,73,224.68,,,,,Passed,,,,"Around 2 years MB dealer. Fit for the job, new dealer.",HR,4/20/2026 15:02:38
+AID-71A2C093,APP-20260420121027,Final Interview,3,Passed,Completed,157.48,65,26.21,,,,,Passed,,,,Familiar with and can handle guest's complaints. Can start anytime - Passed,Jacquelin A. Miclat,4/20/2026 15:01:16
+AID-BEBDA67F,APP-20260420121748,Initial Screening,1,Passed,Math Exam,168,65,23.03,Passed,Passed,No,No,,,,,,HR,4/21/2026 8:25:07
+AID-D6B0D74D,APP-20260420121252,Initial Screening,1,Passed,Math Exam,174,90,29.73,Passed,Passed,Yes,No,,,,,,Jek,4/21/2026 8:54:46
+AID-81C91427,APP-20260420121417,Initial Screening,1,Passed,Math Exam,154.94,45,18.74,Passed,Passed,No,No,,,,,,jason,4/21/2026 8:56:39
+AID-CD8473BA,APP-20260420212609,Initial Screening,1,Passed,Math Exam,160,40,15.62,Passed,Passed,No,No,,,,,,jason,4/21/2026 8:58:47
+AID-CB94C4F6,APP-20260414093142,Initial Screening,1,Passed,Math Exam,178,80,25.25,Passed,Passed,No,Yes,,,,,,Marx,4/14/2026 15:49:45
+AID-BE30E103,APP-20260420163650,Initial Screening,1,Passed,Math Exam,159,50,19.78,Passed,Passed,Yes,Yes,,,,,,HR,4/20/2026 16:37:34
+AID-BE30E103,APP-20260420163650,Math Exam,2,Passed,Table Test,159,50,19.78,,,,,,9,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/20/2026 16:40:29
+AID-BE30E103,APP-20260420163650,Table Test,3,Passed,Final Interview,159,50,19.78,,,,,,,,,,HR,4/20/2026 16:41:42
+AID-BE30E103,APP-20260420163650,Final Interview,4,Passed,Completed,159,50,19.78,,,,,Passed,,,,testing,HR,4/20/2026 16:42:08
+AID-CD8473BA,APP-20260420212609,Math Exam,2,Passed,Final Interview,160,40,15.62,,,,,,,,,,jason,4/21/2026 9:04:11
+AID-CD8473BA,APP-20260420212609,Final Interview,3,Passed,Completed,160,40,15.62,,,,,Passed,,,,She  can express herself and knows how  to handle customer related concerns/issues properly.,jason,4/21/2026 9:05:38
+AID-D693E56C,APP-20260421102525,Initial Screening,1,Passed,Math Exam,165,61,22.41,Passed,Passed,No,No,,,,,,HR,4/22/2026 9:26:22
+AID-6B23E9A5,APP-20260421102239,Initial Screening,1,Passed,Math Exam,160.02,77,30.07,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/21/2026 11:11:41
+AID-6B23E9A5,APP-20260421102239,Math Exam,2,Passed,Final Interview,160.02,77,30.07,,,,,,,,,,Dionisio V Duyao Jr,4/21/2026 11:12:13
+AID-7C22BD40,APP-20260421102114,Initial Screening,1,Passed,Math Exam,1.67,71,254580.66,Passed,Passed,No,Yes,,,,,,HR,4/21/2026 11:23:07
+AID-7C22BD40,APP-20260421102114,Math Exam,2,Passed,Final Interview,1.67,71,254580.66,,,,,,,,,,HR,4/21/2026 11:24:05
+AID-7C22BD40,APP-20260421102114,Final Interview,3,Passed,Completed,1.67,71,254580.66,,,,,Passed,,,,Can express himself well. Good calculation. Fit to be a new dealer.,HR,4/21/2026 11:24:21
+AID-6B23E9A5,APP-20260421102239,Final Interview,3,Passed,Completed,160.02,77,30.07,,,,,Passed,,,,Gerson has the positive attitude to work as a dealer,Dionisio V Duyao Jr,4/21/2026 11:24:48
+AID-B8B021B0,APP-20260421102332,Initial Screening,1,Passed,Math Exam,168,55,19.49,Passed,Passed,No,No,,,,,,Jason Reyes,4/21/2026 11:25:10
+AID-B8B021B0,APP-20260421102332,Math Exam,2,Passed,Final Interview,168,55,19.49,,,,,,10,8,10,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Math Exam System,4/21/2026 15:20:24
+AID-B8B021B0,APP-20260421102332,Final Interview,3,Passed,Completed,168,55,19.49,,,,,Passed,,,,He can express himself and knows how to handle customer related concerns/issues.,Marx REbadulla,4/22/2026 9:25:13
+AID-D693E56C,APP-20260421102525,Math Exam,2,Passed,Final Interview,165,61,22.41,,,,,,,,,,HR,4/22/2026 9:26:43
+AID-47726D1C,APP-20260421102113,Initial Screening,1,Passed,Math Exam,165.1,62,22.75,Passed,Passed,No,No,,,,,,Jacquelin A. Miclat,4/21/2026 11:31:30
+AID-D693E56C,APP-20260421102525,Final Interview,3,Passed,Completed,165,61,22.41,,,,,Passed,,,,"Good candidate, recommended for hiring.",Maricel,4/21/2026 11:28:59
+AID-47726D1C,APP-20260421102113,Math Exam,2,Passed,Final Interview,165.1,62,22.75,,,,,,,,,,Jacquelin A. Miclat,4/21/2026 11:32:04
+AID-47726D1C,APP-20260421102113,Final Interview,3,Passed,Completed,165.1,62,22.75,,,,,Passed,,,,Recommended for new dealer position,Jacquelin A. Miclat,4/21/2026 11:32:19
+AID-324C4B55,APP-20260421110053,Initial Screening,1,Passed,Math Exam,172,80,27.04,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/21/2026 11:30:24
+AID-E00B9658,APP-20260421102243,Initial Screening,1,Passed,Math Exam,171,66,22.57,Passed,Passed,No,No,,,,,,Jason Reyes,4/21/2026 11:41:54
+AID-324C4B55,APP-20260421110053,Math Exam,2,Passed,Final Interview,172,80,27.04,,,,,,,,,,Dionisio V Duyao Jr,4/21/2026 11:31:40
+AID-E00B9658,APP-20260421102243,Math Exam,2,Passed,Final Interview,171,66,22.57,,,,,,,,,,Jason Reyes,4/21/2026 11:42:16
+AID-D1704800,APP-20260421102414,Initial Screening,1,Passed,Math Exam,170.18,72,24.86,Passed,Passed,No,Yes,,,,,,HR,4/21/2026 11:36:32
+AID-D1704800,APP-20260421102414,Math Exam,2,Passed,Final Interview,170.18,72,24.86,,,,,,,,,,HR,4/21/2026 11:39:07
+AID-E00B9658,APP-20260421102243,Final Interview,3,Passed,Completed,171,66,22.57,,,,,Passed,,,,He has the interest in the job and knows also the basics of customer service.,Jason Reyes,4/21/2026 11:43:05
+AID-D1704800,APP-20260421102414,Final Interview,3,Passed,Completed,170.18,72,24.86,,,,,Passed,,,,"Good looking. Fit as a dealer (turning 21 yr old this May 29, 2026).",HR,4/21/2026 11:41:22
+AID-324C4B55,APP-20260421110053,Final Interview,3,Passed,Completed,172,80,27.04,,,,,Passed,,,,"Kyle has positive /good attitude
+Recommended for table game",Dionisio V Duyao Jr,4/21/2026 11:43:17
+AID-DDA0873E,APP-20260421134917,Initial Screening,1,Passed,Math Exam,166,70,25.4,Passed,Passed,No,Yes,,,,,,Marx Rebadulla,4/22/2026 9:33:09
+AID-DDA0873E,APP-20260421134917,Math Exam,2,Passed,Final Interview,166,70,25.4,,,,,,,,,Math Exam submitted via Applicant Portal. | Attempt Status: SUBMITTED | Reason: Submitted by applicant,Marx Rebadulla,4/22/2026 9:34:55
+AID-DDA0873E,APP-20260421134917,Final Interview,3,Passed,Completed,166,70,25.4,,,,,Passed,,,,Good sense of communication. Good smile. Fit as a dealer.,Marx Rebadulla,4/22/2026 9:35:13
+AID-591746FE,APP-20260422102117,Initial Screening,1,Passed,Math Exam,157,44,17.85,Passed,Passed,No,No,,,,,,Jason Reyes,4/22/2026 11:05:36
+AID-591746FE,APP-20260422102117,Math Exam,2,Passed,Final Interview,157,44,17.85,,,,,,,,,,Jason Reyes,4/22/2026 11:06:08
+AID-9271A716,APP-20260422102042,Initial Screening,1,Passed,Math Exam,157,56,22.72,Passed,Passed,Yes,No,,,,,,HR,4/22/2026 10:54:41
+AID-9271A716,APP-20260422102042,Math Exam,2,Passed,Final Interview,157,56,22.72,,,,,,,,,,HR,4/22/2026 10:55:35
+AID-038D915D,APP-20260422102052,Initial Screening,1,Passed,Math Exam,157,60,24.34,Passed,Passed,No,No,,,,,,HR,4/22/2026 10:57:24
+AID-038D915D,APP-20260422102052,Math Exam,2,Passed,Final Interview,157,60,24.34,,,,,,,,,,HR,4/22/2026 10:57:47
+AID-591746FE,APP-20260422102117,Final Interview,3,Passed,Completed,157,44,17.85,,,,,Passed,,,,She has knowledge on customer relations from her previous job as a Junket Roller.,Jason Reyes,4/22/2026 11:06:29
+AID-759A599A,APP-20260422102158,Initial Screening,1,Passed,Math Exam,176,70,22.6,Passed,Passed,No,No,,,,,,HR,4/22/2026 11:02:35
+AID-759A599A,APP-20260422102158,Math Exam,2,Passed,Final Interview,176,70,22.6,,,,,,,,,,HR,4/22/2026 11:03:37
+AID-759A599A,APP-20260422102158,Final Interview,3,Passed,Completed,176,70,22.6,,,,,Passed,,,,"Good candidate, recommended for hiring.",Maricel Zalvidea,4/22/2026 11:05:12
+AID-C3ECDD20,APP-20260422102300,Initial Screening,1,Passed,Math Exam,167,80,28.69,Passed,Passed,No,No,,,,,,HR,4/22/2026 11:05:21
+AID-C3ECDD20,APP-20260422102300,Math Exam,2,Passed,Final Interview,167,80,28.69,,,,,,,,,,HR,4/22/2026 11:05:42
+AID-C3ECDD20,APP-20260422102300,Final Interview,3,Passed,Completed,167,80,28.69,,,,,Passed,,,,Passed- Can start anytime,Jacquelin Miclat,4/22/2026 11:08:03
+AID-038D915D,APP-20260422102052,Final Interview,3,Passed,Completed,157,60,24.34,,,,,Passed,,,,She has good communication skills and qualified for the position.,Pia Tarroza,4/22/2026 11:08:15
+AID-58ABF05B,APP-20260422110548,Initial Screening,1,Passed,Math Exam,149,57,25.67,Passed,Passed,No,No,,,,,,Jason Reyes,4/22/2026 11:24:39
+AID-58ABF05B,APP-20260422110548,Math Exam,2,Passed,Final Interview,149,57,25.67,,,,,,,,,,Jason Reyes,4/22/2026 11:24:55
+AID-9271A716,APP-20260422102042,Final Interview,3,Passed,Completed,157,56,22.72,,,,,Passed,,,,She is recommended to the next step. her good attitude and positivity in learning new things.,HR,4/22/2026 11:22:24
+AID-58ABF05B,APP-20260422110548,Final Interview,3,Passed,Completed,149,57,25.67,,,,,Passed,,,,She has extensive experience in customer service from her previous jobs in a hotel. She also has the knowledge on handling customer concerns/issues.,Jason Reyes,4/22/2026 11:25:19
+AID-296F666A,APP-20260422110638,Initial Screening,1,Passed,Math Exam,175,80,26.12,Passed,Passed,No,No,,,,,,Jason Reyes,4/22/2026 11:44:01
+AID-296F666A,APP-20260422110638,Math Exam,2,Passed,Final Interview,175,80,26.12,,,,,,,,,,Jason Reyes,4/22/2026 11:44:41
+AID-6CC9CA72,APP-20260422110751,Initial Screening,1,Passed,Math Exam,170,70,24.22,Passed,Passed,No,No,,,,,,HR,4/23/2026 10:11:16
+AID-5FEFF506,APP-20260422110813,Initial Screening,1,Passed,Math Exam,163,72,27.1,Passed,Passed,No,Yes,,,,,,Jacquelin Miclat,4/22/2026 11:31:43
+AID-5FEFF506,APP-20260422110813,Math Exam,2,Passed,Final Interview,163,72,27.1,,,,,,,,,,Jacquelin Miclat,4/22/2026 11:32:36
+AID-EB593661,APP-20260422102459,Initial Screening,1,Passed,Math Exam,160,52,20.31,Passed,Passed,No,No,,,,,,HR,4/22/2026 11:42:55
+AID-EB593661,APP-20260422102459,Math Exam,2,Passed,Table Test,160,52,20.31,,,,,,,,,,HR,4/22/2026 11:43:34
+AID-EB593661,APP-20260422102459,Table Test,3,Passed,Final Interview,160,52,20.31,,,,,,,,,,HR,4/22/2026 11:43:56
+AID-296F666A,APP-20260422110638,Final Interview,3,Passed,Completed,175,80,26.12,,,,,Passed,,,,He has the knowledge in handling customer concerns/issues based on his previous job as a casino cashier.,Jason Reyes,4/22/2026 11:45:52
+AID-85F85836,APP-20260422102303,Initial Screening,1,Passed,Math Exam,167,68,24.38,Passed,Passed,No,Yes,,,,,,HR,4/22/2026 11:39:36
+AID-25486545,APP-20260422102250,Initial Screening,1,Passed,Math Exam,179,75,23.41,Passed,Passed,No,No,,,,,,Pia Tarroza,4/22/2026 11:40:46
+AID-85F85836,APP-20260422102303,Math Exam,2,Passed,Table Test,167,68,24.38,,,,,,,,,,HR,4/22/2026 11:40:56
+AID-25486545,APP-20260422102250,Math Exam,2,Passed,Table Test,179,75,23.41,,,,,,,,,,Pia Tarroza,4/22/2026 11:41:07
+AID-5FEFF506,APP-20260422110813,Final Interview,3,Passed,Completed,163,72,27.1,,,,,Passed,,,,Excited and very eager to get the job - Passed,Jacquelin Miclat,4/22/2026 11:41:14
+AID-85F85836,APP-20260422102303,Table Test,3,Passed,Final Interview,167,68,24.38,,,,,,,,,,HR,4/22/2026 11:41:26
+AID-25486545,APP-20260422102250,Table Test,3,Passed,Final Interview,179,75,23.41,,,,,,,,,,Pia Tarroza,4/22/2026 11:41:37
+AID-EB593661,APP-20260422102459,Final Interview,4,Passed,Completed,160,52,20.31,,,,,Passed,,,,She has the positive attitude to be part of our company,HR,4/22/2026 11:44:19
+AID-85F85836,APP-20260422102303,Final Interview,4,Passed,Completed,167,68,24.38,,,,,Passed,,,,He is overall good. Fit for the job.,HR,4/22/2026 11:44:14
+AID-330A3B5D,APP-20260422102202,Initial Screening,1,Passed,Math Exam,1.7,63,217993.08,Passed,Passed,No,Yes,,,,,,Jason Reyes,4/22/2026 11:47:44
+AID-330A3B5D,APP-20260422102202,Math Exam,2,Passed,Table Test,1.7,63,217993.08,,,,,,,,,,Jason Reyes,4/22/2026 11:48:09
+AID-330A3B5D,APP-20260422102202,Table Test,3,Passed,Final Interview,1.7,63,217993.08,,,,,,,,,,Jason Reyes,4/22/2026 11:48:30
+AID-D1B798F4,APP-20260422110713,Initial Screening,1,Passed,Math Exam,178,70,22.09,Passed,Passed,No,Yes,,,,,,HR,4/22/2026 11:50:39
+AID-D1B798F4,APP-20260422110713,Math Exam,2,Passed,Table Test,178,70,22.09,,,,,,,,,,HR,4/22/2026 11:50:59
+AID-D1B798F4,APP-20260422110713,Table Test,3,Passed,Final Interview,178,70,22.09,,,,,,,,,,Dionisio Duyao,4/22/2026 11:51:37
+AID-4B70574F,APP-20260422110905,Initial Screening,1,Passed,Math Exam,160,49,19.14,Passed,Passed,No,No,,,,,,Jacquelin Miclat,4/22/2026 11:53:36
+AID-D1B798F4,APP-20260422110713,Final Interview,4,Passed,Completed,178,70,22.09,,,,,Passed,,,,"Has 4 years of experience as a casino dealer, with good result of table test. Possesses a positive attitude. Recommended for hiring.",Maricel Zalvidea,4/22/2026 11:54:02
+AID-4B70574F,APP-20260422110905,Math Exam,2,Passed,Final Interview,160,49,19.14,,,,,,,,,,Jacquelin Miclat,4/22/2026 11:55:40
+AID-330A3B5D,APP-20260422102202,Final Interview,4,Passed,Completed,1.7,63,217993.08,,,,,Passed,,,,He knows how to handle customer related concerns/issue properly. Experienced Dealer with multiple major games.,Jason Reyes,4/22/2026 11:56:42
+AID-FA5987A4,APP-20260422110704,Initial Screening,1,Passed,Math Exam,173,76,25.39,Passed,Passed,No,No,,,,,,HR,4/22/2026 12:04:18
+AID-FA5987A4,APP-20260422110704,Math Exam,2,Passed,Table Test,173,76,25.39,,,,,,,,,,HR,4/22/2026 12:04:34
+AID-FA5987A4,APP-20260422110704,Table Test,3,Passed,Final Interview,173,76,25.39,,,,,,,,,,HR,4/22/2026 12:04:58
+AID-2C655DC8,APP-20260422102313,Initial Screening,1,Passed,Math Exam,5.6,72,22959.18,Passed,Passed,No,Yes,,,,,,HR,4/22/2026 12:01:38
+AID-2C655DC8,APP-20260422102313,Math Exam,2,Passed,Table Test,5.6,72,22959.18,,,,,,,,,,HR,4/22/2026 12:03:21
+AID-25486545,APP-20260422102250,Final Interview,4,Passed,Completed,179,75,23.41,,,,,Passed,,,,Fit for the position,Pia Tarroza,4/22/2026 12:03:37
+AID-2C655DC8,APP-20260422102313,Table Test,3,Passed,Final Interview,5.6,72,22959.18,,,,,,,,,,HR,4/22/2026 12:03:47
+AID-FA5987A4,APP-20260422110704,Final Interview,4,Passed,Completed,173,76,25.39,,,,,Passed,,,,"Nicanor is a big help to the company, recommended for experienced dealer",HR,4/22/2026 12:05:18
+AID-2C655DC8,APP-20260422102313,Final Interview,4,Passed,Completed,5.6,72,22959.18,,,,,Passed,,,,Overall good. Fit for the job.,HR,4/22/2026 12:04:41
+AID-4B70574F,APP-20260422110905,Final Interview,3,Passed,Completed,160,49,19.14,,,,,Passed,,,,Looking for great opportunities - Passed,Jacquelin Miclat,4/22/2026 12:05:46
+AID-6CC9CA72,APP-20260422110751,Math Exam,2,Passed,Final Interview,170,70,24.22,,,,,,,,,,HR,4/23/2026 10:11:34
+AID-6CC9CA72,APP-20260422110751,Final Interview,3,Passed,Completed,170,70,24.22,,,,,Passed,,,,She has the experience in handling customer related concerns/issues. She also knows how to handle customer complaints from her previous jobs.,JASON,4/23/2026 10:12:02
+AID-E4725386,APP-20260423101208,Initial Screening,1,Passed,Final Interview,182,65,19.62,Passed,,No,No,,,,,,HR,4/23/2026 11:05:54
+AID-DA80238C,APP-20260423101758,Initial Screening,1,Passed,Final Interview,114,68,52.32,Passed,Passed,No,No,,,,,,HR,4/23/2026 10:28:45
+AID-87E9B76B,APP-20260423101210,Initial Screening,1,Passed,Final Interview,158,67,26.84,Passed,,No,No,,,,,,EDISON,4/23/2026 10:42:55
+AID-87E9B76B,APP-20260423101210,Final Interview,2,For Pooling,Completed,158,67,26.84,,,,,,,,,"Qualified for Pit Manager role with solid experience.
+For pooling and for future consideration.",EDISON,4/23/2026 11:29:44
+AID-D01DD45D,APP-20260423101557,Initial Screening,1,Passed,Final Interview,161,75,28.93,Passed,,No,No,,,,,,EDISON,4/23/2026 10:47:35
+AID-E4725386,APP-20260423101208,Final Interview,2,For Pooling,Completed,182,65,19.62,,,,,,,,,Jonathan is an experience Pit manager with knowledge of the gaming operation . One of the opening team in-charge of table set up and layout. Recommended for pooling,HR,4/23/2026 11:06:27
+AID-214C090E,APP-20260423102725,Initial Screening,1,Passed,Final Interview,167,52,18.65,Passed,Passed,No,No,,,,,,JASON REYES,4/23/2026 12:06:21
+AID-0F58BF4C,APP-20260423102919,Initial Screening,1,Passed,Final Interview,160,68,26.56,Passed,Passed,No,No,,,,,,HR,4/23/2026 11:22:07
+AID-214C090E,APP-20260423102725,Final Interview,2,Not Recommended,Completed,167,52,18.65,,,,,,,,,For Exp.Dealer but the candidate is not willing tp be reprofiled. Applicant is currently employed in Solaire as HD Sup for 2 yrs. The applicant lacks knowledge needed for the full-time Supervisor position.,JASON REYES,4/23/2026 12:06:45
+AID-D01DD45D,APP-20260423101557,Final Interview,2,Not Recommended,Completed,161,75,28.93,,,,,,,,,Qualified for the position but not prioritized in the preference list at this time,EDISON,4/23/2026 11:27:43
+AID-0F58BF4C,APP-20260423102919,Final Interview,2,Passed,Completed,160,68,26.56,,,,,,,,,Jeny is qualified as Training officer with extensive knowledge of training. Recommended for pooling,HR,4/23/2026 11:30:26
+AID-CB0AFF6B,APP-20260423101433,Initial Screening,1,Passed,Final Interview,55,68,224.79,Passed,,No,No,,,,,,EDISON,4/23/2026 11:32:23
+AID-E1947043,APP-20260423102607,Initial Screening,1,Passed,Math Exam,170,75,25.95,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/23/2026 11:47:50
+AID-E1947043,APP-20260423102607,Math Exam,2,Passed,Final Interview,170,75,25.95,,,,,,,,,,Dionisio V Duyao Jr,4/23/2026 11:48:29
+AID-98DD2829,APP-20260423102912,Initial Screening,1,Passed,Math Exam,177.8,58,18.35,Passed,Passed,No,Yes,,,,,,HR,4/23/2026 11:35:00
+AID-E8E874C0,APP-20260423110028,Initial Screening,1,Passed,Math Exam,57,80,246.23,Passed,Passed,No,Yes,,,,,,HR,4/23/2026 11:35:19
+AID-98DD2829,APP-20260423102912,Math Exam,2,Passed,Final Interview,177.8,58,18.35,,,,,,,,,,HR,4/23/2026 11:35:24
+AID-E8E874C0,APP-20260423110028,Math Exam,2,Passed,Final Interview,57,80,246.23,,,,,,,,,,HR,4/23/2026 11:36:51
+AID-98DD2829,APP-20260423102912,Final Interview,3,Passed,Completed,177.8,58,18.35,,,,,Passed,,,,Passed as a new dealer.,HR,4/23/2026 11:37:46
+AID-AEF3F37A,APP-20260423111300,Initial Screening,1,Passed,Math Exam,157,50,20.28,Passed,Passed,No,No,,,,,,JASON REYES,4/23/2026 11:37:51
+AID-E8E874C0,APP-20260423110028,Final Interview,3,Passed,Completed,57,80,246.23,,,,,Passed,,,,Good personality. Fit for the job (new dealer).,HR,4/23/2026 11:38:11
+AID-AEF3F37A,APP-20260423111300,Math Exam,2,Passed,Final Interview,157,50,20.28,,,,,,,,,,JASON REYES,4/23/2026 11:38:16
+AID-FA6E6712,APP-20260423102554,Initial Screening,1,Passed,Math Exam,167,56,20.08,Passed,Passed,No,No,,,,,,HR,4/23/2026 12:03:56
+AID-E1947043,APP-20260423102607,Final Interview,3,Passed,Completed,170,75,25.95,,,,,Passed,,,,"-Matthew has the positive attitude, good character
+-recommended for Table games Dealer",Dionisio V Duyao Jr,4/23/2026 11:48:44
+AID-4CA88AB7,APP-20260423102929,Initial Screening,1,Passed,Math Exam,158,57,22.83,Passed,Passed,No,No,,,,,,HR,4/23/2026 11:44:47
+AID-493E539F,APP-20260423102837,Initial Screening,1,Passed,Math Exam,162,55,20.96,Passed,Passed,No,No,,,,,,HR,4/23/2026 11:45:06
+AID-493E539F,APP-20260423102837,Math Exam,2,Passed,Final Interview,162,55,20.96,,,,,,,,,,HR,4/23/2026 11:45:25
+AID-4CA88AB7,APP-20260423102929,Math Exam,2,Passed,Table Test,158,57,22.83,,,,,,,,,,HR,4/23/2026 11:45:35
+AID-493E539F,APP-20260423102837,Final Interview,3,Passed,Completed,162,55,20.96,,,,,Passed,,,,Has experience in customer relations as VIP roller for 10 mos. Good candidate. Recommended for hiring.,Maricel Zalvidea,4/23/2026 11:47:25
+AID-AEF3F37A,APP-20260423111300,Final Interview,3,Passed,Completed,157,50,20.28,,,,,Passed,,,,Applicant has pleasing personality and has experience in customer service and knows how to handle customer related concerns.,JASON REYES,4/23/2026 11:48:19
+AID-37BFD010,APP-20260423101714,Initial Screening,1,Passed,Final Interview,162.56,55,20.81,Passed,,No,No,,,,,,denduy,4/23/2026 16:22:05
+AID-CB0AFF6B,APP-20260423101433,Final Interview,2,Reprofile,Completed,55,68,224.79,,,,,,,,,recommended for pit supervisors position,EDISON,4/23/2026 11:51:37
+AID-08F350FC,APP-20260423111253,Initial Screening,1,Passed,Math Exam,157.48,50,20.16,Passed,Passed,No,No,,,,,,JASON REYES,4/23/2026 12:02:54
+AID-08F350FC,APP-20260423111253,Math Exam,2,Passed,Final Interview,157.48,50,20.16,,,,,,,,,,JASON REYES,4/23/2026 12:04:05
+AID-B4D5C04F,APP-20260423101331,Initial Screening,1,Passed,Final Interview,167,70,25.1,Passed,,No,No,,,,,,EDISON,4/23/2026 11:56:53
+AID-4CA88AB7,APP-20260423102929,Table Test,3,Failed,Final Interview,158,57,22.83,,,,,,,,,,HR,4/23/2026 11:58:46
+AID-FA6E6712,APP-20260423102554,Math Exam,2,Passed,Final Interview,167,56,20.08,,,,,,,,,,HR,4/23/2026 12:04:33
+AID-FA6E6712,APP-20260423102554,Final Interview,3,Passed,Completed,167,56,20.08,,,,,Passed,,,,Has nice smile. Fit for the job (new dealer).,HR,4/23/2026 12:05:05
+AID-4CA88AB7,APP-20260423102929,Final Interview,4,Passed,Completed,158,57,22.83,,,,,Passed,,,,Passed as a new dealer only - only dealt the games for 6months,Jacquelin Miclat,4/23/2026 12:01:51
+AID-08F350FC,APP-20260423111253,Final Interview,3,Passed,Completed,157.48,50,20.16,,,,,Passed,,,,She has the experience and knowledge in customer related conscerns.,JASON REYES,4/23/2026 12:04:26
+AID-DD74296D,APP-20260423102726,Initial Screening,1,Passed,Math Exam,160,65,25.39,Passed,Passed,Yes,Yes,,,,,,Dionisio V Duyao Jr,4/23/2026 12:06:28
+AID-DD74296D,APP-20260423102726,Math Exam,2,Passed,Final Interview,160,65,25.39,,,,,,,,,,Dionisio V Duyao Jr,4/23/2026 12:06:52
+AID-DD74296D,APP-20260423102726,Final Interview,3,Passed,Completed,160,65,25.39,,,,,Passed,,,,recommended for Table Games,Dionisio V Duyao Jr,4/23/2026 12:07:12
+AID-B4D5C04F,APP-20260423101331,Final Interview,2,Not Recommended,Completed,167,70,25.1,,,,,,,,,not suitable,EDISON,4/23/2026 12:10:22
+AID-37BFD010,APP-20260423101714,Final Interview,2,Not Recommended,Completed,162.56,55,20.81,,,,,,,,,"for pooling, Grace is not confident enough to explain her Pit manager function check for NCC.",Zeham,4/23/2026 16:23:00
+AID-22F392DB,APP-20260423113844,Initial Screening,1,Passed,Math Exam,175,75,24.49,Passed,Passed,No,Yes,,,,,,JASON REYES,4/23/2026 13:22:32
+AID-22F392DB,APP-20260423113844,Math Exam,2,Passed,Table Test,175,75,24.49,,,,,,,,,,JASON REYES,4/23/2026 13:22:51
+AID-22F392DB,APP-20260423113844,Table Test,3,Passed,Final Interview,175,75,24.49,,,,,,,,,,JASON REYES,4/23/2026 13:23:23
+AID-20A742A8,APP-20260423102543,Initial Screening,1,Passed,Math Exam,175.26,70,22.79,Passed,Passed,No,No,,,,,,gina,4/23/2026 13:25:54
+AID-22F392DB,APP-20260423113844,Final Interview,4,Passed,Completed,175,75,24.49,,,,,Passed,,,,7 yrs total experience on multiple casinos. He also has supervisory experience in a small casino in Europe.,JASON REYES,4/23/2026 13:25:59
+AID-20A742A8,APP-20260423102543,Math Exam,2,Passed,Final Interview,175.26,70,22.79,,,,,,,,,,gina,4/23/2026 13:26:08
+AID-603023E6,APP-20260423102847,Initial Screening,1,Passed,Math Exam,180,90,27.78,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/23/2026 13:42:20
+AID-603023E6,APP-20260423102847,Math Exam,2,Passed,Final Interview,180,90,27.78,,,,,,,,,,Dionisio V Duyao Jr,4/23/2026 13:42:43
+AID-BC67D026,APP-20260423102654,Initial Screening,1,Passed,Math Exam,163,81,30.49,Passed,Passed,No,No,,,,,,JASON REYES,4/23/2026 13:32:17
+AID-BC67D026,APP-20260423102654,Math Exam,2,Passed,Final Interview,163,81,30.49,,,,,,,,,,JASON REYES,4/23/2026 13:32:39
+AID-04E50982,APP-20260423103909,Initial Screening,1,Passed,Math Exam,165,48,17.63,Passed,Passed,No,Yes,,,,,,HR,4/23/2026 13:39:27
+AID-04E50982,APP-20260423103909,Math Exam,2,Passed,Final Interview,165,48,17.63,,,,,,,,,,HR,4/23/2026 13:39:45
+AID-603023E6,APP-20260423102847,Final Interview,3,Passed,Completed,180,90,27.78,,,,,Passed,,,,recommended for table games dealer for having a positive attitude,Dionisio V Duyao Jr,4/23/2026 13:42:59
+AID-BC67D026,APP-20260423102654,Final Interview,3,Passed,Completed,163,81,30.49,,,,,Passed,,,,He has experience in Solaire as a Dealer (MB only) and he knows how to handle customer related concerns.,JASON REYES,4/23/2026 13:42:37
+AID-04E50982,APP-20260423103909,Final Interview,3,Passed,Completed,165,48,17.63,,,,,Passed,,,,Shy person but was able to express himself.,HR,4/23/2026 13:43:39
+AID-20A742A8,APP-20260423102543,Final Interview,3,Passed,Completed,175.26,70,22.79,,,,,Passed,,,,"Good communication skills, willing to undergo training. Demonstrates good attitude. Recommended for new dealer position.",Maricel Zalvidea,4/23/2026 13:45:23
+AID-39660360,APP-20260423102643,Initial Screening,1,Passed,Math Exam,158,54,21.63,Passed,Passed,No,No,,,,,,HR,4/23/2026 13:47:20
+AID-39660360,APP-20260423102643,Math Exam,2,Passed,Final Interview,158,54,21.63,,,,,,,,,,HR,4/23/2026 13:47:42
+AID-E7663940,APP-20260423102652,Initial Screening,1,Passed,Math Exam,164,70,26.03,Passed,Passed,No,No,,,,,,JASON REYES,4/23/2026 13:48:29
+AID-E7663940,APP-20260423102652,Math Exam,2,Passed,Table Test,164,70,26.03,,,,,,,,,,JASON REYES,4/23/2026 13:49:01
+AID-E7663940,APP-20260423102652,Table Test,3,Passed,Final Interview,164,70,26.03,,,,,,,,,,JASON REYES,4/23/2026 13:49:33
+AID-39660360,APP-20260423102643,Final Interview,3,Passed,Completed,158,54,21.63,,,,,Passed,,,,"Can work under pressure, used to be a working student -- Passed",Jacquelin Miclat,4/23/2026 13:51:17
+AID-E7663940,APP-20260423102652,Final Interview,4,Passed,Completed,164,70,26.03,,,,,Passed,,,,She has experience on different casinos and has multiple games as well.,JASON REYES,4/23/2026 13:55:07
+AID-88B49AB3,APP-20260423102759,Initial Screening,1,Passed,Math Exam,175,71,23.18,Passed,Passed,No,No,,,,,,Dionisio V Duyao Jr,4/23/2026 14:12:10
+AID-88B49AB3,APP-20260423102759,Math Exam,2,Passed,Final Interview,175,71,23.18,,,,,,,,,,Dionisio V Duyao Jr,4/23/2026 14:12:28
+AID-E4839BBC,APP-20260423102825,Initial Screening,1,Passed,Math Exam,168,55,19.49,Passed,Passed,No,Yes,,,,,,HR,4/23/2026 14:01:29
+AID-E4839BBC,APP-20260423102825,Math Exam,2,Passed,Final Interview,168,55,19.49,,,,,,,,,,HR,4/23/2026 14:01:43
+AID-E4839BBC,APP-20260423102825,Final Interview,3,Passed,Completed,168,55,19.49,,,,,Passed,,,,Good smile & charming. Fit to the job (new dealer).,HR,4/23/2026 14:02:02
+AID-57A5B143,APP-20260423133714,Initial Screening,1,Passed,Math Exam,175,79,25.8,Passed,Passed,No,Yes,,,,,,Maricel Zalvidea,4/23/2026 14:06:31
+AID-57A5B143,APP-20260423133714,Math Exam,2,Passed,Final Interview,175,79,25.8,,,,,,,,,,Maricel Zalvidea,4/23/2026 14:06:55
+AID-99993194,APP-20260423134346,Initial Screening,1,Passed,Math Exam,52,43,159.02,Passed,Passed,No,No,,,,,,Jek,4/23/2026 15:58:23
+AID-99993194,APP-20260423134346,Math Exam,2,Passed,Final Interview,52,43,159.02,,,,,,,,,,Jek,4/23/2026 15:58:38
+AID-57A5B143,APP-20260423133714,Final Interview,3,Passed,Completed,175,79,25.8,,,,,Passed,,,,"With pleasing personality, demonstrates good attitude and willing to undergo training. Recommended for a new dealer position.",Maricel Zalvidea,4/23/2026 14:07:34
+AID-88B49AB3,APP-20260423102759,Final Interview,3,Passed,Completed,175,71,23.18,,,,,Passed,,,,"Marianne is recommended for table game dealer
+She has positive attitude towards her goal",Dionisio V Duyao Jr,4/23/2026 14:12:44
+AID-99993194,APP-20260423134346,Final Interview,3,Reprofile,Completed,52,43,159.02,,,,,Passed,,,,"Reprofile - height is only 5'1"" - Card room staff",Jek,4/23/2026 15:59:01
+AID-E9E45241,APP-20260423103002,Initial Screening,1,Passed,Math Exam,170,63,21.8,Passed,Passed,No,No,,,,,,HR,4/23/2026 14:35:32
+AID-E9E45241,APP-20260423103002,Math Exam,2,Passed,Table Test,170,63,21.8,,,,,,,,,,HR,4/23/2026 14:36:04
+AID-E9E45241,APP-20260423103002,Table Test,3,Passed,Final Interview,170,63,21.8,,,,,,,,,,Adrian Z.,4/23/2026 14:37:00
+AID-E9E45241,APP-20260423103002,Final Interview,4,Passed,Completed,170,63,21.8,,,,,Passed,,,,Passed as experienced dealer with MB and BJ games,Jacquelin Miclat,4/23/2026 14:40:37
+AID-DA80238C,APP-20260423101758,Final Interview,2,Passed,Completed,114,68,52.32,,,,,,,,,recommended for Cardroom sup.,denduy,4/23/2026 16:19:43
+AID-A5AFDB67,APP-20260424100756,Initial Screening,1,Passed,Final Interview,165,65,23.88,Passed,,No,No,,,,,,HR,4/24/2026 11:33:24
+AID-472BF898,APP-20260424100750,Initial Screening,1,Passed,Math Exam,157,45,18.26,Passed,Passed,No,No,,,,,,HR,4/24/2026 10:51:50
+AID-472BF898,APP-20260424100750,Math Exam,2,Passed,Final Interview,157,45,18.26,,,,,,,,,,HR,4/24/2026 10:56:31
+AID-472BF898,APP-20260424100750,Final Interview,3,Passed,Completed,157,45,18.26,,,,,Passed,,,,Aprilyn has the extensive knowledge of preventive maintenance and asset control. She has the experience with analytics and inventory system. I am recommending her for the position of TG project and Asset officer,HR,4/24/2026 10:48:17
+AID-A5AFDB67,APP-20260424100756,Final Interview,2,Passed,Completed,165,65,23.88,,,,,,,,,Qualified for Pit manager role with solid experience in table operations and team supervision,Edison,4/24/2026 10:50:25
+AID-CCD12EBE,APP-20260424105447,Initial Screening,1,Passed,Final Interview,160,58,22.66,Passed,,No,No,,,,,,HR,4/24/2026 11:31:18
+AID-CCD12EBE,APP-20260424105447,Final Interview,2,For Pooling,Completed,160,58,22.66,,,,,,,,,qualified but for pooling and for future consideration,HR,4/24/2026 11:30:50
