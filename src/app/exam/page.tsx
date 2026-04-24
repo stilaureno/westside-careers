@@ -7,6 +7,22 @@ import { PASSING_SCORE, MAX_MATH_EXAM_SCORE, EXAM_DURATION_MINUTES } from '@/typ
 type Choice = { key: string; text: string };
 type Question = { id: string; question_no: number; question: string; choices: Choice[] };
 
+function getExamErrorMessage(error: string): string {
+  if (error === 'notEligible') {
+    return 'You are not eligible for the math exam at this time.';
+  }
+
+  if (error === 'initialScreeningRequired') {
+    return 'You must complete Initial Screening before taking the math exam.';
+  }
+
+  if (error === 'alreadyTaken') {
+    return 'You have already taken this exam.';
+  }
+
+  return error;
+}
+
 export default function ExamPage() {
   const [view, setView] = useState<'start' | 'exam' | 'result'>('start');
   const [refInput, setRefInput] = useState('');
@@ -70,14 +86,8 @@ export default function ExamPage() {
 
     const data = await res.json();
 
-    if (data.error === 'notEligible') {
-      setMessage({ text: 'You are not eligible for the math exam at this time.', type: 'error' });
-      setLoading(false);
-      return;
-    }
-
     if (data.error) {
-      setMessage({ text: data.error, type: 'error' });
+      setMessage({ text: getExamErrorMessage(data.error), type: 'error' });
       setLoading(false);
       return;
     }
@@ -108,7 +118,7 @@ export default function ExamPage() {
     const data = await res.json();
 
     if (!data.success) {
-      setMessage({ text: data.error || 'Failed to start exam.', type: 'error' });
+      setMessage({ text: getExamErrorMessage(data.error || 'Failed to start exam.'), type: 'error' });
       return;
     }
 

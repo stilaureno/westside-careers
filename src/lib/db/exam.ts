@@ -83,7 +83,73 @@ export function sanitizeQuestionsForClient(questions: (QuestionnaireQuestion & {
   }));
 }
 
+type ExamApplicantInfo =
+  | {
+      error: string;
+    }
+  | {
+      referenceNo: string;
+      lastName: string;
+      firstName: string;
+      middleName: string | null;
+      alreadyTaken: boolean;
+      previousResult: any;
+    };
+
+export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInfo> {
+  const supabase = await createClient();
+
+  const { data: applicant, error } = await supabase
+    .from('applicants')
+    .select('reference_no, last_name, first_name, middle_name, position_applied, application_status')
+    .eq('reference_no', referenceNo)
+    .single();
+
+  if (error || !applicant) {
+    return { error: 'Applicant not found' };
+  }
+
+  if (applicant.position_applied !== 'Dealer') {
+    return { error: 'Math exam is only available for Dealer applicants' };
+  }
+
+  if (applicant.application_status === 'Completed' || applicant.application_status === 'Not Recommended') {
+    return { error: 'notEligible' };
+  }
+
+  const { data: screeningResult } = await supabase
+    .from('stage_results')
+    .select('id')
+    .eq('reference_no', referenceNo)
+    .eq('stage_name', 'Initial Screening')
+    .single();
+
+  if (!screeningResult) {
+    return { error: 'initialScreeningRequired' };
+  }
+
+  const { data: attempt } = await supabase
+    .from('math_exam_results')
+    .select('*')
+    .eq('reference_no', referenceNo)
+    .single();
+
+  return {
+    referenceNo: applicant.reference_no,
+    lastName: applicant.last_name,
+    firstName: applicant.first_name,
+    middleName: applicant.middle_name,
+    alreadyTaken: !!attempt && attempt.attempt_status !== 'IN_PROGRESS',
+    previousResult: attempt,
+  };
+}
+
 export async function startExam(referenceNo: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  const eligibility = await getExamInfo(referenceNo);
+  if ('error' in eligibility) {
+    return { success: false, error: eligibility.error };
+  }
+
   const supabase = await createClient();
 
   const { data: existing } = await supabase
