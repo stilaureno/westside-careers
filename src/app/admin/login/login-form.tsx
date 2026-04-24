@@ -29,11 +29,11 @@ export default function LoginForm() {
         return;
       }
 
-      // Cookie is set server-side in the API response.
-      // Since this is a client component, we tell Next.js to refresh the page/layout
-      // so the server layout picks up the new cookie.
-      router.refresh();
-      router.replace('/admin/dashboard');
+      // Since we need to refresh the entire layout (which is a server component 
+      // that checks for the session cookie), we use window.location.href 
+      // to force a full page reload. This prevents the "stale layout" bug
+      // where navigation tabs wouldn't appear immediately.
+      window.location.href = '/admin/dashboard';
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
