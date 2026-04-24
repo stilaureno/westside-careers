@@ -16,6 +16,7 @@ create table if not exists public.applicants (
   height_cm numeric,
   weight_kg numeric,
   bmi_value numeric,
+  department text,
   position_applied text not null,
   experience_level text,
   current_company_name text,

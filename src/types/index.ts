@@ -1,4 +1,23 @@
 export const POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager'] as const;
+export const DEPARTMENTS = ['Table Games', 'Slots'] as const;
+export const TABLE_GAMES_POSITIONS = [
+  'Dealer',
+  'Pit Supervisor',
+  'Pit Manager',
+  'Operations Manager',
+  'Card Room Manager',
+  'Card Room Staff',
+  'Card Room Supervisor',
+  'Compliance Officer',
+  'Gaming Office Admin',
+  'Gaming Operations Admin',
+  'Inventory & Maintenance Staff',
+  'Table Games Project and Asset Officer',
+  'Table Games Training Administrator',
+  'Table Games Training Assistant Manager',
+  'Table Games Training Officer',
+] as const;
+export const SLOTS_POSITIONS = ['Slots Ambassador', 'Slots Supervisor', 'Slots Admin'] as const;
 export const EXPERIENCE_LEVELS = ['Non-Experienced Dealer', 'Experienced Dealer'] as const;
 export const ALLOWED_GAMES = ['MB', 'BJ', 'RL', 'CRAPS'] as const;
 export const FINAL_INTERVIEW_RESULTS = ['Passed', 'Reprofile', 'For Pooling', 'Not Recommended'] as const;
@@ -144,6 +163,7 @@ export interface ApplicationFormData {
   emailAddress?: string;
   heightCm?: number;
   weightKg?: number;
+  department: string;
   positionApplied: string;
   experienceLevel?: string;
   games?: string[];

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { submitApplication } from '@/lib/actions/applicant';
-import { POSITIONS, EXPERIENCE_LEVELS, ALLOWED_GAMES } from '@/types';
+import { POSITIONS, EXPERIENCE_LEVELS, ALLOWED_GAMES, DEPARTMENTS, TABLE_GAMES_POSITIONS, SLOTS_POSITIONS } from '@/types';
 import Link from 'next/link';
 import styles from './apply.module.css';
 
@@ -16,7 +16,7 @@ export default function ApplyPage() {
     lastName: '', firstName: '', middleName: '',
     birthdate: '', gender: '', contactNumber: '',
     emailAddress: '', heightCm: '', weightKg: '',
-    positionApplied: '', experienceLevel: '',
+    department: '', positionApplied: '', experienceLevel: '',
     currentlyEmployed: 'No', currentCompanyName: '',
     currentPosition: '', previousCompanyName: '',
     preferredDepartment: '',
@@ -26,6 +26,10 @@ export default function ApplyPage() {
   const isDealer = form.positionApplied === 'Dealer';
   const isExperienced = form.experienceLevel === 'Experienced Dealer';
   const isEmployed = form.currentlyEmployed === 'Yes';
+  const isTableGames = form.department === 'Table Games';
+  const isSlots = form.department === 'Slots';
+
+  const positionOptions = isTableGames ? TABLE_GAMES_POSITIONS : isSlots ? SLOTS_POSITIONS : [];
 
   function toggleGame(code: string) {
     setGames((prev) =>
@@ -38,8 +42,14 @@ export default function ApplyPage() {
     setLoading(true);
     setMessage(null);
 
-    if (!form.lastName || !form.firstName || !form.birthdate || !form.gender || !form.contactNumber || !form.positionApplied) {
+    if (!form.lastName || !form.firstName || !form.birthdate || !form.gender || !form.contactNumber || !form.department) {
       setMessage({ text: 'Please fill in all required fields.', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (!form.positionApplied) {
+      setMessage({ text: 'Please select a position.', type: 'error' });
       setLoading(false);
       return;
     }
@@ -66,6 +76,7 @@ export default function ApplyPage() {
       emailAddress: form.emailAddress,
       heightCm: parseFloat(form.heightCm) || undefined,
       weightKg: parseFloat(form.weightKg) || undefined,
+      department: form.department,
       positionApplied: form.positionApplied,
       experienceLevel: form.experienceLevel,
       games: isExperienced ? games : undefined,
@@ -238,24 +249,28 @@ export default function ApplyPage() {
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Job Details</h3>
             <div className={`${styles.grid} ${styles.gridTwo}`}>
+              <Field label="Department" required>
+                <select
+                  className={styles.control}
+                  value={form.department}
+                  onChange={(e) => setForm({ ...form, department: e.target.value, positionApplied: '' })}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </Field>
               <Field label="Position Applied" required>
                 <select
                   className={styles.control}
                   value={form.positionApplied}
                   onChange={(e) => setForm({ ...form, positionApplied: e.target.value, experienceLevel: '' })}
                   required
+                  disabled={!form.department}
                 >
                   <option value="">Select Position</option>
-                  {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                  {positionOptions.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
-              </Field>
-              <Field label="Preferred Department">
-                <input
-                  className={styles.control}
-                  value={form.preferredDepartment}
-                  onChange={(e) => setForm({ ...form, preferredDepartment: e.target.value })}
-                  autoComplete="organization-title"
-                />
               </Field>
             </div>
 
