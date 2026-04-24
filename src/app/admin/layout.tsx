@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { DashboardSummary, Applicant, PositionSummary, StageSummary, GenderByPosition } from '@/types';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { ADMIN_SESSION_COOKIE } from '@/lib/admin-session';
 
 function SummaryCard({ label, value, color = '#1f2937' }: { label: string; value: number; color?: string }) {
   return (
@@ -29,8 +30,16 @@ function LoadingSpinner() {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isApplicantsRoute = pathname.startsWith('/admin/applicants');
   const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
+
+  useEffect(() => {
+    const cookies = document.cookie.split('; ').find(c => c.startsWith(ADMIN_SESSION_COOKIE + '='));
+    if (!cookies || !cookies.includes('authenticated')) {
+      router.replace('/admin/login');
+    }
+  }, [router]);
 
   return (
     <div style={{ minHeight: '100vh', background: '#f6f8fc' }}>
