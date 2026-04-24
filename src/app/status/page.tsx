@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getApplicantStatus } from '@/lib/actions/applicant';
 import type { StageRoadmapItem } from '@/types';
 import Link from 'next/link';
@@ -10,9 +10,35 @@ export default function StatusPage() {
   const [result, setResult] = useState<{ applicant: any; roadmap: StageRoadmapItem[] } | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!lockedUntil) return;
+
+    const timer = window.setInterval(() => {
+      if (Date.now() >= lockedUntil) {
+        setLockedUntil(null);
+        setError('');
+        window.clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [lockedUntil]);
+
+  const isLocked = !!lockedUntil && lockedUntil > Date.now();
+
+  function formatLockCountdown(until: number) {
+    const remainingMs = Math.max(until - Date.now(), 0);
+    const minutes = Math.floor(remainingMs / 60000);
+    const seconds = Math.floor((remainingMs % 60000) / 1000);
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (isLocked) return;
+
     setLoading(true);
     setError('');
     setResult(null);
@@ -20,8 +46,10 @@ export default function StatusPage() {
     const res = await getApplicantStatus(form.referenceNo, form.birthdate);
     if (res.error || !res.data) {
       setError(res.error || 'Applicant not found');
+      setLockedUntil(res.lockedUntil || null);
     } else {
       setResult(res.data);
+      setLockedUntil(null);
     }
     setLoading(false);
   }
@@ -47,7 +75,14 @@ export default function StatusPage() {
             <div style={{
               padding: '14px', borderRadius: '12px', marginBottom: '16px',
               background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '14px',
-            }}>{error}</div>
+            }}>
+              <div>{error}</div>
+              {isLocked && lockedUntil && (
+                <div style={{ marginTop: '8px', fontWeight: '700' }}>
+                  Locked for: {formatLockCountdown(lockedUntil)}
+                </div>
+              )}
+            </div>
           )}
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
@@ -73,12 +108,12 @@ export default function StatusPage() {
               style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
             />
           </div>
-          <button type="submit" disabled={loading} style={{
+          <button type="submit" disabled={loading || isLocked} style={{
             width: '100%', padding: '14px', background: '#163a70', color: '#fff',
             border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
-            cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.65 : 1,
+            cursor: loading || isLocked ? 'not-allowed' : 'pointer', opacity: loading || isLocked ? 0.65 : 1,
           }}>
-            {loading ? 'Checking...' : 'Check Status'}
+            {loading ? 'Checking...' : isLocked ? 'Temporarily Locked' : 'Check Status'}
           </button>
         </form>
 

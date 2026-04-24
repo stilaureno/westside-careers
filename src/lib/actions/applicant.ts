@@ -1,8 +1,69 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { computeBMI, buildDuplicateKey, generateReferenceNo, generateApplicantId, getStageWorkflow, getNextStage } from '@/lib/db/applicants';
 import type { ApplicationFormData, Applicant, StageRoadmapItem } from '@/types';
+
+const STATUS_CHECK_FAILURES_COOKIE = 'status_check_failures';
+const STATUS_CHECK_LOCK_COOKIE = 'status_check_lock_until';
+const STATUS_CHECK_LIMIT = 5;
+const STATUS_CHECK_LOCK_MINUTES = 5;
+
+function getStatusCheckCookieOptions() {
+  return {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production',
+  };
+}
+
+async function getActiveStatusLock(cookieStore: Awaited<ReturnType<typeof cookies>>) {
+  const lockValue = cookieStore.get(STATUS_CHECK_LOCK_COOKIE)?.value;
+  if (!lockValue) return null;
+
+  const lockedUntil = Number(lockValue);
+  if (!Number.isFinite(lockedUntil) || lockedUntil <= Date.now()) {
+    cookieStore.delete(STATUS_CHECK_LOCK_COOKIE);
+    cookieStore.delete(STATUS_CHECK_FAILURES_COOKIE);
+    return null;
+  }
+
+  return lockedUntil;
+}
+
+async function resetStatusCheckState(cookieStore: Awaited<ReturnType<typeof cookies>>) {
+  cookieStore.delete(STATUS_CHECK_FAILURES_COOKIE);
+  cookieStore.delete(STATUS_CHECK_LOCK_COOKIE);
+}
+
+async function recordFailedStatusCheck(cookieStore: Awaited<ReturnType<typeof cookies>>) {
+  const currentFailures = Number(cookieStore.get(STATUS_CHECK_FAILURES_COOKIE)?.value || '0');
+  const nextFailures = currentFailures + 1;
+
+  if (nextFailures >= STATUS_CHECK_LIMIT) {
+    const lockedUntil = Date.now() + STATUS_CHECK_LOCK_MINUTES * 60 * 1000;
+    cookieStore.set(STATUS_CHECK_LOCK_COOKIE, String(lockedUntil), {
+      ...getStatusCheckCookieOptions(),
+      maxAge: STATUS_CHECK_LOCK_MINUTES * 60,
+    });
+    cookieStore.delete(STATUS_CHECK_FAILURES_COOKIE);
+    return lockedUntil;
+  }
+
+  cookieStore.set(STATUS_CHECK_FAILURES_COOKIE, String(nextFailures), {
+    ...getStatusCheckCookieOptions(),
+    maxAge: STATUS_CHECK_LOCK_MINUTES * 60,
+  });
+  return null;
+}
+
+function getStatusLockError(lockedUntil: number) {
+  const remainingMs = Math.max(lockedUntil - Date.now(), 0);
+  const remainingMinutes = Math.max(1, Math.ceil(remainingMs / 60000));
+  return `Too many failed status checks. Please try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}.`;
+}
 
 export async function submitApplication(formData: ApplicationFormData): Promise<{ success: boolean; referenceNo?: string; error?: string }> {
   const supabase = await createClient();
@@ -74,7 +135,13 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
 export async function getApplicantStatus(
   referenceNo: string,
   birthdate: string
-): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[] } | null; error: string | null }> {
+): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[] } | null; error: string | null; lockedUntil?: number | null }> {
+  const cookieStore = await cookies();
+  const activeLock = await getActiveStatusLock(cookieStore);
+  if (activeLock) {
+    return { data: null, error: getStatusLockError(activeLock), lockedUntil: activeLock };
+  }
+
   const supabase = await createClient();
 
   const { data: applicant, error } = await supabase
@@ -83,9 +150,25 @@ export async function getApplicantStatus(
     .eq('reference_no', referenceNo)
     .single();
 
-  if (error || !applicant) return { data: null, error: 'Applicant not found' };
+  if (error || !applicant) {
+    const lockedUntil = await recordFailedStatusCheck(cookieStore);
+    return {
+      data: null,
+      error: lockedUntil ? getStatusLockError(lockedUntil) : 'Applicant not found',
+      lockedUntil,
+    };
+  }
 
-  if (applicant.birthdate !== birthdate) return { data: null, error: 'Invalid reference number or birthdate' };
+  if (applicant.birthdate !== birthdate) {
+    const lockedUntil = await recordFailedStatusCheck(cookieStore);
+    return {
+      data: null,
+      error: lockedUntil ? getStatusLockError(lockedUntil) : 'Invalid reference number or birthdate',
+      lockedUntil,
+    };
+  }
+
+  await resetStatusCheckState(cookieStore);
 
   const { data: stageRows } = await supabase
     .from('stage_results')
@@ -108,7 +191,7 @@ export async function getApplicantStatus(
     };
   });
 
-  return { data: { applicant: applicant as Applicant, roadmap }, error: null };
+  return { data: { applicant: applicant as Applicant, roadmap }, error: null, lockedUntil: null };
 }
 
 export async function getApplicantInfo(referenceNo: string): Promise<{ data: any; error: string | null }> {
