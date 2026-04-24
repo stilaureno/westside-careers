@@ -55,27 +55,36 @@ export function shuffleQuestions(questions: QuestionnaireQuestion[]): Questionna
   return shuffleArray(questions);
 }
 
+// Improved shuffle choices to be more robust and user-friendly
 export function shuffleChoices(question: QuestionnaireQuestion): QuestionnaireQuestion & { choices: { key: string; text: string }[]; correctChoiceKey: string } {
-  const choices = [
-    { key: 'A', text: question.option_a },
-    { key: 'B', text: question.option_b },
-    { key: 'C', text: question.option_c },
-    { key: 'D', text: question.option_d },
+  // 1. Get all options as an array of texts
+  const options = [
+    question.option_a,
+    question.option_b,
+    question.option_c,
+    question.option_d,
   ];
-  const shuffledChoices = shuffleArray(choices);
+
+  // 2. Shuffle the texts
+  const shuffledTexts = shuffleArray(options);
   
-  // Normalize strings for comparison (remove commas, trim, etc. if needed, 
-  // but at least trim and normalize whitespace)
-  const normalize = (s: string) => s.replace(/\s+/g, ' ').trim();
+  // 3. Map to A, B, C, D keys in order
+  const choices = shuffledTexts.map((text, index) => ({
+    key: String.fromCharCode(65 + index), // A, B, C, D
+    text
+  }));
+
+  // 4. Find which key is correct
+  // Normalize: trim, collapse whitespace, and remove commas for numbers
+  const normalize = (s: string | number) => String(s || '').replace(/\s+/g, ' ').replace(/,/g, '').trim();
   const correctText = normalize(question.correct_answer);
 
-  const correctChoiceKey = shuffledChoices.find(
-    (c) => normalize(c.text) === correctText
-  )?.key || 'A';
+  const correctChoice = choices.find(c => normalize(c.text) === correctText);
+  const correctChoiceKey = correctChoice ? correctChoice.key : 'A'; // Default to A only if mismatch
 
   return {
     ...question,
-    choices: shuffledChoices,
+    choices,
     correctChoiceKey,
   };
 }
@@ -269,11 +278,16 @@ export async function submitExam(
   }
 
   const questions = attempt.questions_json as (QuestionnaireQuestion & { choices: { key: string; text: string }[]; correctChoiceKey: string })[];
+  
+  // Merge answers: prefer the final submission answers, then previous progress
   const submittedAnswers = { ...(attempt.answers_json || {}), ...answers };
   let score = 0;
 
   questions.forEach((q) => {
-    const chosen = submittedAnswers[q.questionNo?.toString() || ''];
+    const questionKey = q.question_no?.toString() || '';
+    const chosen = submittedAnswers[questionKey];
+    
+    // Check if the chosen key matches the stored correct key for this specific shuffle
     if (chosen && chosen.toUpperCase() === q.correctChoiceKey?.toUpperCase()) {
       score++;
     }
@@ -304,13 +318,14 @@ export async function submitExam(
 async function syncMathExamStage(referenceNo: string, score: number, passed: boolean) {
   const supabase = await createClient();
 
-  const { applicant_id } = await supabase
+  const { data: applicant } = await supabase
     .from('applicants')
     .select('applicant_id')
     .eq('reference_no', referenceNo)
-    .single() as any || {};
+    .single();
 
-  if (!applicant_id) return;
+  if (!applicant?.applicant_id) return;
+  const applicant_id = applicant.applicant_id;
 
   const { data: existing } = await supabase
     .from('stage_results')
@@ -319,7 +334,7 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
     .eq('stage_name', 'Math Exam')
     .single();
 
-  const remarks = `Math Exam submitted via Applicant Portal. | Attempt Status: ${passed ? 'SUBMITTED' : 'AUTO_SUBMITTED'} | Reason: Submitted by applicant`;
+  const remarks = `Math Exam submitted via Applicant Portal. | Result: ${passed ? 'Passed' : 'Failed'} | Score: ${score}/${MAX_MATH_EXAM_SCORE}`;
 
   if (existing) {
     await supabase
@@ -353,7 +368,6 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
       });
   }
 
-  const nextStage = passed ? 'Table Test' : 'Final Interview';
   const applicationStatus = passed ? 'Ongoing' : 'Failed';
 
   await supabase
