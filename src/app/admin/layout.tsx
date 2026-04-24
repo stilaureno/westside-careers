@@ -1,14 +1,11 @@
 'use client';
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import type { ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { DashboardSummary, Applicant, PositionSummary, StageSummary, GenderByPosition } from '@/types';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
-
-// Lazy load pages for better code splitting
-const DashboardView = lazy(() => import('./dashboard/page'));
-const ApplicantsView = lazy(() => import('./applicants/page'));
+import { usePathname } from 'next/navigation';
 
 function SummaryCard({ label, value, color = '#1f2937' }: { label: string; value: number; color?: string }) {
   return (
@@ -30,41 +27,10 @@ function LoadingSpinner() {
   );
 }
 
-export default function AdminLayout() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'applicants'>('dashboard');
-  const [initialized, setInitialized] = useState(false);
+export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const supabase = createClient();
-
-  // Initialize: check which page user came from
-  useEffect(() => {
-    const path = window.location.pathname;
-    if (path.includes('/applicants')) {
-      setActiveTab('applicants');
-    }
-    setInitialized(true);
-  }, []);
-
-  // Handle browser back/forward
-  useEffect(() => {
-    const handlePopState = (e: PopStateEvent) => {
-      const path = window.location.pathname;
-      setActiveTab(path.includes('/applicants') ? 'applicants' : 'dashboard');
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  // Update URL without reload when tab changes
-  const handleTabChange = (tab: 'dashboard' | 'applicants') => {
-    setActiveTab(tab);
-    const url = tab === 'dashboard' ? '/admin/dashboard' : '/admin/applicants';
-    window.history.pushState(null, '', url);
-  };
-
-  if (!initialized) {
-    return <LoadingSpinner />;
-  }
+  const isApplicantsRoute = pathname.startsWith('/admin/applicants');
+  const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
 
   return (
     <div style={{ minHeight: '100vh', background: '#f6f8fc' }}>
@@ -84,38 +50,40 @@ export default function AdminLayout() {
 
         {/* Tab Navigation */}
         <div style={{ display: 'flex', gap: '4px', padding: '8px' }}>
-          <button
-            onClick={() => handleTabChange('dashboard')}
+          <Link
+            href="/admin/dashboard"
             style={{
               padding: '10px 20px',
-              background: activeTab === 'dashboard' ? '#8b1e2d' : 'transparent',
-              color: activeTab === 'dashboard' ? '#fff' : '#6b7280',
+              background: isDashboardRoute ? '#8b1e2d' : 'transparent',
+              color: isDashboardRoute ? '#fff' : '#6b7280',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.2s',
+              textDecoration: 'none',
             }}
           >
             Dashboard
-          </button>
-          <button
-            onClick={() => handleTabChange('applicants')}
+          </Link>
+          <Link
+            href="/admin/applicants"
             style={{
               padding: '10px 20px',
-              background: activeTab === 'applicants' ? '#8b1e2d' : 'transparent',
-              color: activeTab === 'applicants' ? '#fff' : '#6b7280',
+              background: isApplicantsRoute ? '#8b1e2d' : 'transparent',
+              color: isApplicantsRoute ? '#fff' : '#6b7280',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.2s',
+              textDecoration: 'none',
             }}
           >
             Applicants
-          </button>
+          </Link>
         </div>
 
         <form action="/admin/logout" method="post">
@@ -127,12 +95,7 @@ export default function AdminLayout() {
         </form>
       </div>
 
-      {/* Content Area - Lazy Loaded */}
-      <div style={{ padding: '24px' }}>
-        <Suspense fallback={<LoadingSpinner />}>
-          {activeTab === 'dashboard' ? <DashboardContent /> : <ApplicantsContent />}
-        </Suspense>
-      </div>
+      <div style={{ padding: '24px' }}>{children}</div>
     </div>
   );
 }
