@@ -1,10 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import {
+  ADMIN_SESSION_COOKIE,
+  isValidAdminSession,
+} from '@/lib/admin-session';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const adminSession = request.cookies.get('admin_session');
-  
-  console.log('Middleware:', pathname, 'session:', adminSession?.value);
+  const adminSession = request.cookies.get(ADMIN_SESSION_COOKIE);
+  const hasValidAdminSession = isValidAdminSession(adminSession?.value);
   
   // Skip middleware for static files, API routes, favicon
   if (
@@ -32,19 +35,21 @@ export async function middleware(request: NextRequest) {
   const isLoginRoute = pathname === '/admin/login';
   const isAdminRoute = pathname.startsWith('/admin');
 
-  // If not logged in and trying to access admin (except login page), redirect to login
-  if (isAdminRoute && !isLoginRoute && !adminSession) {
-    console.log('Redirecting to login - no session');
-    return NextResponse.redirect(new URL('/admin/login', request.url));
-  }
-
   // If already logged in and trying to access login, redirect to admin landing
-  if (isLoginRoute && adminSession) {
-    console.log('Redirecting to admin - has session');
-    return NextResponse.redirect(new URL('/admin', request.url));
+  if (isLoginRoute && hasValidAdminSession) {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
-  console.log('Allowing through');
+  if (isAdminRoute && !isLoginRoute && !hasValidAdminSession) {
+    const response = NextResponse.redirect(new URL('/admin/login', request.url));
+
+    if (adminSession) {
+      response.cookies.delete(ADMIN_SESSION_COOKIE);
+    }
+
+    return response;
+  }
+
   return NextResponse.next({ request });
 }
 

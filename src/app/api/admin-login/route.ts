@@ -1,4 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
+import {
+  ADMIN_SESSION_COOKIE,
+  ADMIN_SESSION_VALUE,
+  getAdminSessionCookieOptions,
+} from '@/lib/admin-session';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -22,20 +27,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Invalid password' }, { status: 401 });
     }
 
-    // Success - set cookie in response
     const response = NextResponse.json({ success: true });
-    
-    // Detect production environment
-    const host = request.headers.get('host') || '';
-    const isProduction = host.includes('vercel.app') || host.includes('westside-careers');
-    
-    // Set cookie - Vercel handles cookie domain automatically
-    response.cookies.set('admin_session', 'authenticated', {
-      path: '/',
+
+    response.cookies.set(ADMIN_SESSION_COOKIE, ADMIN_SESSION_VALUE, {
+      ...getAdminSessionCookieOptions(request),
       maxAge: 60 * 60 * 24, // 24 hours
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: isProduction,
     });
 
     return response;

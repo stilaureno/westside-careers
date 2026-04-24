@@ -28,9 +28,9 @@ export default function LoginPage() {
       return;
     }
 
-    // Cookie is now set server-side in the API response
-    // Redirect to admin (landing page for the new SPA layout)
-    router.push('/admin');
+    // Cookie is set server-side in the API response.
+    router.replace('/admin/dashboard');
+    router.refresh();
     setLoading(false);
   }
 
