@@ -33,13 +33,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const isApplicantsRoute = pathname.startsWith('/admin/applicants');
   const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const cookies = document.cookie.split('; ').find(c => c.startsWith(ADMIN_SESSION_COOKIE + '='));
     if (!cookies || !cookies.includes('authenticated')) {
       router.replace('/admin/login');
+    } else {
+      setIsAuthorized(true);
     }
   }, [router]);
+
+  if (!isAuthorized) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f6f8fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#6b7280' }}>Checking authorization...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f6f8fc' }}>

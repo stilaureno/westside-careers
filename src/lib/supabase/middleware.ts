@@ -47,6 +47,19 @@ export async function middleware(request: NextRequest) {
       response.cookies.delete(ADMIN_SESSION_COOKIE);
     }
 
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
+  }
+
+  // Add cache-control headers to admin responses to prevent caching
+  if (isAdminRoute && hasValidAdminSession) {
+    const response = NextResponse.next({ request });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
     return response;
   }
 
