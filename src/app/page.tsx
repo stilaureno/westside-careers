@@ -21,9 +21,9 @@ export default function HomePage() {
         border: '1px solid rgba(212,175,55,.22)',
       }}>
         <img
-          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238b1e2d'/%3E%3Ctext x='50' y='60' font-size='40' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EWC%3C/text%3E%3C/svg%3E"
+          src="/WESTSIDE LOGO COLORED.png"
           alt="Westside Careers Logo"
-          style={{ maxWidth: '120px', margin: '0 auto 16px', display: 'block', borderRadius: '12px' }}
+          style={{ maxWidth: '120px', margin: '0 auto 16px', display: 'block' }}
         />
         <h1 style={{ fontSize: '26px', marginBottom: '8px', color: '#163a70' }}>Westside Resort</h1>
         <p style={{ fontSize: '15px', color: '#555', marginBottom: '24px' }}>Table Games Hiring Portal</p>

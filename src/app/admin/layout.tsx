@@ -9,9 +9,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <img
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238b1e2d'/%3E%3Ctext x='50' y='60' font-size='40' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EWC%3C/text%3E%3C/svg%3E"
+            src="/WESTSIDE LOGO COLORED.png"
             alt="Logo"
-            style={{ width: '50px', height: '50px', borderRadius: '10px' }}
+            style={{ width: '50px', height: '50px' }}
           />
           <span style={{ fontSize: '20px', fontWeight: '700', color: '#8b1e2d' }}>Westside Careers Admin</span>
         </div>
