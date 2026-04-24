@@ -31,11 +31,16 @@ function LoadingSpinner() {
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const isLoginRoute = pathname === '/admin/login';
   const isApplicantsRoute = pathname.startsWith('/admin/applicants');
   const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    if (isLoginRoute) {
+      setIsAuthorized(true);
+      return;
+    }
     const cookieStr = document.cookie;
     const hasValidSession = cookieStr.includes(ADMIN_SESSION_COOKIE + '=authenticated');
     if (!hasValidSession) {
@@ -43,7 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     } else {
       setIsAuthorized(true);
     }
-  }, [router]);
+  }, [router, isLoginRoute]);
 
   if (!isAuthorized) {
     return (
