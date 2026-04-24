@@ -3,7 +3,6 @@
 import type { ReactNode } from 'react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { DashboardSummary, Applicant, PositionSummary, StageSummary, GenderByPosition } from '@/types';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ADMIN_SESSION_COOKIE } from '@/lib/admin-session';
