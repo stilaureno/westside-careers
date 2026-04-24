@@ -2,8 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const adminSession = request.cookies.get('admin_session');
   
-  // Skip middleware for static files, API, and the login page itself
+  console.log('Middleware:', pathname, 'session:', adminSession?.value);
+  
+  // Skip middleware for static files, API routes, favicon
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
@@ -28,18 +31,20 @@ export async function middleware(request: NextRequest) {
   // Admin routes
   const isLoginRoute = pathname === '/admin/login';
   const isAdminRoute = pathname.startsWith('/admin');
-  const adminSession = request.cookies.get('admin_session');
 
   // If trying to access admin but not logged in, redirect to login
   if (isAdminRoute && !isLoginRoute && !adminSession) {
+    console.log('Redirecting to login - no session');
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
   // If already logged in and trying to access login, redirect to dashboard
   if (isLoginRoute && adminSession) {
+    console.log('Redirecting to dashboard - has session');
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
+  console.log('Allowing through');
   return NextResponse.next({ request });
 }
 
