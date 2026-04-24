@@ -1,0 +1,73 @@
+import Link from 'next/link';
+
+export default function HomePage() {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(180deg, #08111f 0%, #0d1a2f 26%, #10213b 58%, #0a1424 100%)',
+      padding: '20px',
+    }}>
+      <div style={{
+        background: 'rgba(255,255,255,0.97)',
+        borderRadius: '22px',
+        boxShadow: '0 18px 42px rgba(4,12,24,.34)',
+        padding: '40px',
+        maxWidth: '480px',
+        width: '100%',
+        textAlign: 'center',
+        border: '1px solid rgba(212,175,55,.22)',
+      }}>
+        <img
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238b1e2d'/%3E%3Ctext x='50' y='60' font-size='40' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EWC%3C/text%3E%3C/svg%3E"
+          alt="Westside Careers Logo"
+          style={{ maxWidth: '120px', margin: '0 auto 16px', display: 'block', borderRadius: '12px' }}
+        />
+        <h1 style={{ fontSize: '26px', marginBottom: '8px', color: '#163a70' }}>Westside Resort</h1>
+        <p style={{ fontSize: '15px', color: '#555', marginBottom: '24px' }}>Table Games Hiring Portal</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <Link href="/apply" style={{
+            display: 'block',
+            padding: '14px 24px',
+            background: '#163a70',
+            color: '#fff',
+            borderRadius: '12px',
+            fontWeight: '700',
+            textDecoration: 'none',
+            fontSize: '15px',
+          }}>
+            Apply Now
+          </Link>
+          <Link href="/status" style={{
+            display: 'block',
+            padding: '14px 24px',
+            background: '#fff',
+            color: '#163a70',
+            border: '2px solid #163a70',
+            borderRadius: '12px',
+            fontWeight: '700',
+            textDecoration: 'none',
+            fontSize: '15px',
+          }}>
+            Check Application Status
+          </Link>
+          <Link href="/exam" style={{
+            display: 'block',
+            padding: '14px 24px',
+            background: '#fff',
+            color: '#163a70',
+            border: '2px solid #e5e7eb',
+            borderRadius: '12px',
+            fontWeight: '700',
+            textDecoration: 'none',
+            fontSize: '15px',
+          }}>
+            Take Math Exam
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
