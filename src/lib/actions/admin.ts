@@ -30,33 +30,25 @@ export async function getApplicant(
   _adminPassword: string
 ): Promise<{ data: { applicant: Applicant; games: any[]; stages: any[]; notifications: any[] } | null; error: string | null }> {
   const supabase = await createClient();
-  const { data: applicant, error } = await getApplicantByReference(referenceNo);
 
-  if (error || !applicant) return { data: null, error };
+  const [applicantRes, gamesRes, stagesRes, notificationsRes] = await Promise.all([
+    supabase.from('applicants').select('*').eq('reference_no', referenceNo).single(),
+    supabase.from('applicant_games').select('*').eq('reference_no', referenceNo),
+    supabase.from('stage_results').select('*').eq('reference_no', referenceNo).order('stage_sequence', { ascending: true }),
+    supabase.from('applicant_notifications').select('*').eq('reference_no', referenceNo).order('created_at', { ascending: false }),
+  ]);
 
-  const { data: games } = await supabase
-    .from('applicant_games')
-    .select('*')
-    .eq('reference_no', referenceNo);
+  const applicant = applicantRes.data;
+  const applicantError = applicantRes.error;
 
-  const { data: stages } = await supabase
-    .from('stage_results')
-    .select('*')
-    .eq('reference_no', referenceNo)
-    .order('stage_sequence', { ascending: true });
-
-  const { data: notifications } = await supabase
-    .from('applicant_notifications')
-    .select('*')
-    .eq('reference_no', referenceNo)
-    .order('created_at', { ascending: false });
+  if (applicantError || !applicant) return { data: null, error: applicantError?.message || 'Applicant not found' };
 
   return {
     data: {
-      applicant,
-      games: games || [],
-      stages: stages || [],
-      notifications: notifications || [],
+      applicant: applicant as Applicant,
+      games: gamesRes.data || [],
+      stages: stagesRes.data || [],
+      notifications: notificationsRes.data || [],
     },
     error: null,
   };
