@@ -111,6 +111,10 @@ type ExamApplicantInfo =
       previousResult: any;
     };
 
+function getExamWriteErrorMessage(context: string, error: { message?: string } | null): string {
+  return error?.message ? `${context}: ${error.message}` : context;
+}
+
 export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInfo> {
   const supabase = await createClient();
 
@@ -167,11 +171,15 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
 
   const supabase = await createClient();
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from('math_exam_results')
     .select('*')
     .eq('reference_no', referenceNo)
     .single();
+
+  if (existingError && existingError.code !== 'PGRST116') {
+    return { success: false, error: getExamWriteErrorMessage('Failed to load exam attempt', existingError) };
+  }
 
   if (existing && existing.attempt_status !== 'IN_PROGRESS') {
     return { success: false, error: 'alreadyTaken', data: existing };
@@ -183,36 +191,48 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
   const shuffledQ = shuffleQuestions(allQuestions);
   const questionsWithShuffledChoices = shuffledQ.map(shuffleChoices);
   const sanitized = sanitizeQuestionsForClient(questionsWithShuffledChoices);
+  const startedAt = new Date().toISOString();
 
   if (existing) {
-    await supabase
+    const { error: updateError } = await supabase
       .from('math_exam_results')
       .update({
         assigned_set: assignedSet,
-        started_at: new Date().toISOString(),
+        started_at: startedAt,
         submitted_at: null,
         attempt_status: 'IN_PROGRESS',
         answers_json: {},
         questions_json: questionsWithShuffledChoices,
-        last_heartbeat: new Date().toISOString(),
+        last_heartbeat: startedAt,
         status: null,
         score: null,
         termination_reason: null,
       })
       .eq('reference_no', referenceNo);
+
+    if (updateError) {
+      return { success: false, error: getExamWriteErrorMessage('Failed to reset exam attempt', updateError) };
+    }
   } else {
-    await supabase
+    const { error: insertError } = await supabase
       .from('math_exam_results')
       .insert({
         reference_no: referenceNo,
+        last_name: eligibility.lastName,
+        first_name: eligibility.firstName,
+        middle_name: eligibility.middleName,
         assigned_set: assignedSet,
-        started_at: new Date().toISOString(),
+        started_at: startedAt,
         attempt_status: 'IN_PROGRESS',
         answers_json: {},
         questions_json: questionsWithShuffledChoices,
         time_limit_minutes: EXAM_DURATION_MINUTES,
-        last_heartbeat: new Date().toISOString(),
+        last_heartbeat: startedAt,
       });
+
+    if (insertError) {
+      return { success: false, error: getExamWriteErrorMessage('Failed to create exam attempt', insertError) };
+    }
   }
 
   return {
@@ -220,14 +240,14 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
     data: {
       questions: sanitized,
       duration: EXAM_DURATION_MINUTES * 60,
-      startedAt: new Date().toISOString(),
+      startedAt,
     },
   };
 }
 
-export async function saveExamProgress(referenceNo: string, answers: Record<string, string>): Promise<{ success: boolean }> {
+export async function saveExamProgress(referenceNo: string, answers: Record<string, string>): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
-  await supabase
+  const { error } = await supabase
     .from('math_exam_results')
     .update({
       answers_json: answers,
@@ -235,16 +255,22 @@ export async function saveExamProgress(referenceNo: string, answers: Record<stri
     })
     .eq('reference_no', referenceNo)
     .eq('attempt_status', 'IN_PROGRESS');
+  if (error) {
+    return { success: false, error: getExamWriteErrorMessage('Failed to save exam progress', error) };
+  }
   return { success: true };
 }
 
-export async function heartbeat(referenceNo: string): Promise<{ success: boolean }> {
+export async function heartbeat(referenceNo: string): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
-  await supabase
+  const { error } = await supabase
     .from('math_exam_results')
     .update({ last_heartbeat: new Date().toISOString() })
     .eq('reference_no', referenceNo)
     .eq('attempt_status', 'IN_PROGRESS');
+  if (error) {
+    return { success: false, error: getExamWriteErrorMessage('Failed to update exam heartbeat', error) };
+  }
   return { success: true };
 }
 
@@ -255,11 +281,15 @@ export async function submitExam(
 ): Promise<{ success: boolean; data?: any; error?: string }> {
   const supabase = await createClient();
 
-  const { data: attempt } = await supabase
+  const { data: attempt, error: attemptError } = await supabase
     .from('math_exam_results')
     .select('questions_json, answers_json, attempt_status, score, status, termination_reason')
     .eq('reference_no', referenceNo)
     .single();
+
+  if (attemptError && attemptError.code !== 'PGRST116') {
+    return { success: false, error: getExamWriteErrorMessage('Failed to load exam attempt', attemptError) };
+  }
 
   if (!attempt) return { success: false, error: 'Exam not found' };
 
@@ -295,7 +325,7 @@ export async function submitExam(
 
   const passed = score >= PASSING_SCORE;
 
-  await supabase
+  const { error: updateError } = await supabase
     .from('math_exam_results')
     .update({
       answers_json: submittedAnswers,
@@ -306,6 +336,10 @@ export async function submitExam(
       submitted_at: new Date().toISOString(),
     })
     .eq('reference_no', referenceNo);
+
+  if (updateError) {
+    return { success: false, error: getExamWriteErrorMessage('Failed to submit exam', updateError) };
+  }
 
   await syncMathExamStage(referenceNo, score, passed);
 

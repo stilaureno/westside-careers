@@ -23,10 +23,11 @@ function getExamErrorMessage(error: string): string {
 export default function ExamPage() {
   const [view, setView] = useState<'start' | 'exam' | 'result'>('start');
   const [refInput, setRefInput] = useState('');
-  const [applicant, setApplicant] = useState<any>(null);
+  const [applicant, setApplicant] = useState<{ referenceNo: string; lastName: string; firstName: string; middleName?: string | null } | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const answersRef = useRef<Record<string, string>>({});
+  const activeReferenceRef = useRef('');
   const [remaining, setRemaining] = useState(EXAM_DURATION_MINUTES * 60);
   const [startedAt, setStartedAt] = useState('');
   const [result, setResult] = useState<any>(null);
@@ -48,23 +49,8 @@ export default function ExamPage() {
   }, [answers]);
 
   useEffect(() => {
-    if (view !== 'exam') return;
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        forceFinish('TAB_HIDDEN_OR_MINIMIZED');
-      }
-    };
-    const handleBlur = () => forceFinish('WINDOW_LOST_FOCUS');
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('blur', handleBlur);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('blur', handleBlur);
-      stopTimers();
-    };
-  }, [view, stopTimers]);
+    activeReferenceRef.current = applicant?.referenceNo || refInput.trim();
+  }, [applicant, refInput]);
 
   async function verifyAndStart() {
     if (!refInput.trim()) {
@@ -107,7 +93,13 @@ export default function ExamPage() {
         return;
       }
 
-      setApplicant(data);
+      setApplicant({
+        referenceNo: data.referenceNo,
+        lastName: data.lastName,
+        firstName: data.firstName,
+        middleName: data.middleName,
+      });
+      setRefInput(data.referenceNo);
       await startExam(data.referenceNo);
     } catch (err) {
       setMessage({ text: 'An unexpected error occurred.', type: 'error' });
@@ -116,77 +108,112 @@ export default function ExamPage() {
   }
 
   async function startExam(referenceNo: string) {
-    const res = await fetch(`/api/exam`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'start', referenceNo }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(`/api/exam`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start', referenceNo }),
+      });
+      const data = await res.json();
 
-    if (!data.success) {
-      if (data.error === 'alreadyTaken' && data.data) {
-        setResult({
-          score: data.data.score,
-          passed: data.data.status === 'Passed',
-          terminationReason: data.data.termination_reason || 'Previously taken',
-          previousResult: true,
+      if (!data.success) {
+        if (data.error === 'alreadyTaken' && data.data) {
+          setResult({
+            score: data.data.score,
+            passed: data.data.status === 'Passed',
+            terminationReason: data.data.termination_reason || 'Previously taken',
+            previousResult: true,
+          });
+          setView('result');
+          return;
+        }
+        setMessage({ text: getExamErrorMessage(data.error || 'Failed to start exam.'), type: 'error' });
+        return;
+      }
+
+      setQuestions(data.data.questions);
+      setStartedAt(data.data.startedAt);
+      setRemaining(data.data.duration);
+      setAnswers({});
+      answersRef.current = {};
+      setMessage(null);
+      setView('exam');
+
+      timerRef.current = setInterval(() => {
+        setRemaining((prev) => {
+          if (prev <= 1) {
+            stopTimers();
+            forceFinish('TIME_LIMIT_REACHED');
+            return 0;
+          }
+          return prev - 1;
         });
+      }, 1000);
+
+      heartbeatRef.current = setInterval(async () => {
+        await fetch(`/api/exam`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'heartbeat', referenceNo }),
+        });
+      }, 15000);
+
+      saveRef.current = setInterval(async () => {
+        await fetch(`/api/exam`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'saveProgress', referenceNo, answers: answersRef.current }),
+        });
+      }, 15000);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const forceFinish = useCallback(async (reason: string) => {
+    stopTimers();
+    const currentAnswers = answersRef.current;
+    const referenceNo = activeReferenceRef.current;
+
+    try {
+      const res = await fetch(`/api/exam`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submit', referenceNo, answers: currentAnswers, reason }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setResult(data.data);
+        setMessage(null);
         setView('result');
         return;
       }
-      setMessage({ text: getExamErrorMessage(data.error || 'Failed to start exam.'), type: 'error' });
-      return;
+
+      setMessage({ text: getExamErrorMessage(data.error || 'Failed to submit exam.'), type: 'error' });
+    } catch (err) {
+      setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
     }
+  }, [stopTimers]);
 
-    setQuestions(data.data.questions);
-    setStartedAt(data.data.startedAt);
-    setRemaining(data.data.duration);
-    setAnswers({});
-    answersRef.current = {};
-    setView('exam');
+  useEffect(() => {
+    if (view !== 'exam') return;
 
-    timerRef.current = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          stopTimers();
-          forceFinish('TIME_LIMIT_REACHED');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    const handleVisibility = () => {
+      if (document.hidden) {
+        forceFinish('TAB_HIDDEN_OR_MINIMIZED');
+      }
+    };
+    const handleBlur = () => forceFinish('WINDOW_LOST_FOCUS');
 
-    heartbeatRef.current = setInterval(async () => {
-      await fetch(`/api/exam`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'heartbeat', referenceNo }),
-      });
-    }, 15000);
-
-    saveRef.current = setInterval(async () => {
-      await fetch(`/api/exam`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'saveProgress', referenceNo, answers: answersRef.current }),
-      });
-    }, 15000);
-  }
-
-  async function forceFinish(reason: string) {
-    stopTimers();
-    const currentAnswers = answersRef.current;
-    const res = await fetch(`/api/exam`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'submit', referenceNo: refInput, answers: currentAnswers, reason }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setResult(data.data);
-    }
-    setView('result');
-  }
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
+      stopTimers();
+    };
+  }, [forceFinish, stopTimers, view]);
 
   function handleAnswer(questionNo: string, choiceKey: string) {
     setAnswers((prev) => ({ ...prev, [questionNo]: choiceKey }));
@@ -210,16 +237,27 @@ export default function ExamPage() {
 
     stopTimers();
     const currentAnswers = answersRef.current;
-    const res = await fetch(`/api/exam`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'submit', referenceNo: refInput, answers: currentAnswers, reason: 'SUBMIT' }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setResult(data.data);
+    const referenceNo = activeReferenceRef.current;
+
+    try {
+      const res = await fetch(`/api/exam`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submit', referenceNo, answers: currentAnswers, reason: 'SUBMIT' }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setResult(data.data);
+        setMessage(null);
+        setView('result');
+        return;
+      }
+
+      setMessage({ text: getExamErrorMessage(data.error || 'Failed to submit exam.'), type: 'error' });
+    } catch (err) {
+      setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
     }
-    setView('result');
   }
 
   function formatTime(secs: number): string {
