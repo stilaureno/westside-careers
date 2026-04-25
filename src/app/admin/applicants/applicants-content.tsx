@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
@@ -52,47 +52,50 @@ export default function ApplicantsContent() {
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
-    async function load() {
-      const { data: apps } = await supabase
-        .from('applicants')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(300);
+  const loadApplicants = useCallback(async () => {
+    setLoading(true);
 
-      const { data: stages } = await supabase
-        .from('stage_results')
-        .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks');
+    const { data: apps } = await supabase
+      .from('applicants')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(300);
 
-      const stageMap: Record<string, any[]> = {};
-      stages?.forEach((s) => {
-        if (!stageMap[s.reference_no]) stageMap[s.reference_no] = [];
-        stageMap[s.reference_no].push(s);
-      });
+    const { data: stages } = await supabase
+      .from('stage_results')
+      .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks');
 
-      const enriched = (apps || []).map((app: any) => {
-        const appStages = stageMap[app.reference_no] || [];
-        const getStageResult = (stage: string) => {
-          const s = appStages.find((x: any) => x.stage_name === stage);
-          return s?.result_status || '-';
-        };
-        return {
-          ...app,
-          displayName: `${app.first_name} ${app.last_name}`,
-          initialScreeningResult: getStageResult('Initial Screening'),
-          mathExamResult: getStageResult('Math Exam'),
-          tableTestResult: getStageResult('Table Test'),
-          sweatyPalmResult: appStages.find((x: any) => x.stage_name === 'Final Interview')?.result_status || '-',
-          finalInterviewResult: getStageResult('Final Interview'),
-          stages: appStages,
-        };
-      });
+    const stageMap: Record<string, any[]> = {};
+    stages?.forEach((s) => {
+      if (!stageMap[s.reference_no]) stageMap[s.reference_no] = [];
+      stageMap[s.reference_no].push(s);
+    });
 
-      setApplicants(enriched);
-      setLoading(false);
-    }
-    load();
+    const enriched = (apps || []).map((app: any) => {
+      const appStages = stageMap[app.reference_no] || [];
+      const getStageResult = (stage: string) => {
+        const s = appStages.find((x: any) => x.stage_name === stage);
+        return s?.result_status || '-';
+      };
+      return {
+        ...app,
+        displayName: `${app.first_name} ${app.last_name}`,
+        initialScreeningResult: getStageResult('Initial Screening'),
+        mathExamResult: getStageResult('Math Exam'),
+        tableTestResult: getStageResult('Table Test'),
+        sweatyPalmResult: appStages.find((x: any) => x.stage_name === 'Final Interview')?.result_status || '-',
+        finalInterviewResult: getStageResult('Final Interview'),
+        stages: appStages,
+      };
+    });
+
+    setApplicants(enriched);
+    setLoading(false);
   }, [supabase]);
+
+  useEffect(() => {
+    loadApplicants();
+  }, [loadApplicants]);
 
   const filteredByDate = useMemo(() => {
     const start = filterStartDate;
@@ -437,7 +440,7 @@ export default function ApplicantsContent() {
         {hasFilters && <span> (filtered)</span>}
       </div>
 
-      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} />
+      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ interface ApplicantModalProps {
   referenceNo: string;
   isOpen: boolean;
   onClose: () => void;
+  onSaved?: () => Promise<void> | void;
 }
 
 interface VisibleField {
@@ -19,7 +20,7 @@ interface VisibleField {
   is_visible: boolean;
 }
 
-export default function ApplicantModal({ referenceNo, isOpen, onClose }: ApplicantModalProps) {
+export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }: ApplicantModalProps) {
   const [data, setData] = useState<any>(null);
   const [visibleFields, setVisibleFields] = useState<VisibleField[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,8 +126,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose }: Applica
     }, '');
 
     if (res.success) {
-      setMessage({ text: 'Stage result saved successfully!', type: 'success' });
-      await loadData();
+      await onSaved?.();
+      onClose();
     } else {
       setMessage({ text: res.error || 'Failed to save.', type: 'error' });
     }
