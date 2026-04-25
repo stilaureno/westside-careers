@@ -104,7 +104,10 @@ function GenderRow({ label, male, female }: { label: string; male: number; femal
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
       <span style={{ fontSize: '13px', color: '#6b7280' }}>{label}</span>
-      <span style={{ fontSize: '13px', fontWeight: '600' }}>{male} / {female}</span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', fontWeight: '600' }}>
+        <span style={{ color: '#1d4ed8' }}>M {male}</span>
+        <span style={{ color: '#dc2626' }}>F {female}</span>
+      </span>
     </div>
   );
 }
@@ -411,33 +414,40 @@ export default function DashboardContent() {
               );
             })}
             
-            {/* Gender Breakdown by Position */}
             <div style={{
-              background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginTop: '20px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '20px',
+              marginTop: '20px',
             }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Gender Breakdown by Position</h3>
-              {positions.map(posName => {
-                const genderData = deptData.genderByPosition[posName];
-                if (!genderData || (genderData.male === 0 && genderData.female === 0)) return null;
-                return (
-                  <GenderRow 
-                    key={posName} 
-                    label={posName} 
-                    male={genderData.male} 
-                    female={genderData.female} 
-                  />
-                );
-              })}
-            </div>
+              {/* Gender Breakdown by Position */}
+              <div style={{
+                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Gender Breakdown by Position</h3>
+                {positions.map(posName => {
+                  const genderData = deptData.genderByPosition[posName];
+                  if (!genderData || (genderData.male === 0 && genderData.female === 0)) return null;
+                  return (
+                    <GenderRow 
+                      key={posName} 
+                      label={posName} 
+                      male={genderData.male} 
+                      female={genderData.female} 
+                    />
+                  );
+                })}
+              </div>
 
-            <div style={{
-              background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginTop: '20px',
-            }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Age Band Breakdown</h3>
-              <AgeBandRow label="20s" value={deptData.ageBands.age20s} />
-              <AgeBandRow label="30s" value={deptData.ageBands.age30s} />
-              <AgeBandRow label="40s" value={deptData.ageBands.age40s} />
-              <AgeBandRow label="50 and above" value={deptData.ageBands.age50Plus} isLast />
+              <div style={{
+                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Age Band Breakdown</h3>
+                <AgeBandRow label="20s" value={deptData.ageBands.age20s} />
+                <AgeBandRow label="30s" value={deptData.ageBands.age30s} />
+                <AgeBandRow label="40s" value={deptData.ageBands.age40s} />
+                <AgeBandRow label="50 and above" value={deptData.ageBands.age50Plus} isLast />
+              </div>
             </div>
           </div>
         );
