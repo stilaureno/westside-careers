@@ -5,6 +5,7 @@ import {
   SUPER_ADMIN_SESSION_COOKIE,
   SUPER_ADMIN_SESSION_VALUE,
   getAdminSessionCookieOptions,
+  getSuperAdminSessionCookieOptions,
 } from '@/lib/admin-session';
 import { NextResponse } from 'next/server';
 
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
 
     if (isSuperAdmin) {
       response.cookies.set(SUPER_ADMIN_SESSION_COOKIE, SUPER_ADMIN_SESSION_VALUE, {
-        ...getAdminSessionCookieOptions(request),
+        ...getSuperAdminSessionCookieOptions(request),
         maxAge: 60 * 60 * 24,
       });
     }

@@ -11,7 +11,7 @@ export function AdminHeader() {
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     setMounted(true);
     const cookie = document.cookie.split('; ').find(c => c.startsWith('super_admin_session='));
     setIsSuperAdmin(!!(cookie && cookie.includes('super')));

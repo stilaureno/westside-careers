@@ -21,3 +21,14 @@ export function getAdminSessionCookieOptions(request: Request) {
     secure: isSecure,
   };
 }
+
+export function getSuperAdminSessionCookieOptions(request: Request) {
+  const isSecure = new URL(request.url).protocol === 'https:';
+
+  return {
+    path: '/',
+    httpOnly: false, // Allow JavaScript to read this cookie
+    sameSite: 'lax' as const,
+    secure: isSecure,
+  };
+}
