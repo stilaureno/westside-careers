@@ -199,11 +199,12 @@ const workflow = getStageWorkflow(applicant.position_applied, applicant.experien
   
   const completedStages = stageRows?.filter(s => s.result_status === 'Passed' || s.result_status === 'Failed') || [];
   const lastCompletedIdx = completedStages.length;
+  const allStagesCompleted = lastCompletedIdx >= workflow.length;
   
   let currentStage: string;
   let currentIdx: number;
   
-  if (lastCompletedIdx >= workflow.length) {
+  if (allStagesCompleted) {
     currentStage = workflow[workflow.length - 1];
     currentIdx = workflow.length - 1;
   } else {
@@ -216,14 +217,13 @@ const workflow = getStageWorkflow(applicant.position_applied, applicant.experien
     return {
       stageName,
       sequence: idx + 1,
-      status: idx < currentIdx ? 'completed' : (idx === workflow.length - 1 && allStagesCompleted) ? 'completed' : stageName === currentStage ? 'current' : 'pending',
+      status: idx < currentIdx ? 'completed' : stageName === currentStage ? 'current' : 'pending',
       result: undefined,
       label: stageData?.current_stage_label,
     };
   });
 
   let nextStep: string | null = null;
-  const allStagesCompleted = lastCompletedIdx >= workflow.length;
   
   if (allStagesCompleted) {
     nextStep = 'You have completed the Hiring Portal process for the Dealer position, including the Initial Screening, Math Exam, and Final Interview stages. Please follow the next instructions provided by the final interviewer.\n\nFor application monitoring purposes, please create your Darwinbox account, complete all required information, and select the position you applied for today.\n\nDarwinbox link = westsideresort.darwinbox.com/ms/candidatev2/main/auth/login';
