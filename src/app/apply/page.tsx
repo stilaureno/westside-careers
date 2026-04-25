@@ -56,7 +56,7 @@ export default function ApplyPage() {
   const selectedDept = departments.find(d => d.id === form.departmentId);
   const positionOptions = positions.filter(p => p.department_id === form.departmentId);
 
-  const isDealer = selectedDept?.name === 'Dealer';
+  const isDealer = form.positionApplied === 'Dealer';
   const isExperienced = form.experienceLevel === 'Experienced Dealer';
   const isEmployed = form.currentlyEmployed === 'Yes';
 
@@ -294,7 +294,10 @@ export default function ApplyPage() {
                 <select
                   className={styles.control}
                   value={form.departmentId}
-                  onChange={(e) => setForm({ ...form, departmentId: e.target.value, positionApplied: '', experienceLevel: '' })}
+                  onChange={(e) => {
+                    setForm({ ...form, departmentId: e.target.value, positionApplied: '', experienceLevel: '' });
+                    setGames([]);
+                  }}
                   required
                 >
                   <option value="">Select Department</option>
@@ -305,7 +308,10 @@ export default function ApplyPage() {
                 <select
                   className={styles.control}
                   value={form.positionApplied}
-                  onChange={(e) => setForm({ ...form, positionApplied: e.target.value, experienceLevel: '' })}
+                  onChange={(e) => {
+                    setForm({ ...form, positionApplied: e.target.value, experienceLevel: '' });
+                    setGames([]);
+                  }}
                   required
                   disabled={!form.departmentId}
                 >
@@ -321,7 +327,12 @@ export default function ApplyPage() {
                   <select
                     className={styles.control}
                     value={form.experienceLevel}
-                    onChange={(e) => setForm({ ...form, experienceLevel: e.target.value })}
+                    onChange={(e) => {
+                      setForm({ ...form, experienceLevel: e.target.value });
+                      if (e.target.value !== 'Experienced Dealer') {
+                        setGames([]);
+                      }
+                    }}
                     required
                   >
                     <option value="">Select Experience</option>
