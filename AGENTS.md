@@ -23,9 +23,25 @@ Lint → typecheck → build is the standard order for pre-commit checks.
 
 ## Database
 
-- **Local**: `supabase/config.toml` — connects to local Supabase (`127.0.0.1:54321`)
-- **Remote**: Supabase project `westside-careers`
+- **Production**: Remote Supabase (`eodgowpdhsdsuwukepsz.supabase.co`) — configured via `.env.local`
+- **Local dev**: `supabase/config.toml` — connects to local Supabase (`127.0.0.1:54321`)
 - **Migrations**: `supabase/migrations/0001_initial_schema.sql`, `0002_seed_questionnaire.sql`
+
+> **Important**: The app uses the remote database by default. To use local DB, modify `.env.local` to point to `http://127.0.0.1:54321` and start local Supabase with `npx supabase start`.
+
+### Query Remote DB
+
+Use the Supabase MCP server (`supabase_execute_sql`) to query the production database directly:
+
+```typescript
+// Example: get all applicants with status
+supabase_execute_sql({
+  project_id: "eodgowpdhsdsuwukepsz",
+  query: "SELECT reference_no, last_name, first_name, application_status FROM applicants LIMIT 10"
+})
+```
+
+Project ID: `eodgowpdhsdsuwukepsz`
 
 ### Tables
 
@@ -47,14 +63,24 @@ PASSING_SCORE = 8
 MAX_MATH_EXAM_SCORE = 10
 ALLOWED_GAMES = ['MB', 'BJ', 'RL', 'CRAPS']
 POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager']
+EXPERIENCE_LEVELS = ['Non-Experienced Dealer', 'Experienced Dealer']
+FINAL_INTERVIEW_RESULTS = ['Passed', 'Reprofile', 'For Pooling', 'Not Recommended']
 ```
 
 ### Auth
 
-- No Supabase Auth used. Admin login is handled via `/api/admin-login` (POST) which sets an `admin_session` cookie.
-- All `/admin/*` routes are protected by `src/lib/supabase/middleware.ts`.
+- No Supabase Auth used. Admin login via `/api/admin-login` (POST) sets cookies.
+- Two admin tiers: `admin_session` (standard) and `super_admin_session` (super admin).
+- All `/admin/*` routes protected by `src/lib/supabase/middleware.ts`.
 - Public routes: `/`, `/apply`, `/status`, `/exam` — no auth required.
 - `ADMIN_PASSWORD` defaults to `TGHR2026` (seeded in migration 0001).
+
+### Per-Admin Department Access
+
+- Standard admins can be restricted to specific departments via `config.allowed_departments` (text array).
+- Super admins see all departments by default.
+- Configure in Settings → "Admin Department Access" (super admin only).
+- Filters apply toApplicant List and Dashboard.
 
 ## Key Routes
 
@@ -102,10 +128,19 @@ src/
     actions/
       applicant.ts
       admin.ts
+    admin-session.ts  # Cookie constants and helpers
   types/index.ts
 supabase/
   config.toml
   migrations/
+```
+
+### Application Statuses
+
+```typescript
+// Applicant.status: ApplicationStatus = 'Pending' | 'Ongoing' | 'Completed' | 'Not Recommended' | 'Passed' | 'Failed' | 'Reprofile' | 'For Pooling'
+// Stage result: ResultStatus = 'Passed' | 'Failed' | 'In Progress'
+// Exam attempt: AttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'AUTO_SUBMITTED'
 ```
 
 ## Exam Flow
