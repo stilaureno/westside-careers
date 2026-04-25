@@ -269,6 +269,38 @@ const [autoFetched, setAutoFetched] = useState(false);
               </div>
             )}
 
+            <h3 style={{ color: '#163a70', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {result.roadmap.map((item, idx) => (
+                <div key={item.stageName} style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '12px 16px', borderRadius: '12px',
+                  background: item.status === 'completed' ? '#ecfdf3' : item.status === 'current' ? '#fffbeb' : '#f9fafb',
+                  border: `2px solid ${item.status === 'completed' ? '#86efac' : item.status === 'current' ? '#fcd34d' : '#e5e7eb'}`,
+                }}>
+                  <div style={{
+                    width: '28px', height: '28px', borderRadius: '50%', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700',
+                    background: item.status === 'completed' ? '#166534' : item.status === 'current' ? '#d97706' : '#9ca3af',
+                    color: '#fff', flexShrink: 0,
+                  }}>
+                    {item.status === 'completed' ? '✓' : idx + 1}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{item.stageName}</p>
+                  </div>
+                  <span style={{
+                    fontSize: '12px', fontWeight: '600',
+                    color: item.status === 'completed' ? '#166534' : item.status === 'current' ? '#d97706' : '#9ca3af',
+                  }}>
+                    {item.status === 'completed' 
+                      ? (item.stageName === 'Initial Screening' ? 'Completed' : 'Done') 
+                      : item.status === 'current' ? 'Current' : 'Pending'}
+                  </span>
+                </div>
+              ))}
+            </div>
+
             {result.nextStep && (
               <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
                 <p style={{ fontSize: '13px', color: '#1e40af', margin: 0 }}>
