@@ -1,23 +1,20 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-:root {
-  --color-navy: #000080;
-  --color-navy-dark: #000060;
-  --color-navy-light: #1a1a4a;
-  --color-gold: #FFD700;
-  --color-gold-dark: #DAA520;
-  --color-gold-light: #FFE44D;
-}
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+html {
   background-image: url('/bg.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: transparent;
   min-height: 100vh;
   color: #fff;
+  position: relative;
 }
 
 body::before {
