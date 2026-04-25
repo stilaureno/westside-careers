@@ -24,6 +24,7 @@ export default function ApplyPage() {
   const [step, setStep] = useState<'form' | 'success'>('form');
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [referenceNo, setReferenceNo] = useState('');
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -64,6 +65,19 @@ export default function ApplyPage() {
     setGames((prev) =>
       prev.includes(code) ? prev.filter((g) => g !== code) : [...prev, code]
     );
+  }
+
+  async function handleCopyReference() {
+    if (!referenceNo) return;
+
+    try {
+      await navigator.clipboard.writeText(referenceNo);
+      setCopyState('copied');
+      window.setTimeout(() => setCopyState('idle'), 2000);
+    } catch {
+      setCopyState('error');
+      window.setTimeout(() => setCopyState('idle'), 2500);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -117,7 +131,15 @@ export default function ApplyPage() {
     });
 
     if (result.success) {
+      try {
+        localStorage.setItem('savedReferenceNo', result.referenceNo || '');
+        localStorage.setItem('savedBirthdate', form.birthdate);
+      } catch {
+        // Ignore storage failures so submission success is not blocked.
+      }
+
       setReferenceNo(result.referenceNo || '');
+      setCopyState('idle');
       setStep('success');
       return;
     }
@@ -145,12 +167,24 @@ export default function ApplyPage() {
           <div className={styles.successIcon}>✅</div>
           <h2 className={styles.successTitle}>Application Submitted!</h2>
           <p className={styles.successText}>Your application has been received.</p>
-          <div className={styles.referenceBox}>
+          <button
+            type="button"
+            className={styles.referenceBox}
+            onClick={handleCopyReference}
+            aria-label="Copy reference number"
+          >
             <p className={styles.referenceLabel}>Your Reference Number:</p>
             <p className={styles.referenceValue}>{referenceNo}</p>
-          </div>
+            <p className={styles.referenceNote}>Click to copy your Reference No.</p>
+            {copyState === 'copied' && (
+              <p className={styles.referenceFeedback}>Copied to clipboard.</p>
+            )}
+            {copyState === 'error' && (
+              <p className={styles.referenceFeedback}>Copy failed. Please copy it manually.</p>
+            )}
+          </button>
           <p className={styles.successHint}>
-            Please save your reference number to check your application status.
+            Your reference number and birthdate were saved on this device, so the status page can load faster.
           </p>
           <Link href="/status" className={`${styles.button} ${styles.linkButton}`}>
             Check Application Status

@@ -71,11 +71,31 @@
 }
 
 .referenceBox {
+  width: 100%;
+  appearance: none;
   background: #ecfdf3;
   border: 1px solid #86efac;
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 16px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.referenceBox:hover {
+  border-color: #4ade80;
+  box-shadow: 0 10px 24px rgba(22, 101, 52, 0.14);
+}
+
+.referenceBox:focus-visible {
+  outline: none;
+  border-color: #15803d;
+  box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.15);
+}
+
+.referenceBox:active {
+  transform: scale(0.99);
 }
 
 .referenceLabel {
@@ -90,6 +110,19 @@
   font-weight: 700;
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.referenceNote {
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 10px 0 0;
+}
+
+.referenceFeedback {
+  color: #166534;
+  font-size: 12px;
+  margin: 8px 0 0;
 }
 
 .successHint {
