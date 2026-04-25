@@ -69,56 +69,66 @@ export default function ApplicantsContent() {
     load();
   }, [supabase]);
 
+  const filteredByDate = useMemo(() => {
+    const start = filterStartDate;
+    const end = filterEndDate;
+    return applicants.filter(app => {
+      const created = (app.created_at || '').slice(0, 10);
+      return (!start || created >= start) && (!end || created <= end);
+    });
+  }, [applicants, filterStartDate, filterEndDate]);
+
+  const filteredBySearch = useMemo(() => {
+    const g = globalSearch.toLowerCase();
+    if (!g) return filteredByDate;
+    return filteredByDate.filter(app => {
+      const name = (app.displayName || '').toLowerCase();
+      const ref = (app.reference_no || '').toLowerCase();
+      const rem = (app.remarks || '').toLowerCase();
+      return name.includes(g) || ref.includes(g) || rem.includes(g);
+    });
+  }, [filteredByDate, globalSearch]);
+
   const positionCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: applicants.length };
+    const counts: Record<string, number> = { all: filteredBySearch.length };
     POSITIONS.forEach(p => { counts[p] = 0; });
-    applicants.forEach(app => {
+    filteredBySearch.forEach(app => {
       const p = app.position_applied;
       if (p && counts[p] !== undefined) counts[p]++;
     });
     return counts;
-  }, [applicants]);
+  }, [filteredBySearch]);
 
   const stageCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: applicants.length };
-    applicants.forEach(app => {
+    const counts: Record<string, number> = { all: filteredBySearch.length };
+    filteredBySearch.forEach(app => {
       const s = app.current_stage;
       if (s) counts[s] = (counts[s] || 0) + 1;
     });
     return counts;
-  }, [applicants]);
+  }, [filteredBySearch]);
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: applicants.length };
-    applicants.forEach(app => {
+    const counts: Record<string, number> = { all: filteredBySearch.length };
+    filteredBySearch.forEach(app => {
       const s = app.application_status || 'Pending';
       counts[s] = (counts[s] || 0) + 1;
     });
     return counts;
-  }, [applicants]);
+  }, [filteredBySearch]);
 
   const availableStages = useMemo(() => Object.keys(stageCounts).filter(s => s !== 'all').sort(), [stageCounts]);
   const availableStatuses = useMemo(() => Object.keys(statusCounts).filter(s => s !== 'all').sort(), [statusCounts]);
 
   const filteredApplicants = useMemo(() => {
-    let result = applicants.filter((app) => {
-      const g = globalSearch.toLowerCase();
+    let result = filteredBySearch.filter((app) => {
       const pos = filterPosition.toLowerCase();
       const stg = filterStage.toLowerCase();
       const sts = filterStatus.toLowerCase();
-      const start = filterStartDate;
-      const end = filterEndDate;
 
-      const name = (app.displayName || '').toLowerCase();
-      const ref = (app.reference_no || '').toLowerCase();
-      const rem = (app.remarks || '').toLowerCase();
-      const created = (app.created_at || '').slice(0, 10);
-      const matchesSearch = !g || name.includes(g) || ref.includes(g) || rem.includes(g);
-      const matchesDate = (!start || created >= start) && (!end || created <= end);
-
-      return matchesSearch && (!pos || (app.position_applied || '').toLowerCase() === pos) &&
+      return (!pos || (app.position_applied || '').toLowerCase() === pos) &&
         (!stg || (app.current_stage || '').toLowerCase() === stg) &&
-        (!sts || (app.application_status || '').toLowerCase() === sts) && matchesDate;
+        (!sts || (app.application_status || '').toLowerCase() === sts);
     });
 
     result.sort((a, b) => {
@@ -134,7 +144,7 @@ export default function ApplicantsContent() {
     });
 
     return result;
-  }, [applicants, globalSearch, filterPosition, filterStage, filterStatus, filterStartDate, filterEndDate, sortField, sortDir]);
+  }, [filteredBySearch, filterPosition, filterStage, filterStatus, sortField, sortDir]);
 
   function handleSort(field: SortField) {
     if (sortField === field) {
