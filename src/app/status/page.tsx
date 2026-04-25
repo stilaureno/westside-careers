@@ -12,7 +12,7 @@ export default function StatusPage() {
   const [loading, setLoading] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
-  const initialLoadRef = useRef(true);
+const [autoFetched, setAutoFetched] = useState(false);
 
   useEffect(() => {
     if (!lockedUntil) return;
@@ -31,22 +31,44 @@ export default function StatusPage() {
   const isLocked = !!lockedUntil && lockedUntil > Date.now();
 
   useEffect(() => {
-    if (initialLoadRef.current) {
-      initialLoadRef.current = false;
-      const savedRef = localStorage.getItem('savedReferenceNo');
-      const savedDob = localStorage.getItem('savedBirthdate');
-      if (savedRef && savedDob) {
-        setForm({ referenceNo: savedRef, birthdate: savedDob });
-        setRememberMe(true);
-      }
+    const savedRef = localStorage.getItem('savedReferenceNo');
+    const savedDob = localStorage.getItem('savedBirthdate');
+    if (savedRef && savedDob) {
+      setForm({ referenceNo: savedRef, birthdate: savedDob });
+      setRememberMe(true);
+      setAutoFetched(true);
     }
   }, []);
+
+  // Auto-fetch status on first load if saved credentials exist
+  useEffect(() => {
+    if (!autoFetched || !rememberMe) return;
+
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      setError('');
+
+      const res = await getApplicantStatus(form.referenceNo, form.birthdate);
+      if (res.error || !res.data) {
+        setError(res.error || 'Applicant not found');
+        setLockedUntil(res.lockedUntil || null);
+      } else {
+        setResult(res.data);
+        setLockedUntil(null);
+      }
+      setLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [autoFetched, rememberMe, form.referenceNo, form.birthdate]);
 
   function clearSavedInfo() {
     localStorage.removeItem('savedReferenceNo');
     localStorage.removeItem('savedBirthdate');
     setForm({ referenceNo: '', birthdate: '' });
     setRememberMe(false);
+    setResult(null);
+    setError('');
   }
 
   function formatLockCountdown(until: number) {
@@ -79,6 +101,8 @@ export default function StatusPage() {
     setLoading(false);
   }
 
+  const showForm = !result || loading;
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -88,87 +112,101 @@ export default function StatusPage() {
       <div style={{ maxWidth: '580px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '24px', padding: '20px' }}>
           <h1 style={{ color: '#fff', fontSize: '28px', marginBottom: '6px' }}>Check Application Status</h1>
-          <p style={{ color: '#b7c6df', fontSize: '15px' }}>Enter your reference number and birthdate</p>
+          <p style={{ color: '#b7c6df', fontSize: '15px' }}>
+            {showForm ? 'Enter your reference number and birthdate' : 'Your application status'}
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{
-          background: 'rgba(255,255,255,0.97)', borderRadius: '22px',
-          boxShadow: '0 18px 42px rgba(4,12,24,.34)', padding: '28px',
-          border: '1px solid rgba(212,175,55,.22)', marginBottom: '20px',
-        }}>
-          {error && (
-            <div style={{
-              padding: '14px', borderRadius: '12px', marginBottom: '16px',
-              background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '14px',
-            }}>
-              <div>{error}</div>
-              {isLocked && lockedUntil && (
-                <div style={{ marginTop: '8px', fontWeight: '700' }}>
-                  Locked for: {formatLockCountdown(lockedUntil)}
-                </div>
-              )}
-            </div>
-          )}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
-              Reference Number *
-            </label>
-            <input
-              value={form.referenceNo}
-              onChange={(e) => setForm({ ...form, referenceNo: e.target.value })}
-              required
-              placeholder="APP-YYYYMMDDHHMMSS"
-              autoComplete="off"
-              style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
-              Birthdate *
-            </label>
-            <input
-              type="date"
-              value={form.birthdate}
-              onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
-              required
-              max={new Date().toISOString().split('T')[0]}
-              autoComplete="bday"
-              style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              style={{ width: '18px', height: '18px' }}
-            />
-            <span style={{ fontSize: '14px', color: '#4b5563' }}>Remember this device</span>
-          </label>
-          {rememberMe && (
-            <div style={{ marginBottom: '16px' }}>
-              <button
-                type="button"
-                onClick={clearSavedInfo}
-                style={{
-                  background: 'none', border: 'none', color: '#6b7280', fontSize: '13px',
-                  cursor: 'pointer', textDecoration: 'underline', padding: 0, marginTop: '4px',
-                }}
-              >
-                Clear saved info
-              </button>
-            </div>
-          )}
-          <button type="submit" disabled={loading || isLocked} style={{
-            width: '100%', padding: '14px', background: '#163a70', color: '#fff',
-            border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
-            cursor: loading || isLocked ? 'not-allowed' : 'pointer', opacity: loading || isLocked ? 0.65 : 1,
+        {showForm && (
+          <form onSubmit={handleSubmit} style={{
+            background: 'rgba(255,255,255,0.97)', borderRadius: '22px',
+            boxShadow: '0 18px 42px rgba(4,12,24,.34)', padding: '28px',
+            border: '1px solid rgba(212,175,55,.22)', marginBottom: '20px',
           }}>
-            {loading ? 'Checking...' : isLocked ? 'Temporarily Locked' : 'Check Status'}
-          </button>
-        </form>
+            {error && (
+              <div style={{
+                padding: '14px', borderRadius: '12px', marginBottom: '16px',
+                background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '14px',
+              }}>
+                <div>{error}</div>
+                {isLocked && lockedUntil && (
+                  <div style={{ marginTop: '8px', fontWeight: '700' }}>
+                    Locked for: {formatLockCountdown(lockedUntil)}
+                  </div>
+                )}
+              </div>
+            )}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+                Reference Number *
+              </label>
+              <input
+                value={form.referenceNo}
+                onChange={(e) => setForm({ ...form, referenceNo: e.target.value })}
+                required
+                placeholder="APP-YYYYMMDDHHMMSS"
+                autoComplete="off"
+                style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+              />
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+                Birthdate *
+              </label>
+              <input
+                type="date"
+                value={form.birthdate}
+                onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
+                required
+                max={new Date().toISOString().split('T')[0]}
+                autoComplete="bday"
+                style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+              />
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{ width: '18px', height: '18px' }}
+              />
+              <span style={{ fontSize: '14px', color: '#4b5563' }}>Remember this device</span>
+            </label>
+            {rememberMe && (
+              <div style={{ marginBottom: '16px' }}>
+                <button
+                  type="button"
+                  onClick={clearSavedInfo}
+                  style={{
+                    background: 'none', border: 'none', color: '#6b7280', fontSize: '13px',
+                    cursor: 'pointer', textDecoration: 'underline', padding: 0, marginTop: '4px',
+                  }}
+                >
+                  Clear saved info
+                </button>
+              </div>
+            )}
+            <button type="submit" disabled={loading || isLocked} style={{
+              width: '100%', padding: '14px', background: '#163a70', color: '#fff',
+              border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
+              cursor: loading || isLocked ? 'not-allowed' : 'pointer', opacity: loading || isLocked ? 0.65 : 1,
+            }}>
+              {loading ? 'Checking...' : isLocked ? 'Temporarily Locked' : 'Check Status'}
+            </button>
+          </form>
+        )}
 
-        {result && (
+        {loading && (
+          <div style={{
+            background: 'rgba(255,255,255,0.97)', borderRadius: '22px',
+            boxShadow: '0 18px 42px rgba(4,12,24,.34)', padding: '40px',
+            border: '1px solid rgba(212,175,55,.22)', textAlign: 'center',
+          }}>
+            <div style={{ color: '#163a70', fontSize: '16px' }}>Loading your status...</div>
+          </div>
+        )}
+
+        {result && !loading && (
           <div style={{
             background: 'rgba(255,255,255,0.97)', borderRadius: '22px',
             boxShadow: '0 18px 42px rgba(4,12,24,.34)', padding: '28px',
@@ -210,7 +248,7 @@ export default function StatusPage() {
                     background: item.status === 'completed' ? '#166534' : item.status === 'current' ? '#d97706' : '#9ca3af',
                     color: '#fff', flexShrink: 0,
                   }}>
-                    {item.status === 'completed' ? '✓' : item.status === 'current' ? idx + 1 : idx + 1}
+                    {item.status === 'completed' ? '✓' : idx + 1}
                   </div>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{item.stageName}</p>
@@ -227,6 +265,20 @@ export default function StatusPage() {
                 </div>
               ))}
             </div>
+
+            {rememberMe && (
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <button
+                  onClick={clearSavedInfo}
+                  style={{
+                    background: 'none', border: 'none', color: '#6b7280', fontSize: '13px',
+                    cursor: 'pointer', textDecoration: 'underline', padding: 0,
+                  }}
+                >
+                  Check different application
+                </button>
+              </div>
+            )}
           </div>
         )}
 
