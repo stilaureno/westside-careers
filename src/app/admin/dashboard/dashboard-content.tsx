@@ -217,7 +217,7 @@ export default function DashboardContent() {
 
     setSummary(s);
     setLoading(false);
-  }, [supabase, startDate, endDate]);
+  }, [supabase, startDate, endDate, isSuperAdmin, allowedDepartments]);
 
   useEffect(() => { loadDashboard(); }, [loadDashboard]);
 
