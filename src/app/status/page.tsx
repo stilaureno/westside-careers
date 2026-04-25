@@ -294,7 +294,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                   </div>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', margin: 0 }}>{item.stageName}</p>
-                    {item.result && (
+                    {item.result && item.stageName !== 'Initial Screening' && (
                       <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>{item.result}</p>
                     )}
                   </div>
@@ -302,7 +302,9 @@ const [autoFetched, setAutoFetched] = useState(false);
                     fontSize: '12px', fontWeight: '600',
                     color: item.status === 'completed' ? '#166534' : item.status === 'current' ? '#d97706' : '#9ca3af',
                   }}>
-                    {item.status === 'completed' ? 'Done' : item.status === 'current' ? 'Current' : 'Pending'}
+                    {item.status === 'completed' 
+                      ? (item.stageName === 'Initial Screening' ? 'Completed' : 'Done') 
+                      : item.status === 'current' ? 'Current' : 'Pending'}
                   </span>
                 </div>
               ))}
