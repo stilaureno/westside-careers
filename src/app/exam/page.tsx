@@ -45,10 +45,6 @@ export default function ExamPage() {
   }, []);
 
   useEffect(() => {
-    answersRef.current = answers;
-  }, [answers]);
-
-  useEffect(() => {
     activeReferenceRef.current = applicant?.referenceNo || refInput.trim();
   }, [applicant, refInput]);
 
@@ -216,14 +212,18 @@ export default function ExamPage() {
   }, [forceFinish, stopTimers, view]);
 
   function handleAnswer(questionNo: string, choiceKey: string) {
-    setAnswers((prev) => ({ ...prev, [questionNo]: choiceKey }));
+    const nextAnswers = { ...answersRef.current, [questionNo]: choiceKey };
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
   }
 
   async function submitExam() {
+    const currentAnswers = answersRef.current;
+
     // Check for unanswered questions
-    const unanswered = questions.find(q => !answers[q.question_no.toString()]);
+    const unanswered = questions.find(q => !currentAnswers[q.question_no.toString()]);
     if (unanswered) {
-      const confirmed = window.confirm(`You still have ${questions.length - Object.keys(answers).length} unanswered questions. Are you sure you want to submit?`);
+      const confirmed = window.confirm(`You still have ${questions.length - Object.keys(currentAnswers).length} unanswered questions. Are you sure you want to submit?`);
       if (!confirmed) {
         const el = document.getElementById(`question-${unanswered.question_no}`);
         if (el) {
@@ -236,7 +236,6 @@ export default function ExamPage() {
     }
 
     stopTimers();
-    const currentAnswers = answersRef.current;
     const referenceNo = activeReferenceRef.current;
 
     try {
