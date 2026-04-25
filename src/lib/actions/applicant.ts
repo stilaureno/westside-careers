@@ -199,11 +199,12 @@ export async function getApplicantStatus(
   
   const completedStages = stageRows?.filter(s => s.result_status === 'Passed' || s.result_status === 'Failed') || [];
   const nextStageIndex = completedStages.length;
-  const currentStage = nextStageIndex < workflow.length 
+const currentStage = nextStageIndex < workflow.length 
     ? workflow[nextStageIndex] 
     : applicant.current_stage || 'Initial Screening';
+  
   const currentIdx = workflow.indexOf(currentStage);
-
+  
   const roadmap: StageRoadmapItem[] = workflow.map((stageName, idx) => {
     const stageData = stageRows?.find((s) => s.stage_name === stageName);
     return {
@@ -216,22 +217,9 @@ export async function getApplicantStatus(
   });
 
   let nextStep: string | null = null;
-  if (currentStage !== workflow[workflow.length - 1]) {
-    if (applicant.position_applied === 'Dealer') {
-      if (currentStage === 'Initial Screening') {
-        nextStep = 'Math Proficiency Exam';
-      } else if (currentStage === 'Math Exam') {
-        nextStep = 'Document Verification';
-      } else if (currentStage === 'Document Verification') {
-        nextStep = 'Wait for interview schedule';
-      }
-    } else if (applicant.position_applied === 'Pit Supervisor') {
-      nextStep = 'Wait for interview schedule';
-    } else if (applicant.position_applied === 'Pit Manager') {
-      nextStep = 'Wait for senior interview schedule';
-    } else if (applicant.position_applied === 'Operations Manager') {
-      nextStep = 'Wait for senior interview schedule';
-    }
+  const lastCompletedStageIdx = completedStages.length;
+  if (lastCompletedStageIdx < workflow.length) {
+    nextStep = workflow[lastCompletedStageIdx];
   }
 
   return { data: { applicant: applicant as Applicant, roadmap, mathExam, nextStep }, error: null, lockedUntil: null };
