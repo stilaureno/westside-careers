@@ -26,8 +26,14 @@ interface StageSummary {
   failed: number;
 }
 
+interface GenderByPosition {
+  male: number;
+  female: number;
+}
+
 interface DeptData {
   positions: { [posName: string]: PositionSummary };
+  genderByPosition: { [posName: string]: GenderByPosition };
   stageMath: StageSummary;
   stageTable: StageSummary;
   total: number;
@@ -82,6 +88,15 @@ function StageSection({ title, summary }: { title: string; summary: StageSummary
         <SummaryCard label="Passed" value={summary.passed} color="#166534" />
         <SummaryCard label="Failed" value={summary.failed} color="#991b1b" />
       </div>
+    </div>
+  );
+}
+
+function GenderRow({ label, male, female }: { label: string; male: number; female: number }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
+      <span style={{ fontSize: '13px', color: '#6b7280' }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '600' }}>{male} / {female}</span>
     </div>
   );
 }
@@ -150,6 +165,7 @@ export default function DashboardContent() {
       
       data[dept.name] = {
         positions: {},
+        genderByPosition: {},
         stageMath: emptyStage(),
         stageTable: emptyStage(),
         total: 0,
@@ -164,6 +180,7 @@ export default function DashboardContent() {
       // Initialize position summaries
       for (const pos of posRows || []) {
         data[dept.name].positions[pos.name] = emptyPos();
+        data[dept.name].genderByPosition[pos.name] = { male: 0, female: 0 };
       }
     }
     
@@ -230,6 +247,13 @@ export default function DashboardContent() {
         else if (status === 'Reprofile') posData.reprofile++;
         else if (status === 'For Pooling') posData.pooling++;
         else if (status === 'Failed' || status === 'Not Recommended') posData.failed++;
+      }
+      
+      // Gender breakdown by position
+      const genderData = deptData.genderByPosition[pos];
+      if (genderData && (gender === 'Male' || gender === 'Female')) {
+        if (gender === 'Male') genderData.male++;
+        else if (gender === 'Female') genderData.female++;
       }
       
       // Stage stats (only for Dealer position in Table Games)
@@ -362,6 +386,25 @@ export default function DashboardContent() {
                 </div>
               );
             })}
+            
+            {/* Gender Breakdown by Position */}
+            <div style={{
+              background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginTop: '20px',
+            }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Gender Breakdown by Position</h3>
+              {positions.map(posName => {
+                const genderData = deptData.genderByPosition[posName];
+                if (!genderData || (genderData.male === 0 && genderData.female === 0)) return null;
+                return (
+                  <GenderRow 
+                    key={posName} 
+                    label={posName} 
+                    male={genderData.male} 
+                    female={genderData.female} 
+                  />
+                );
+              })}
+            </div>
           </div>
         );
       })}
