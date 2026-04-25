@@ -38,6 +38,8 @@ export default function ExamPage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const saveRef = useRef<NodeJS.Timeout | null>(null);
+  const suppressAutoSubmitRef = useRef(false);
+  const finishInProgressRef = useRef(false);
 
   const stopTimers = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -168,6 +170,8 @@ export default function ExamPage() {
   }
 
   const forceFinish = useCallback(async (reason: string) => {
+    if (suppressAutoSubmitRef.current || finishInProgressRef.current) return;
+    finishInProgressRef.current = true;
     stopTimers();
     const currentAnswers = answersRef.current;
     const referenceNo = activeReferenceRef.current;
@@ -188,12 +192,14 @@ export default function ExamPage() {
       }
 
       setMessage({ text: getExamErrorMessage(data.error || 'Failed to submit exam.'), type: 'error' });
-        setSubmitting(false);
-      } catch (err) {
-        setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
-        setSubmitting(false);
-      }
-    }, [stopTimers]);
+      setSubmitting(false);
+    } catch (err) {
+      setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
+      setSubmitting(false);
+    } finally {
+      finishInProgressRef.current = false;
+    }
+  }, [stopTimers]);
 
   useEffect(() => {
     if (view !== 'exam') return;
@@ -221,15 +227,18 @@ export default function ExamPage() {
   }
 
   async function submitExam() {
-    if (submitting) return;
+    if (submitting || finishInProgressRef.current) return;
     setSubmitting(true);
     const currentAnswers = answersRef.current;
 
     // Check for unanswered questions
     const unanswered = questions.find(q => !currentAnswers[q.question_no.toString()]);
     if (unanswered) {
+      suppressAutoSubmitRef.current = true;
       const confirmed = window.confirm(`You still have ${questions.length - Object.keys(currentAnswers).length} unanswered questions. Are you sure you want to submit?`);
+      suppressAutoSubmitRef.current = false;
       if (!confirmed) {
+        setSubmitting(false);
         const el = document.getElementById(`question-${unanswered.question_no}`);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -240,6 +249,7 @@ export default function ExamPage() {
       }
     }
 
+    finishInProgressRef.current = true;
     stopTimers();
     const referenceNo = activeReferenceRef.current;
 
@@ -263,6 +273,8 @@ export default function ExamPage() {
     } catch (err) {
       setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
       setSubmitting(false);
+    } finally {
+      finishInProgressRef.current = false;
     }
   }
 
