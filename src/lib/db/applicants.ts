@@ -1,6 +1,26 @@
 import { createClient } from '@/lib/supabase/server';
 import type { Applicant, DashboardSummary, StageRoadmapItem, PositionSummary, StageSummary, GenderByPosition } from '@/types';
 
+export interface ApplicantStageSummary {
+  reference_no: string;
+  stage_name: string;
+  stage_sequence: number;
+  result_status: string | null;
+  current_stage_label: string | null;
+  remarks: string | null;
+}
+
+export interface ApplicantListItem extends Applicant {
+  displayName: string;
+  initialScreeningResult: string;
+  mathExamResult: string;
+  tableTestResult: string;
+  sweatyPalmResult: string;
+  finalInterviewResult: string;
+  remarks?: string;
+  stages: ApplicantStageSummary[];
+}
+
 function emptyPositionSummary(): PositionSummary {
   return { total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0 };
 }
@@ -310,4 +330,71 @@ export async function getApplicantSummaryData(): Promise<Applicant[]> {
 
   if (error || !data) return [];
   return data as Applicant[];
+}
+
+export async function getApplicantsPageData(options?: {
+  limit?: number;
+  allowedDepartments?: string[];
+  isSuperAdmin?: boolean;
+}): Promise<ApplicantListItem[]> {
+  const supabase = await createClient();
+  const limit = options?.limit ?? 300;
+  const allowedDepartments = options?.allowedDepartments ?? [];
+  const isSuperAdmin = options?.isSuperAdmin ?? false;
+
+  if (!isSuperAdmin && allowedDepartments.length === 0) {
+    return [];
+  }
+
+  let applicantsQuery = supabase
+    .from('applicants')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (!isSuperAdmin) {
+    applicantsQuery = applicantsQuery.in('department', allowedDepartments);
+  }
+
+  const { data: applicants, error } = await applicantsQuery;
+
+  if (error || !applicants?.length) {
+    return [];
+  }
+
+  const referenceNumbers = applicants.map((app) => app.reference_no).filter(Boolean);
+  const { data: stages } = referenceNumbers.length > 0
+    ? await supabase
+        .from('stage_results')
+        .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks')
+        .in('reference_no', referenceNumbers)
+    : { data: [] as ApplicantStageSummary[] };
+
+  const stageMap: Record<string, ApplicantStageSummary[]> = {};
+  stages?.forEach((stage) => {
+    if (!stageMap[stage.reference_no]) {
+      stageMap[stage.reference_no] = [];
+    }
+    stageMap[stage.reference_no].push(stage as ApplicantStageSummary);
+  });
+
+  return applicants.map((applicant) => {
+    const applicantStages = stageMap[applicant.reference_no] || [];
+    const getStageResult = (stageName: string) => {
+      const stage = applicantStages.find((item) => item.stage_name === stageName);
+      return stage?.result_status || '-';
+    };
+
+    return {
+      ...(applicant as Applicant),
+      displayName: `${applicant.first_name} ${applicant.last_name}`,
+      initialScreeningResult: getStageResult('Initial Screening'),
+      mathExamResult: getStageResult('Math Exam'),
+      tableTestResult: getStageResult('Table Test'),
+      sweatyPalmResult: applicantStages.find((item) => item.stage_name === 'Final Interview')?.result_status || '-',
+      finalInterviewResult: getStageResult('Final Interview'),
+      remarks: applicant.remarks,
+      stages: applicantStages,
+    };
+  });
 }

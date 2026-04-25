@@ -1,42 +1,30 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
+import type { ApplicantListItem } from '@/lib/db/applicants';
 
 type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
 
 const POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager'];
 
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? decodeURIComponent(match[2]) : null;
-}
+type ApplicantsContentProps = {
+  initialApplicants: ApplicantListItem[];
+  isSuperAdmin: boolean;
+  allowedDepartments: string[];
+};
 
-export default function ApplicantsContent() {
-  const [applicants, setApplicants] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ApplicantsContent({
+  initialApplicants,
+  isSuperAdmin,
+  allowedDepartments,
+}: ApplicantsContentProps) {
+  const [applicants, setApplicants] = useState<ApplicantListItem[]>(initialApplicants);
+  const [loading, setLoading] = useState(false);
   const supabase = createClient();
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [allowedDepartments, setAllowedDepartments] = useState<string[]>([]);
-
-  useEffect(() => {
-    const superAdminCookie = getCookie('super_admin_session');
-    const deptCookie = getCookie('allowed_departments');
-    
-    setIsSuperAdmin(superAdminCookie === 'super');
-    
-    if (deptCookie) {
-      try {
-        setAllowedDepartments(JSON.parse(deptCookie));
-      } catch (e) {
-        setAllowedDepartments([]);
-      }
-    }
-  }, []);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -55,26 +43,41 @@ export default function ApplicantsContent() {
   const loadApplicants = useCallback(async () => {
     setLoading(true);
 
-    const { data: apps } = await supabase
+    let applicantsQuery = supabase
       .from('applicants')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(300);
 
-    const { data: stages } = await supabase
-      .from('stage_results')
-      .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks');
+    if (!isSuperAdmin) {
+      if (allowedDepartments.length === 0) {
+        setApplicants([]);
+        setLoading(false);
+        return;
+      }
 
-    const stageMap: Record<string, any[]> = {};
+      applicantsQuery = applicantsQuery.in('department', allowedDepartments);
+    }
+
+    const { data: apps } = await applicantsQuery;
+    const referenceNumbers = (apps || []).map((app) => app.reference_no).filter(Boolean);
+    const { data: stages } = referenceNumbers.length > 0
+      ? await supabase
+          .from('stage_results')
+          .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks')
+          .in('reference_no', referenceNumbers)
+      : { data: [] };
+
+    const stageMap: Record<string, ApplicantListItem['stages']> = {};
     stages?.forEach((s) => {
       if (!stageMap[s.reference_no]) stageMap[s.reference_no] = [];
       stageMap[s.reference_no].push(s);
     });
 
-    const enriched = (apps || []).map((app: any) => {
+    const enriched = (apps || []).map((app) => {
       const appStages = stageMap[app.reference_no] || [];
       const getStageResult = (stage: string) => {
-        const s = appStages.find((x: any) => x.stage_name === stage);
+        const s = appStages.find((x) => x.stage_name === stage);
         return s?.result_status || '-';
       };
       return {
@@ -83,7 +86,7 @@ export default function ApplicantsContent() {
         initialScreeningResult: getStageResult('Initial Screening'),
         mathExamResult: getStageResult('Math Exam'),
         tableTestResult: getStageResult('Table Test'),
-        sweatyPalmResult: appStages.find((x: any) => x.stage_name === 'Final Interview')?.result_status || '-',
+        sweatyPalmResult: appStages.find((x) => x.stage_name === 'Final Interview')?.result_status || '-',
         finalInterviewResult: getStageResult('Final Interview'),
         stages: appStages,
       };
@@ -91,16 +94,12 @@ export default function ApplicantsContent() {
 
     setApplicants(enriched);
     setLoading(false);
-  }, [supabase]);
-
-  useEffect(() => {
-    loadApplicants();
-  }, [loadApplicants]);
+  }, [allowedDepartments, isSuperAdmin, supabase]);
 
   const filteredByDate = useMemo(() => {
     const start = filterStartDate;
     const end = filterEndDate;
-    return applicants.filter(app => {
+    return applicants.filter((app) => {
       const created = (app.created_at || '').slice(0, 10);
       return (!start || created >= start) && (!end || created <= end);
     });
@@ -109,7 +108,7 @@ export default function ApplicantsContent() {
   const filteredBySearch = useMemo(() => {
     const g = globalSearch.toLowerCase();
     if (!g) return filteredByDate;
-    return filteredByDate.filter(app => {
+    return filteredByDate.filter((app) => {
       const name = (app.displayName || '').toLowerCase();
       const ref = (app.reference_no || '').toLowerCase();
       const rem = (app.remarks || '').toLowerCase();
@@ -119,7 +118,7 @@ export default function ApplicantsContent() {
 
   const applicantsForCounts = useMemo(() => {
     if (!isSuperAdmin && allowedDepartments.length > 0) {
-      return filteredBySearch.filter(app => {
+      return filteredBySearch.filter((app) => {
         const dept = app.department || '';
         return allowedDepartments.includes(dept);
       });
@@ -130,7 +129,7 @@ export default function ApplicantsContent() {
   const positionCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
     POSITIONS.forEach(p => { counts[p] = 0; });
-    applicantsForCounts.forEach(app => {
+    applicantsForCounts.forEach((app) => {
       const p = app.position_applied;
       if (p && counts[p] !== undefined) counts[p]++;
     });
@@ -139,7 +138,7 @@ export default function ApplicantsContent() {
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
-    applicantsForCounts.forEach(app => {
+    applicantsForCounts.forEach((app) => {
       const s = app.current_stage;
       if (s) counts[s] = (counts[s] || 0) + 1;
     });
@@ -148,7 +147,7 @@ export default function ApplicantsContent() {
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
-    applicantsForCounts.forEach(app => {
+    applicantsForCounts.forEach((app) => {
       const s = app.application_status || 'Pending';
       counts[s] = (counts[s] || 0) + 1;
     });
@@ -170,7 +169,7 @@ export default function ApplicantsContent() {
     });
 
     if (!isSuperAdmin && allowedDepartments.length > 0) {
-      result = result.filter(app => {
+      result = result.filter((app) => {
         const dept = app.department || '';
         return allowedDepartments.includes(dept);
       });
@@ -189,7 +188,7 @@ export default function ApplicantsContent() {
     });
 
     return result;
-  }, [filteredBySearch, filterPosition, filterStage, filterStatus, sortField, sortDir]);
+  }, [filteredBySearch, filterPosition, filterStage, filterStatus, sortField, sortDir, isSuperAdmin, allowedDepartments]);
 
   function handleSort(field: SortField) {
     if (sortField === field) {
@@ -258,7 +257,7 @@ export default function ApplicantsContent() {
 
   if (loading) {
     return (
-      <div className="container-fluid py-4">
+      <div className="container-fluid py-4" style={{ minHeight: 'calc(100vh - 240px)' }}>
         <div className="text-center text-secondary">Loading...</div>
       </div>
     );
@@ -267,7 +266,7 @@ export default function ApplicantsContent() {
   return (
     <div className="container-fluid py-3" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif' }}>
       {/* Filters Row */}
-      <div className="card mb-3 shadow-sm">
+      <div className="card mb-3 shadow-sm" style={{ minHeight: '118px' }}>
         <div className="card-body">
           <div className="row g-3 align-items-end">
             <div className="col-md-2">
@@ -349,7 +348,7 @@ export default function ApplicantsContent() {
       </div>
 
       {/* Results Table */}
-      <div className="card shadow-sm">
+      <div className="card shadow-sm" style={{ minHeight: '540px' }}>
         <div className="card-body p-0">
           <div className="table-responsive">
             <table className="table table-hover table-sm mb-0">

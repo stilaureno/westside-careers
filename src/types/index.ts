@@ -33,12 +33,14 @@ export interface Applicant {
   current_company_name?: string;
   current_position?: string;
   previous_company_name?: string;
+  department?: string;
   preferred_department?: string;
   currently_employed: string;
   duplicate_key?: string;
   current_stage?: string;
   application_status?: string;
   overall_result?: string;
+  remarks?: string;
   created_at?: string;
   updated_at?: string;
 }

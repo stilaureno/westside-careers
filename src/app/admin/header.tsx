@@ -2,22 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
 
-export function AdminHeader() {
+export function AdminHeader({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const pathname = usePathname();
   const isApplicantsRoute = pathname.startsWith('/admin/applicants');
   const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
-  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
-  const [mounted, setMounted] = useState(false);
-
-useEffect(() => {
-    setMounted(true);
-    const cookie = document.cookie.split('; ').find(c => c.startsWith('super_admin_session='));
-    setIsSuperAdmin(!!(cookie && cookie.includes('super')));
-  }, []);
-
-  if (!mounted) return null;
 
   return (
     <header style={{
