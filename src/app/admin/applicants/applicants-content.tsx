@@ -173,7 +173,7 @@ export default function ApplicantsContent() {
                 <tr key={app.reference_no} style={{ borderBottom: '1px solid #e5e7eb' }}>
                   <td style={{ padding: '8px 12px', color: '#6b7280' }}>{app.created_at?.slice(0, 10) || '-'}</td>
                   <td style={{ padding: '8px 12px' }}>
-                    <Link href={`/admin/applicants/${app.reference_no}`} style={{ color: '#8b1e2d', fontWeight: '700', textDecoration: 'none' }}>
+                    <Link href={`/admin/applicants/${app.reference_no}`} style={{ color: '#8b1e2d', fontWeight: '700', textDecoration: 'none', cursor: 'pointer' }}>
                       {app.reference_no}
                     </Link>
                   </td>
