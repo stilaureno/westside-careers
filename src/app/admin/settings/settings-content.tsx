@@ -23,11 +23,19 @@ interface Position {
   is_active: boolean;
 }
 
+interface AdminPassword {
+  id: string;
+  key: string;
+  value: string;
+  allowed_departments: string[] | null;
+}
+
 export default function SettingsContent() {
   const supabase = createClient();
   const [fields, setFields] = useState<VisibleField[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
+  const [adminPasswords, setAdminPasswords] = useState<AdminPassword[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -35,36 +43,24 @@ export default function SettingsContent() {
   const [newDeptName, setNewDeptName] = useState('');
   const [newPosName, setNewPosName] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
-  const [selectedAdminDepts, setSelectedAdminDepts] = useState<string[]>([]);
+  const [newAdminPassword, setNewAdminPassword] = useState('');
 
   useEffect(() => {
     loadData();
   }, []);
 
-  useEffect(() => {
-    async function loadAdminDepts() {
-      const { data } = await supabase
-        .from('config')
-        .select('allowed_departments')
-        .eq('key', 'ADMIN_PASSWORD')
-        .single();
-      if (data?.allowed_departments) {
-        setSelectedAdminDepts(data.allowed_departments);
-      }
-    }
-    loadAdminDepts();
-  }, [supabase]);
-
   async function loadData() {
     setLoading(true);
-    const [fieldsRes, deptsRes, possRes] = await Promise.all([
+    const [fieldsRes, deptsRes, possRes, adminPassRes] = await Promise.all([
       supabase.from('visible_fields').select('*').order('display_order'),
       supabase.from('departments').select('*').order('name'),
       supabase.from('positions').select('*').order('name'),
+      supabase.from('config').select('*').like('key', 'ADMIN_PASSWORD%').neq('key', 'SUPER_ADMIN_PASSWORD'),
     ]);
     setFields(fieldsRes.data || []);
     setDepartments(deptsRes.data || []);
     setPositions(possRes.data || []);
+    setAdminPasswords(adminPassRes.data || []);
     setLoading(false);
   }
 
@@ -162,25 +158,72 @@ export default function SettingsContent() {
     setSaving(false);
   }
 
-  function toggleAdminDept(deptName: string) {
-    setSelectedAdminDepts(prev =>
-      prev.includes(deptName)
-        ? prev.filter(d => d !== deptName)
-        : [...prev, deptName]
-    );
+  async function addAdminPassword() {
+    if (!newAdminPassword.trim()) return;
+    setSaving(true);
+
+    const existingKeys = adminPasswords.map(a => a.key);
+    const maxNum = existingKeys.reduce((max, key) => {
+      const num = parseInt(key.replace('ADMIN_PASSWORD', '')) || 1;
+      return Math.max(max, num);
+    }, 1);
+    const newKey = maxNum + 1;
+
+    const { error } = await supabase
+      .from('config')
+      .insert({ key: `ADMIN_PASSWORD${newKey}`, value: newAdminPassword.trim(), allowed_departments: [] });
+
+    if (!error) {
+      setNewAdminPassword('');
+      await loadData();
+      setMessage({ text: 'Admin password added', type: 'success' });
+    } else {
+      setMessage({ text: error.message, type: 'error' });
+    }
+    setSaving(false);
   }
 
-  async function saveAdminDepartments() {
+  async function deleteAdminPassword(key: string) {
+    if (!confirm(`Delete admin password ${key}?`)) return;
+    setSaving(true);
+    const { error } = await supabase.from('config').delete().eq('key', key);
+    if (!error) {
+      await loadData();
+      setMessage({ text: 'Admin password deleted', type: 'success' });
+    }
+    setSaving(false);
+  }
+
+  async function updateAdminPasswordValue(admin: AdminPassword, newValue: string) {
     setSaving(true);
     const { error } = await supabase
       .from('config')
-      .update({ allowed_departments: selectedAdminDepts })
-      .eq('key', 'ADMIN_PASSWORD');
+      .update({ value: newValue })
+      .eq('key', admin.key);
 
     if (!error) {
-      setMessage({ text: 'Admin department access saved', type: 'success' });
+      setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, value: newValue } : a));
+      setMessage({ text: 'Password updated', type: 'success' });
     } else {
-      setMessage({ text: 'Failed to save', type: 'error' });
+      setMessage({ text: 'Failed to update password', type: 'error' });
+    }
+    setSaving(false);
+  }
+
+  async function toggleAdminDept(admin: AdminPassword, deptName: string) {
+    const currentDepts = admin.allowed_departments || [];
+    const newDepts = currentDepts.includes(deptName)
+      ? currentDepts.filter(d => d !== deptName)
+      : [...currentDepts, deptName];
+
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .update({ allowed_departments: newDepts })
+      .eq('key', admin.key);
+
+    if (!error) {
+      setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, allowed_departments: newDepts } : a));
     }
     setSaving(false);
   }
@@ -347,54 +390,98 @@ export default function SettingsContent() {
           </div>
         </div>
 
-        <div className="card mb-4">
-          <div className="card-header bg-dark text-white">
-            <h5 className="mb-0">Admin Department Access</h5>
-          </div>
-          <div className="card-body">
-            <p className="text-muted small mb-3">
-              Assign which departments each admin password can access. Super admins see all departments by default.
-            </p>
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <>
-                <div className="mb-3">
-                  <label className="form-label fw-bold">Standard Admin Departments</label>
-                  <div className="border rounded p-3">
-                    <div className="d-flex flex-wrap gap-2 mb-2">
-                      {departments.filter(d => d.is_active).length === 0 && (
-                        <span className="text-muted">No active departments</span>
-                      )}
-                      {departments.filter(d => d.is_active).map(dept => {
-                        const isChecked = selectedAdminDepts.includes(dept.name);
-                        return (
-                          <div key={dept.id} className="form-check">
+        {/* Admin Passwords */}
+        <div className="col-md-12">
+          <div className="card border-dark">
+            <div className="card-header bg-dark text-white">
+              <h5 className="mb-0">Admin Passwords & Department Access</h5>
+            </div>
+            <div className="card-body">
+              <p className="text-muted small mb-3">
+                Manage admin passwords and assign which departments each one can access. Super admin sees all departments by default.
+              </p>
+
+              {/* Add new password */}
+              <div className="d-flex gap-2 mb-4 p-3 bg-light rounded">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="New admin password..."
+                  value={newAdminPassword}
+                  onChange={(e) => setNewAdminPassword(e.target.value)}
+                />
+                <button className="btn btn-dark" onClick={addAdminPassword} disabled={saving || !newAdminPassword.trim()}>
+                  Add Password
+                </button>
+              </div>
+
+              {/* List admin passwords */}
+              {adminPasswords.length === 0 ? (
+                <p className="text-muted">No admin passwords configured yet.</p>
+              ) : (
+                <div className="row g-3">
+                  {adminPasswords.map(admin => (
+                    <div key={admin.key} className="col-md-6 col-lg-4">
+                      <div className="card h-100">
+                        <div className="card-header d-flex justify-content-between align-items-center py-2">
+                          <span className="fw-bold">{admin.key}</span>
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => deleteAdminPassword(admin.key)}
+                            disabled={saving}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        <div className="card-body py-2">
+                          <div className="mb-2">
+                            <label className="form-label small fw-bold">Password:</label>
                             <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id={`dept-${dept.id}`}
-                              checked={isChecked}
-                              onChange={() => toggleAdminDept(dept.name)}
+                              type="text"
+                              className="form-control form-control-sm"
+                              defaultValue={admin.value}
+                              id={`pw-${admin.key}`}
+                              onBlur={(e) => {
+                                if (e.target.value !== admin.value) {
+                                  updateAdminPasswordValue(admin, e.target.value);
+                                }
+                              }}
                             />
-                            <label className="form-check-label" htmlFor={`dept-${dept.id}`}>
-                              {dept.name}
-                            </label>
                           </div>
-                        );
-                      })}
+                          <div>
+                            <label className="form-label small fw-bold">Allowed Departments:</label>
+                            <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                              {departments.filter(d => d.is_active).length === 0 ? (
+                                <span className="text-muted small">No active departments</span>
+                              ) : (
+                                departments.filter(d => d.is_active).map(dept => {
+                                  const isChecked = (admin.allowed_departments || []).includes(dept.name);
+                                  return (
+                                    <div key={dept.id} className="form-check">
+                                      <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id={`${admin.key}-${dept.id}`}
+                                        checked={isChecked}
+                                        disabled={saving}
+                                        onChange={() => toggleAdminDept(admin, dept.name)}
+                                      />
+                                      <label className="form-check-label" htmlFor={`${admin.key}-${dept.id}`}>
+                                        {dept.name}
+                                      </label>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={saveAdminDepartments}
-                      disabled={saving}
-                    >
-                      {saving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
