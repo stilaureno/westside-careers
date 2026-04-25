@@ -73,14 +73,14 @@ FINAL_INTERVIEW_RESULTS = ['Passed', 'Reprofile', 'For Pooling', 'Not Recommende
 - Two admin tiers: `admin_session` (standard) and `super_admin_session` (super admin).
 - All `/admin/*` routes protected by `src/lib/supabase/middleware.ts`.
 - Public routes: `/`, `/apply`, `/status`, `/exam` — no auth required.
-- `ADMIN_PASSWORD` defaults to `TGHR2026` (seeded in migration 0001).
 
 ### Per-Admin Department Access
 
-- Standard admins can be restricted to specific departments via `config.allowed_departments` (text array).
-- Super admins see all departments by default.
-- Configure in Settings → "Admin Department Access" (super admin only).
-- Filters apply toApplicant List and Dashboard.
+- Multiple admin passwords supported via config keys: `ADMIN_PASSWORD`, `ADMIN_PASSWORD2`, `ADMIN_PASSWORD3`, etc.
+- Each admin password has its own `allowed_departments` (text array in `config` table).
+- Super admin (`SUPER_ADMIN_PASSWORD`) sees all departments by default.
+- Configure in Settings → "Admin Passwords & Department Access" (super admin only).
+- Filters apply to Applicant List and Dashboard.
 
 ## Key Routes
 
