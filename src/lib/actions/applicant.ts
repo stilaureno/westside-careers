@@ -197,8 +197,8 @@ export async function getApplicantStatus(
 
   const workflow = getStageWorkflow(applicant.position_applied, applicant.experience_level);
   
-  const passedStages = stageRows?.filter(s => s.result_status === 'Passed') || [];
-  const nextStageIndex = passedStages.length;
+  const completedStages = stageRows?.filter(s => s.result_status === 'Passed' || s.result_status === 'Failed') || [];
+  const nextStageIndex = completedStages.length;
   const currentStage = nextStageIndex < workflow.length 
     ? workflow[nextStageIndex] 
     : applicant.current_stage || 'Initial Screening';
@@ -210,7 +210,7 @@ export async function getApplicantStatus(
       stageName,
       sequence: idx + 1,
       status: idx < currentIdx ? 'completed' : stageName === currentStage ? 'current' : 'pending',
-      result: stageData?.result_status,
+      result: undefined,
       label: stageData?.current_stage_label,
     };
   });
@@ -223,14 +223,14 @@ export async function getApplicantStatus(
       } else if (currentStage === 'Math Exam') {
         nextStep = 'Document Verification';
       } else if (currentStage === 'Document Verification') {
-        nextStep = '等待面试安排';
+        nextStep = 'Wait for interview schedule';
       }
     } else if (applicant.position_applied === 'Pit Supervisor') {
-      nextStep = '等待面试安排';
+      nextStep = 'Wait for interview schedule';
     } else if (applicant.position_applied === 'Pit Manager') {
-      nextStep = '等待高级面试安排';
+      nextStep = 'Wait for senior interview schedule';
     } else if (applicant.position_applied === 'Operations Manager') {
-      nextStep = '等待高级面试安排';
+      nextStep = 'Wait for senior interview schedule';
     }
   }
 
