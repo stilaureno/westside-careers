@@ -5,12 +5,14 @@ import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
+type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
+type SortDir = 'asc' | 'desc';
+
 export default function ApplicantsContent() {
   const [applicants, setApplicants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  // Filters
   const [globalSearch, setGlobalSearch] = useState('');
   const [filterPosition, setFilterPosition] = useState('');
   const [filterStage, setFilterStage] = useState('');
@@ -18,16 +20,17 @@ export default function ApplicantsContent() {
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
 
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+
   useEffect(() => {
     async function load() {
-      // Load applicants
       const { data: apps } = await supabase
         .from('applicants')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(300);
 
-      // Load stage results for all
       const { data: stages } = await supabase
         .from('stage_results')
         .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks');
@@ -38,7 +41,6 @@ export default function ApplicantsContent() {
         stageMap[s.reference_no].push(s);
       });
 
-      // Map stage results to applicants
       const enriched = (apps || []).map((app: any) => {
         const appStages = stageMap[app.reference_no] || [];
         const getStageResult = (stage: string) => {
@@ -63,8 +65,24 @@ export default function ApplicantsContent() {
     load();
   }, [supabase]);
 
+  const availableStages = useMemo(() => {
+    const stages = new Set<string>();
+    applicants.forEach(app => {
+      if (app.current_stage) stages.add(app.current_stage);
+    });
+    return Array.from(stages).sort();
+  }, [applicants]);
+
+  const availableStatuses = useMemo(() => {
+    const statuses = new Set<string>();
+    applicants.forEach(app => {
+      if (app.application_status) statuses.add(app.application_status);
+    });
+    return Array.from(statuses).sort();
+  }, [applicants]);
+
   const filteredApplicants = useMemo(() => {
-    return applicants.filter((app) => {
+    let result = applicants.filter((app) => {
       const g = globalSearch.toLowerCase();
       const pos = filterPosition.toLowerCase();
       const stg = filterStage.toLowerCase();
@@ -80,24 +98,65 @@ export default function ApplicantsContent() {
       const matchesDate = (!start || created >= start) && (!end || created <= end);
 
       return matchesSearch && (!pos || (app.position_applied || '').toLowerCase() === pos) &&
-        (!stg || (app.current_stage || '').toLowerCase().includes(stg)) &&
-        (!sts || (app.application_status || '').toLowerCase().includes(sts)) && matchesDate;
+        (!stg || (app.current_stage || '').toLowerCase() === stg) &&
+        (!sts || (app.application_status || '').toLowerCase() === sts) && matchesDate;
     });
-  }, [applicants, globalSearch, filterPosition, filterStage, filterStatus, filterStartDate, filterEndDate]);
+
+    result.sort((a, b) => {
+      let aVal: any = a[sortField];
+      let bVal: any = b[sortField];
+
+      if (sortField === 'created_at') {
+        aVal = aVal || '';
+        bVal = bVal || '';
+      }
+
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [applicants, globalSearch, filterPosition, filterStage, filterStatus, filterStartDate, filterEndDate, sortField, sortDir]);
+
+  function handleSort(field: SortField) {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  }
+
+  const tableHeaders: { key: SortField; label: string }[] = [
+    { key: 'created_at', label: 'Application Date' },
+    { key: 'reference_no', label: 'Reference No' },
+    { key: 'displayName', label: 'Name' },
+    { key: 'position_applied', label: 'Position' },
+    { key: 'experience_level', label: 'Experience' },
+    { key: 'current_stage', label: 'Current Stage' },
+    { key: 'application_status', label: 'Status' },
+    { key: 'height_cm', label: 'Height' },
+    { key: 'initialScreeningResult', label: 'Initial Screening' },
+    { key: 'mathExamResult', label: 'Math Exam' },
+    { key: 'tableTestResult', label: 'Table Test' },
+    { key: 'sweatyPalmResult', label: 'Sweaty Palm' },
+    { key: 'finalInterviewResult', label: 'Final Interview' },
+    { key: 'remarks', label: 'Remarks' },
+  ];
 
   if (loading) {
     return <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>Loading...</div>;
   }
 
   return (
-    <div style={{ padding: '0' }}>
+    <div style={{ width: '100%', minWidth: '100%' }}>
       <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '20px' }}>Applicant Summary</h1>
 
-      {/* Filters */}
       <div style={{
         background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginBottom: '20px',
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
           <div>
             <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Search Name / Reference / Remarks</label>
             <input
@@ -121,19 +180,27 @@ export default function ApplicantsContent() {
           </div>
           <div>
             <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Filter by Stage</label>
-            <input
+            <select
               value={filterStage} onChange={(e) => setFilterStage(e.target.value)}
-              placeholder="Stage name..."
               style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
+            >
+              <option value="">All</option>
+              {availableStages.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Filter by Status</label>
-            <input
+            <select
               value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-              placeholder="Status..."
               style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
+            >
+              <option value="">All</option>
+              {availableStatuses.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Start Date</label>
@@ -152,20 +219,33 @@ export default function ApplicantsContent() {
         </div>
       </div>
 
-      {/* Table */}
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '16px', overflow: 'hidden' }}>
         <div style={{ maxHeight: '560px', overflow: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '1400px' }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                {[
-                  'Application Date', 'Reference No', 'Name', 'Position', 'Experience', 'Current Stage', 'Status',
-                  'Height', 'Initial Screening', 'Math Exam', 'Table Test', 'Sweaty Palm', 'Final Interview', 'Remarks'
-                ].map((h) => (
-                  <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: '#6b7280', fontWeight: '600', whiteSpace: 'nowrap' }}>
-                    {h}
-                  </th>
-                ))}
+                {tableHeaders.map(({ key, label }) => {
+                  const isSortable = key !== 'remarks';
+                  const isActive = sortField === key;
+                  return (
+                    <th
+                      key={key}
+                      onClick={isSortable ? () => handleSort(key as SortField) : undefined}
+                      style={{
+                        padding: '10px 12px', textAlign: 'left', color: '#6b7280', fontWeight: '600',
+                        whiteSpace: 'nowrap', cursor: isSortable ? 'pointer' : 'default',
+                        userSelect: 'none',
+                      }}
+                    >
+                      {label}
+                      {isSortable && (
+                        <span style={{ marginLeft: '4px', color: isActive ? '#8b1e2d' : '#9ca3af' }}>
+                          {isActive ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                        </span>
+                      )}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
