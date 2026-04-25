@@ -308,7 +308,7 @@ export default function ApplicantsContent() {
                         key={key}
                         className={`${isSortable ? 'cursor-pointer' : ''} text-nowrap`}
                         onClick={isSortable ? () => handleSort(key as SortField) : undefined}
-                        style={isSortable ? { cursor: 'pointer', fontSize: '11px', fontWeight: '600' } : { fontSize: '11px', fontWeight: '600' }}
+                        style={isSortable ? { cursor: 'pointer', fontSize: '12px', fontWeight: '600' } : { fontSize: '12px', fontWeight: '600' }}
                       >
                         {label}
                         {isSortable && (
@@ -324,17 +324,17 @@ export default function ApplicantsContent() {
               <tbody>
                 {filteredApplicants.slice(0, 100).map((app) => (
 <tr key={app.reference_no}>
-                    <td className="text-muted" style={{ fontSize: '11px' }}>{app.created_at?.slice(0, 10) || '-'}</td>
-                    <td style={{ fontSize: '11px' }}>
+                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.created_at?.slice(0, 10) || '-'}</td>
+                    <td style={{ fontSize: '12px' }}>
                       <Link href={`/admin/applicants/${app.reference_no}`} className="text-decoration-none fw-bold" style={{ color: '#8b1e2d' }}>
                         {app.reference_no}
                       </Link>
                     </td>
-                    <td style={{ fontSize: '11px' }}>{app.displayName}</td>
-                    <td className="text-muted" style={{ fontSize: '11px' }}>{app.position_applied}</td>
-                    <td className="text-muted" style={{ fontSize: '11px' }}>{app.experience_level || '-'}</td>
-                    <td className="text-muted" style={{ fontSize: '11px' }}>{app.current_stage || '-'}</td>
-                    <td style={{ fontSize: '11px' }}>
+                    <td style={{ fontSize: '12px' }}>{app.displayName}</td>
+                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.position_applied}</td>
+                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.experience_level || '-'}</td>
+                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.current_stage || '-'}</td>
+                    <td style={{ fontSize: '12px' }}>
                       <span className={`badge rounded-pill ${
                         app.application_status === 'Passed' || app.application_status === 'Completed' ? 'bg-success' :
                         app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? 'bg-danger' :
@@ -343,26 +343,26 @@ export default function ApplicantsContent() {
                         {app.application_status || 'Pending'}
                       </span>
                     </td>
-                    <td className="text-muted" style={{ fontSize: '11px' }}>{app.height_cm || '-'}</td>
-                    <td className={app.initialScreeningResult === 'Passed' ? 'text-success' : app.initialScreeningResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '11px' }}>
+                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.height_cm || '-'}</td>
+                    <td className={app.initialScreeningResult === 'Passed' ? 'text-success' : app.initialScreeningResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
                       {app.initialScreeningResult}
                     </td>
-                    <td className={app.mathExamResult === 'Passed' ? 'text-success' : app.mathExamResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '11px' }}>
+                    <td className={app.mathExamResult === 'Passed' ? 'text-success' : app.mathExamResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
                       {app.mathExamResult}
                     </td>
-                    <td className={app.tableTestResult === 'Passed' ? 'text-success' : app.tableTestResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '11px' }}>
+                    <td className={app.tableTestResult === 'Passed' ? 'text-success' : app.tableTestResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
                       {app.tableTestResult}
                     </td>
-                    <td className="text-muted" style={{ fontSize: '11px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
+                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
                     <td className={
                       app.finalInterviewResult === 'Passed' ? 'text-success' :
                       app.finalInterviewResult === 'Reprofile' ? 'text-warning' :
                       app.finalInterviewResult === 'For Pooling' ? 'text-info' :
                       app.finalInterviewResult === 'Not Recommended' ? 'text-danger' : 'text-muted'
-                    } style={{ fontSize: '11px' }}>
+                    } style={{ fontSize: '12px' }}>
                       {app.finalInterviewResult}
                     </td>
-                    <td className="text-muted" style={{ maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '11px' }}>
+                    <td className="text-muted" style={{ maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '12px' }}>
                       {renderFormattedMessage(app.remarks)}
                     </td>
                   </tr>
