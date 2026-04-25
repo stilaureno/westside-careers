@@ -282,14 +282,14 @@ export default function ApplicantsContent() {
                 onChange={(e) => setFilterEndDate(e.target.value)}
               />
             </div>
+            {hasFilters && (
+              <div className="col-md-2 d-flex align-items-end">
+                <button className="btn btn-sm btn-danger w-100" onClick={clearFilters}>
+                  Clear Filters
+                </button>
+              </div>
+            )}
           </div>
-          {hasFilters && (
-            <div className="mt-2">
-              <button className="btn btn-sm btn-outline-secondary" onClick={clearFilters}>
-                Clear Filters
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
