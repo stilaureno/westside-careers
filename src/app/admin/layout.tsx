@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       */}
       {isAuthenticated && <AdminHeader />}
 
-      <main style={{ flex: 1, padding: isAuthenticated ? '32px' : '0', maxWidth: '1600px', width: '100%', margin: '0 auto' }}>
+      <main style={{ flex: 1, padding: isAuthenticated ? '32px' : '0', width: '100%', margin: '0 auto' }}>
         {children}
       </main>
 
