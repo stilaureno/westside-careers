@@ -33,6 +33,7 @@ export default function ExamPage() {
   const [result, setResult] = useState<any>(null);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
@@ -187,10 +188,12 @@ export default function ExamPage() {
       }
 
       setMessage({ text: getExamErrorMessage(data.error || 'Failed to submit exam.'), type: 'error' });
-    } catch (err) {
-      setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
-    }
-  }, [stopTimers]);
+        setSubmitting(false);
+      } catch (err) {
+        setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
+        setSubmitting(false);
+      }
+    }, [stopTimers]);
 
   useEffect(() => {
     if (view !== 'exam') return;
@@ -218,6 +221,8 @@ export default function ExamPage() {
   }
 
   async function submitExam() {
+    if (submitting) return;
+    setSubmitting(true);
     const currentAnswers = answersRef.current;
 
     // Check for unanswered questions
@@ -254,8 +259,10 @@ export default function ExamPage() {
       }
 
       setMessage({ text: getExamErrorMessage(data.error || 'Failed to submit exam.'), type: 'error' });
+      setSubmitting(false);
     } catch (err) {
       setMessage({ text: 'Failed to submit exam. Please try again.', type: 'error' });
+      setSubmitting(false);
     }
   }
 
@@ -368,12 +375,12 @@ export default function ExamPage() {
         </div>
 
         <div style={{ width: '100%', maxWidth: '720px', marginTop: '20px', paddingBottom: '40px' }}>
-          <button onClick={submitExam} style={{
+          <button onClick={submitExam} disabled={submitting} style={{
             width: '100%', padding: '16px', background: '#8b1e2d', color: '#fff',
             border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: '700',
-            cursor: 'pointer',
+            cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.65 : 1,
           }}>
-            Submit Exam
+            {submitting ? 'Submitting...' : 'Submit Exam'}
           </button>
         </div>
       </div>
