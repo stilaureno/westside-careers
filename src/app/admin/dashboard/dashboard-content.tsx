@@ -31,11 +31,19 @@ interface GenderByPosition {
   female: number;
 }
 
+interface AgeBandSummary {
+  age20s: number;
+  age30s: number;
+  age40s: number;
+  age50Plus: number;
+}
+
 interface DeptData {
   positions: { [posName: string]: PositionSummary };
   genderByPosition: { [posName: string]: GenderByPosition };
   stageMath: StageSummary;
   stageTable: StageSummary;
+  ageBands: AgeBandSummary;
   total: number;
   pending: number;
   ongoing: number;
@@ -101,6 +109,15 @@ function GenderRow({ label, male, female }: { label: string; male: number; femal
   );
 }
 
+function AgeBandRow({ label, value, isLast = false }: { label: string; value: number; isLast?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: isLast ? 'none' : '1px solid #e5e7eb' }}>
+      <span style={{ fontSize: '13px', color: '#6b7280' }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '600' }}>{value}</span>
+    </div>
+  );
+}
+
 export default function DashboardContent() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({});
   const [deptPositions, setDeptPositions] = useState<{ [dept: string]: string[] }>({});
@@ -131,6 +148,7 @@ export default function DashboardContent() {
     
     const emptyPos = (): PositionSummary => ({ total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0 });
     const emptyStage = (): StageSummary => ({ taken: 0, pending: 0, passed: 0, failed: 0 });
+    const emptyAgeBands = (): AgeBandSummary => ({ age20s: 0, age30s: 0, age40s: 0, age50Plus: 0 });
     
     const data: DashboardData = {};
     const positionsMap: { [dept: string]: string[] } = {};
@@ -168,6 +186,7 @@ export default function DashboardContent() {
         genderByPosition: {},
         stageMath: emptyStage(),
         stageTable: emptyStage(),
+        ageBands: emptyAgeBands(),
         total: 0,
         pending: 0,
         ongoing: 0,
@@ -187,7 +206,7 @@ export default function DashboardContent() {
     // Query applicants
     let appQuery = supabase
       .from('applicants')
-      .select('application_status, current_stage, position_applied, gender, birthdate, experience_level, department')
+      .select('reference_no, application_status, current_stage, position_applied, gender, birthdate, experience_level, department')
       .in('department', deptsToShow.map(d => d.name));
     
     if (startDate) appQuery = appQuery.gte('created_at', startDate);
@@ -255,6 +274,11 @@ export default function DashboardContent() {
         if (gender === 'Male') genderData.male++;
         else if (gender === 'Female') genderData.female++;
       }
+
+      if (age >= 20 && age <= 29) deptData.ageBands.age20s++;
+      else if (age >= 30 && age <= 39) deptData.ageBands.age30s++;
+      else if (age >= 40 && age <= 49) deptData.ageBands.age40s++;
+      else if (age >= 50) deptData.ageBands.age50Plus++;
       
       // Stage stats (only for Dealer position in Table Games)
       if (pos === 'Dealer' && dept === 'Table Games') {
@@ -404,6 +428,16 @@ export default function DashboardContent() {
                   />
                 );
               })}
+            </div>
+
+            <div style={{
+              background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginTop: '20px',
+            }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Age Band Breakdown</h3>
+              <AgeBandRow label="20s" value={deptData.ageBands.age20s} />
+              <AgeBandRow label="30s" value={deptData.ageBands.age30s} />
+              <AgeBandRow label="40s" value={deptData.ageBands.age40s} />
+              <AgeBandRow label="50 and above" value={deptData.ageBands.age50Plus} isLast />
             </div>
           </div>
         );
