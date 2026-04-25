@@ -65,6 +65,15 @@ function getStatusLockError(lockedUntil: number) {
   return `Too many failed status checks. Please try again in ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}.`;
 }
 
+function isCompletedStageResult(stageName: string, resultStatus?: string | null) {
+  if (!resultStatus) return false;
+  if (resultStatus === 'Passed' || resultStatus === 'Failed') return true;
+  if (stageName === 'Final Interview' && (resultStatus === 'Reprofile' || resultStatus === 'For Pooling' || resultStatus === 'Not Recommended')) {
+    return true;
+  }
+  return false;
+}
+
 export async function submitApplication(formData: ApplicationFormData): Promise<{ success: boolean; referenceNo?: string; error?: string }> {
   const supabase = await createClient();
 
@@ -197,7 +206,7 @@ export async function getApplicantStatus(
 
 const workflow = getStageWorkflow(applicant.position_applied, applicant.experience_level);
   
-  const completedStages = stageRows?.filter(s => s.result_status === 'Passed' || s.result_status === 'Failed') || [];
+  const completedStages = stageRows?.filter(s => isCompletedStageResult(s.stage_name, s.result_status)) || [];
   const lastCompletedIdx = completedStages.length;
   const allStagesCompleted = lastCompletedIdx >= workflow.length;
   

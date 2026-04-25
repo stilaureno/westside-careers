@@ -29,7 +29,8 @@ export async function upsertStageResult(payload: {
   if (!applicant_id) return { success: false, error: 'Applicant not found' };
 
   const nextStage = getNextStage(payload.stageName, position_applied || '', experience_level);
-  const applicationStatus = payload.resultStatus === 'Passed' ? 'Ongoing' : payload.resultStatus;
+  const isFinalInterview = payload.stageName === 'Final Interview';
+  const applicationStatus = getApplicationStatus(payload.stageName, payload.resultStatus);
   const overallResult = payload.resultStatus;
 
   const { data: existing } = await supabase
@@ -100,7 +101,7 @@ export async function upsertStageResult(payload: {
   await supabase
     .from('applicants')
     .update({
-      current_stage: payload.stageName,
+      current_stage: isFinalInterview ? 'Completed' : payload.stageName,
       application_status: applicationStatus,
       overall_result: overallResult,
       updated_at: new Date().toISOString(),
@@ -130,6 +131,16 @@ async function getApplicantMeta(referenceNo: string) {
     .eq('reference_no', referenceNo)
     .single();
   return data as { applicant_id?: string; position_applied?: string; experience_level?: string } || {};
+}
+
+function getApplicationStatus(stageName: string, resultStatus: string): string {
+  if (stageName === 'Final Interview') {
+    if (resultStatus === 'Passed') return 'Completed';
+    return resultStatus;
+  }
+
+  if (resultStatus === 'Passed') return 'Ongoing';
+  return resultStatus;
 }
 
 function getStageInstruction(stageName: string, resultStatus: string): string {
