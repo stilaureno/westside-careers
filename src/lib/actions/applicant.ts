@@ -214,10 +214,11 @@ const workflow = getStageWorkflow(applicant.position_applied, applicant.experien
   
   const roadmap: StageRoadmapItem[] = workflow.map((stageName, idx) => {
     const stageData = stageRows?.find((s) => s.stage_name === stageName);
+    const isLastStage = idx === workflow.length - 1;
     return {
       stageName,
       sequence: idx + 1,
-      status: idx < currentIdx ? 'completed' : stageName === currentStage ? 'current' : 'pending',
+      status: allStagesCompleted && isLastStage ? 'completed' : idx < currentIdx ? 'completed' : stageName === currentStage ? 'current' : 'pending',
       result: undefined,
       label: stageData?.current_stage_label,
     };
