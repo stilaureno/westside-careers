@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getApplicantStatus } from '@/lib/actions/applicant';
 import type { StageRoadmapItem } from '@/types';
 import Link from 'next/link';
@@ -11,6 +11,8 @@ export default function StatusPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
+  const initialLoadRef = useRef(true);
 
   useEffect(() => {
     if (!lockedUntil) return;
@@ -27,6 +29,25 @@ export default function StatusPage() {
   }, [lockedUntil]);
 
   const isLocked = !!lockedUntil && lockedUntil > Date.now();
+
+  useEffect(() => {
+    if (initialLoadRef.current) {
+      initialLoadRef.current = false;
+      const savedRef = localStorage.getItem('savedReferenceNo');
+      const savedDob = localStorage.getItem('savedBirthdate');
+      if (savedRef && savedDob) {
+        setForm({ referenceNo: savedRef, birthdate: savedDob });
+        setRememberMe(true);
+      }
+    }
+  }, []);
+
+  function clearSavedInfo() {
+    localStorage.removeItem('savedReferenceNo');
+    localStorage.removeItem('savedBirthdate');
+    setForm({ referenceNo: '', birthdate: '' });
+    setRememberMe(false);
+  }
 
   function formatLockCountdown(until: number) {
     const remainingMs = Math.max(until - Date.now(), 0);
@@ -50,6 +71,10 @@ export default function StatusPage() {
     } else {
       setResult(res.data);
       setLockedUntil(null);
+      if (rememberMe) {
+        localStorage.setItem('savedReferenceNo', form.referenceNo);
+        localStorage.setItem('savedBirthdate', form.birthdate);
+      }
     }
     setLoading(false);
   }
@@ -93,6 +118,7 @@ export default function StatusPage() {
               onChange={(e) => setForm({ ...form, referenceNo: e.target.value })}
               required
               placeholder="APP-YYYYMMDDHHMMSS"
+              autoComplete="off"
               style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
             />
           </div>
@@ -105,9 +131,34 @@ export default function StatusPage() {
               value={form.birthdate}
               onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
               required
+              max={new Date().toISOString().split('T')[0]}
+              autoComplete="bday"
               style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
             />
           </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ width: '18px', height: '18px' }}
+            />
+            <span style={{ fontSize: '14px', color: '#4b5563' }}>Remember this device</span>
+          </label>
+          {rememberMe && (
+            <div style={{ marginBottom: '16px' }}>
+              <button
+                type="button"
+                onClick={clearSavedInfo}
+                style={{
+                  background: 'none', border: 'none', color: '#6b7280', fontSize: '13px',
+                  cursor: 'pointer', textDecoration: 'underline', padding: 0, marginTop: '4px',
+                }}
+              >
+                Clear saved info
+              </button>
+            </div>
+          )}
           <button type="submit" disabled={loading || isLocked} style={{
             width: '100%', padding: '14px', background: '#163a70', color: '#fff',
             border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
