@@ -32,6 +32,12 @@ export async function POST(request: Request) {
       .eq('key', 'SUPER_ADMIN_PASSWORD')
       .single();
 
+    const { data: adminDeptsConfig } = await supabase
+      .from('config')
+      .select('allowed_departments')
+      .eq('key', 'ADMIN_PASSWORD')
+      .single();
+
     const isSuperAdmin = superAdminConfig?.value === password;
     const isAdmin = adminConfig?.value === password;
 
@@ -39,12 +45,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Invalid password' }, { status: 401 });
     }
 
-    const response = NextResponse.json({ success: true, isSuperAdmin });
+    const allowedDepartments = adminDeptsConfig?.allowed_departments || null;
+
+    const response = NextResponse.json({ success: true, isSuperAdmin, allowedDepartments });
 
     response.cookies.set(ADMIN_SESSION_COOKIE, ADMIN_SESSION_VALUE, {
       ...getAdminSessionCookieOptions(request),
       maxAge: 60 * 60 * 24,
     });
+
+    if (allowedDepartments && allowedDepartments.length > 0) {
+      response.cookies.set('allowed_departments', JSON.stringify(allowedDepartments), {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24,
+      });
+    }
 
     if (isSuperAdmin) {
       response.cookies.set(SUPER_ADMIN_SESSION_COOKIE, SUPER_ADMIN_SESSION_VALUE, {

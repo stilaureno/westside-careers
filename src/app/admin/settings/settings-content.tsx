@@ -35,10 +35,25 @@ export default function SettingsContent() {
   const [newDeptName, setNewDeptName] = useState('');
   const [newPosName, setNewPosName] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
+  const [selectedAdminDepts, setSelectedAdminDepts] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    async function loadAdminDepts() {
+      const { data } = await supabase
+        .from('config')
+        .select('allowed_departments')
+        .eq('key', 'ADMIN_PASSWORD')
+        .single();
+      if (data?.allowed_departments) {
+        setSelectedAdminDepts(data.allowed_departments);
+      }
+    }
+    loadAdminDepts();
+  }, [supabase]);
 
   async function loadData() {
     setLoading(true);
@@ -143,6 +158,29 @@ export default function SettingsContent() {
     if (!error) {
       await loadData();
       setMessage({ text: 'Position deleted', type: 'success' });
+    }
+    setSaving(false);
+  }
+
+  function toggleAdminDept(deptName: string) {
+    setSelectedAdminDepts(prev =>
+      prev.includes(deptName)
+        ? prev.filter(d => d !== deptName)
+        : [...prev, deptName]
+    );
+  }
+
+  async function saveAdminDepartments() {
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .update({ allowed_departments: selectedAdminDepts })
+      .eq('key', 'ADMIN_PASSWORD');
+
+    if (!error) {
+      setMessage({ text: 'Admin department access saved', type: 'success' });
+    } else {
+      setMessage({ text: 'Failed to save', type: 'error' });
     }
     setSaving(false);
   }
@@ -306,6 +344,57 @@ export default function SettingsContent() {
                 );
               })}
             </div>
+          </div>
+        </div>
+
+        <div className="card mb-4">
+          <div className="card-header bg-dark text-white">
+            <h5 className="mb-0">Admin Department Access</h5>
+          </div>
+          <div className="card-body">
+            <p className="text-muted small mb-3">
+              Assign which departments each admin password can access. Super admins see all departments by default.
+            </p>
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Standard Admin Departments</label>
+                  <div className="border rounded p-3">
+                    <div className="d-flex flex-wrap gap-2 mb-2">
+                      {departments.filter(d => d.is_active).length === 0 && (
+                        <span className="text-muted">No active departments</span>
+                      )}
+                      {departments.filter(d => d.is_active).map(dept => {
+                        const isChecked = selectedAdminDepts.includes(dept.name);
+                        return (
+                          <div key={dept.id} className="form-check">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              id={`dept-${dept.id}`}
+                              checked={isChecked}
+                              onChange={() => toggleAdminDept(dept.name)}
+                            />
+                            <label className="form-check-label" htmlFor={`dept-${dept.id}`}>
+                              {dept.name}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={saveAdminDepartments}
+                      disabled={saving}
+                    >
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -4,6 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { DashboardSummary, PositionSummary, StageSummary, GenderByPosition } from '@/types';
 
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
 function SummaryCard({ label, value, color = '#1f2937' }: { label: string; value: number; color?: string }) {
   return (
     <div style={{
@@ -62,17 +68,41 @@ export default function DashboardContent() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const supabase = createClient();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [allowedDepartments, setAllowedDepartments] = useState<string[]>([]);
+
+  useEffect(() => {
+    const superAdminCookie = getCookie('super_admin_session');
+    const deptCookie = getCookie('allowed_departments');
+    
+    setIsSuperAdmin(superAdminCookie === 'super');
+    
+    if (deptCookie) {
+      try {
+        setAllowedDepartments(JSON.parse(deptCookie));
+      } catch (e) {
+        setAllowedDepartments([]);
+      }
+    }
+  }, []);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     let query = supabase
       .from('applicants')
-      .select('application_status, current_stage, position_applied, gender, birthdate, experience_level');
+      .select('application_status, current_stage, position_applied, gender, birthdate, experience_level, department');
 
     if (startDate) query = query.gte('created_at', startDate);
     if (endDate) query = query.lte('created_at', endDate + 'T23:59:59');
 
-    const { data: rows } = await query;
+    const { data: allRows } = await query;
+
+    const rows = (!isSuperAdmin && allowedDepartments.length > 0)
+      ? (allRows || []).filter(r => {
+          const dept = r.department || '';
+          return allowedDepartments.includes(dept);
+        })
+      : (allRows || []);
 
     const emptyPos = (): PositionSummary => ({ total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0 });
     const emptyStage = (): StageSummary => ({ taken: 0, pending: 0, passed: 0, failed: 0 });
@@ -95,8 +125,14 @@ export default function DashboardContent() {
 
     // Get stage results
     const { data: stageRows } = await supabase.from('stage_results').select('reference_no, stage_name, result_status');
+    
+    const allowedRefNos = new Set(rows.map((r: any) => r.reference_no));
+    const filteredStageRows = (!isSuperAdmin && allowedDepartments.length > 0)
+      ? (stageRows || []).filter(r => allowedRefNos.has(r.reference_no))
+      : (stageRows || []);
+    
     const stageMap: Record<string, Record<string, string>> = {};
-    stageRows?.forEach((row) => {
+    filteredStageRows?.forEach((row) => {
       if (!stageMap[row.reference_no]) stageMap[row.reference_no] = {};
       stageMap[row.reference_no][row.stage_name] = row.result_status || '';
     });

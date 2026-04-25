@@ -10,10 +10,33 @@ type SortDir = 'asc' | 'desc';
 
 const POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager'];
 
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
 export default function ApplicantsContent() {
   const [applicants, setApplicants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [allowedDepartments, setAllowedDepartments] = useState<string[]>([]);
+
+  useEffect(() => {
+    const superAdminCookie = getCookie('super_admin_session');
+    const deptCookie = getCookie('allowed_departments');
+    
+    setIsSuperAdmin(superAdminCookie === 'super');
+    
+    if (deptCookie) {
+      try {
+        setAllowedDepartments(JSON.parse(deptCookie));
+      } catch (e) {
+        setAllowedDepartments([]);
+      }
+    }
+  }, []);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -91,33 +114,43 @@ export default function ApplicantsContent() {
     });
   }, [filteredByDate, globalSearch]);
 
+  const applicantsForCounts = useMemo(() => {
+    if (!isSuperAdmin && allowedDepartments.length > 0) {
+      return filteredBySearch.filter(app => {
+        const dept = app.department || '';
+        return allowedDepartments.includes(dept);
+      });
+    }
+    return filteredBySearch;
+  }, [filteredBySearch, isSuperAdmin, allowedDepartments]);
+
   const positionCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: filteredBySearch.length };
+    const counts: Record<string, number> = { all: applicantsForCounts.length };
     POSITIONS.forEach(p => { counts[p] = 0; });
-    filteredBySearch.forEach(app => {
+    applicantsForCounts.forEach(app => {
       const p = app.position_applied;
       if (p && counts[p] !== undefined) counts[p]++;
     });
     return counts;
-  }, [filteredBySearch]);
+  }, [applicantsForCounts]);
 
   const stageCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: filteredBySearch.length };
-    filteredBySearch.forEach(app => {
+    const counts: Record<string, number> = { all: applicantsForCounts.length };
+    applicantsForCounts.forEach(app => {
       const s = app.current_stage;
       if (s) counts[s] = (counts[s] || 0) + 1;
     });
     return counts;
-  }, [filteredBySearch]);
+  }, [applicantsForCounts]);
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: filteredBySearch.length };
-    filteredBySearch.forEach(app => {
+    const counts: Record<string, number> = { all: applicantsForCounts.length };
+    applicantsForCounts.forEach(app => {
       const s = app.application_status || 'Pending';
       counts[s] = (counts[s] || 0) + 1;
     });
     return counts;
-  }, [filteredBySearch]);
+  }, [applicantsForCounts]);
 
   const availableStages = useMemo(() => Object.keys(stageCounts).filter(s => s !== 'all').sort(), [stageCounts]);
   const availableStatuses = useMemo(() => Object.keys(statusCounts).filter(s => s !== 'all').sort(), [statusCounts]);
@@ -132,6 +165,13 @@ export default function ApplicantsContent() {
         (!stg || (app.current_stage || '').toLowerCase() === stg) &&
         (!sts || (app.application_status || '').toLowerCase() === sts);
     });
+
+    if (!isSuperAdmin && allowedDepartments.length > 0) {
+      result = result.filter(app => {
+        const dept = app.department || '';
+        return allowedDepartments.includes(dept);
+      });
+    }
 
     result.sort((a, b) => {
       let aVal: any = a[sortField];
