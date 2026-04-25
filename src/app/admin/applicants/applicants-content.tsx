@@ -15,12 +15,14 @@ export default function ApplicantsContent() {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
+  const today = new Date().toISOString().split('T')[0];
+
   const [globalSearch, setGlobalSearch] = useState('');
   const [filterPosition, setFilterPosition] = useState('');
   const [filterStage, setFilterStage] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [filterStartDate, setFilterStartDate] = useState('');
-  const [filterEndDate, setFilterEndDate] = useState('');
+  const [filterStartDate, setFilterStartDate] = useState(today);
+  const [filterEndDate, setFilterEndDate] = useState(today);
 
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -148,9 +150,27 @@ export default function ApplicantsContent() {
     setFilterPosition('');
     setFilterStage('');
     setFilterStatus('');
-    setFilterStartDate('');
-    setFilterEndDate('');
+    setFilterStartDate(today);
+    setFilterEndDate(today);
   }
+
+  const getPositionLabel = (value: string) => {
+    if (!value) return `All (${positionCounts.all})`;
+    const count = positionCounts[value] || 0;
+    return `${value} (${count})`;
+  };
+
+  const getStageLabel = (value: string) => {
+    if (!value) return 'All Stages';
+    const count = stageCounts[value] || 0;
+    return `${value} (${count})`;
+  };
+
+  const getStatusLabel = (value: string) => {
+    if (!value) return 'All Status';
+    const count = statusCounts[value] || 0;
+    return `${value} (${count})`;
+  };
 
   const tableHeaders: { key: SortField; label: string }[] = [
     { key: 'created_at', label: 'Application Date' },
@@ -169,7 +189,7 @@ export default function ApplicantsContent() {
     { key: 'remarks', label: 'Remarks' },
   ];
 
-  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate || filterEndDate;
+  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== today || filterEndDate !== today;
 
   if (loading) {
     return (
@@ -181,21 +201,60 @@ export default function ApplicantsContent() {
 
   return (
     <div className="container-fluid py-3">
-      {/* Search and Date Filters Row */}
+      {/* Filters Row */}
       <div className="card mb-3 shadow-sm">
         <div className="card-body">
           <div className="row g-3 align-items-end">
-            <div className="col-md-4">
+            <div className="col-md-2">
               <label className="form-label small text-muted mb-1">Search</label>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search name, reference, or remarks..."
+                placeholder="Name, reference, remarks..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
               />
             </div>
-            <div className="col-md-3">
+            <div className="col-md-2">
+              <label className="form-label small text-muted mb-1">Position</label>
+              <select
+                className="form-select"
+                value={filterPosition}
+                onChange={(e) => setFilterPosition(e.target.value)}
+              >
+                <option value="">{getPositionLabel('')}</option>
+                {POSITIONS.map(p => (
+                  <option key={p} value={p}>{getPositionLabel(p)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <label className="form-label small text-muted mb-1">Stage</label>
+              <select
+                className="form-select"
+                value={filterStage}
+                onChange={(e) => setFilterStage(e.target.value)}
+              >
+                <option value="">{getStageLabel('')}</option>
+                {availableStages.map(s => (
+                  <option key={s} value={s}>{getStageLabel(s)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <label className="form-label small text-muted mb-1">Status</label>
+              <select
+                className="form-select"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="">{getStatusLabel('')}</option>
+                {availableStatuses.map(s => (
+                  <option key={s} value={s}>{getStatusLabel(s)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
               <label className="form-label small text-muted mb-1">Start Date</label>
               <input
                 type="date"
@@ -204,7 +263,7 @@ export default function ApplicantsContent() {
                 onChange={(e) => setFilterStartDate(e.target.value)}
               />
             </div>
-            <div className="col-md-3">
+            <div className="col-md-2">
               <label className="form-label small text-muted mb-1">End Date</label>
               <input
                 type="date"
@@ -213,80 +272,14 @@ export default function ApplicantsContent() {
                 onChange={(e) => setFilterEndDate(e.target.value)}
               />
             </div>
-            <div className="col-md-2">
-              {hasFilters && (
-                <button className="btn btn-outline-secondary w-100" onClick={clearFilters}>
-                  Clear
-                </button>
-              )}
-            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Position Filter */}
-      <div className="mb-3">
-        <div className="d-flex align-items-center gap-2 flex-wrap">
-          <span className="text-muted small fw-medium me-2">Position:</span>
-          <button
-            className={`btn btn-sm ${!filterPosition ? 'btn-dark' : 'btn-outline-secondary'}`}
-            onClick={() => setFilterPosition('')}
-          >
-            All ({positionCounts.all})
-          </button>
-          {POSITIONS.map(p => (
-            <button
-              key={p}
-              className={`btn btn-sm ${filterPosition.toLowerCase() === p.toLowerCase() ? 'btn-dark' : 'btn-outline-secondary'}`}
-              onClick={() => setFilterPosition(filterPosition === p ? '' : p)}
-            >
-              {p} ({positionCounts[p]})
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Stage Filter */}
-      <div className="mb-3">
-        <div className="d-flex align-items-center gap-2 flex-wrap">
-          <span className="text-muted small fw-medium me-2">Stage:</span>
-          <button
-            className={`btn btn-sm ${!filterStage ? 'btn-dark' : 'btn-outline-secondary'}`}
-            onClick={() => setFilterStage('')}
-          >
-            All
-          </button>
-          {availableStages.map(s => (
-            <button
-              key={s}
-              className={`btn btn-sm ${filterStage === s ? 'btn-dark' : 'btn-outline-secondary'}`}
-              onClick={() => setFilterStage(filterStage === s ? '' : s)}
-            >
-              {s} ({stageCounts[s]})
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Status Filter */}
-      <div className="mb-3">
-        <div className="d-flex align-items-center gap-2 flex-wrap">
-          <span className="text-muted small fw-medium me-2">Status:</span>
-          <button
-            className={`btn btn-sm ${!filterStatus ? 'btn-dark' : 'btn-outline-secondary'}`}
-            onClick={() => setFilterStatus('')}
-          >
-            All
-          </button>
-          {availableStatuses.map(s => (
-            <button
-              key={s}
-              className={`btn btn-sm ${filterStatus === s ? 'btn-dark' : 'btn-outline-secondary'}`}
-              onClick={() => setFilterStatus(filterStatus === s ? '' : s)}
-            >
-              {s} ({statusCounts[s]})
-            </button>
-          ))}
+          {hasFilters && (
+            <div className="mt-2">
+              <button className="btn btn-sm btn-outline-secondary" onClick={clearFilters}>
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
