@@ -233,11 +233,6 @@ const [autoFetched, setAutoFetched] = useState(false);
                 padding: '6px 14px', background: '#f0f4ff', color: '#163a70',
                 borderRadius: '20px', fontSize: '13px', fontWeight: '600',
               }}>{result.applicant.position_applied}</span>
-              <span style={{
-                padding: '6px 14px', background: result.applicant.application_status === 'Passed' ? '#ecfdf3' : '#fef2f2',
-                color: result.applicant.application_status === 'Passed' ? '#166534' : '#991b1b',
-                borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-              }}>{result.applicant.application_status || 'Pending'}</span>
             </div>
 
             {result.mathExam && (
