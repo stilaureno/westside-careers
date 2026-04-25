@@ -227,7 +227,9 @@ const workflow = getStageWorkflow(applicant.position_applied, applicant.experien
   let nextStep: string | null = null;
   
   if (allStagesCompleted) {
-    nextStep = 'You have completed the Hiring Portal process for the Dealer position, including the Initial Screening, Math Exam, and Final Interview stages. Please follow the next instructions provided by the final interviewer.\n\nFor application monitoring purposes, please create your Darwinbox account, complete all required information, and select the position you applied for today.\n\nDarwinbox link = westsideresort.darwinbox.com/ms/candidatev2/main/auth/login';
+    const stagesList = workflow.join(', ');
+    const pos = applicant.position_applied;
+    nextStep = `You have completed the Hiring Portal process for the ${pos} position, including the ${stagesList}. Please follow the next instructions provided by the final interviewer.\n\nFor application monitoring purposes, please create your Darwinbox account, complete all required information, and select the position you applied for today.\n\nDarwinbox link = https://westsideresort.darwinbox.com/ms/candidatev2/main/auth/login`;
   } else if (lastCompletedIdx < workflow.length) {
     nextStep = workflow[lastCompletedIdx];
   }
