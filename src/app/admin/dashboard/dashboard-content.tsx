@@ -124,8 +124,16 @@ export default function DashboardContent() {
     let deptQuery = supabase.from('departments').select('id, name, is_active').order('name');
     const { data: deptRows } = await deptQuery;
     
-    // Filter to allowed departments or all if super admin
-    const deptsToShow = (isSuperAdmin || allowedDepartments.length === 0)
+    // Filter to allowed departments - only show departments if super admin, otherwise strictly filter
+    // Non-super admins without allowed departments should see nothing
+    if (!isSuperAdmin && allowedDepartments.length === 0) {
+      setDeptPositions({});
+      setDashboardData({});
+      setLoading(false);
+      return;
+    }
+    
+    const deptsToShow = isSuperAdmin
       ? (deptRows || []).filter((d: any) => d.is_active)
       : (deptRows || []).filter((d: any) => d.is_active && allowedDepartments.includes(d.name));
     
