@@ -136,7 +136,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
 export async function getApplicantStatus(
   referenceNo: string,
   birthdate: string
-): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[] } | null; error: string | null; lockedUntil?: number | null }> {
+): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[]; mathExam: { score: number | null; passed: boolean | null; takenAt: string | null; status: string | null } | null } | null; error: string | null; lockedUntil?: number | null }> {
   const cookieStore = await cookies();
   const activeLock = await getActiveStatusLock(cookieStore);
   if (activeLock) {
@@ -177,6 +177,24 @@ export async function getApplicantStatus(
     .eq('reference_no', referenceNo)
     .order('stage_sequence', { ascending: true });
 
+  let mathExam = null;
+  if (applicant.position_applied === 'Dealer') {
+    const { data: mathExamRow } = await supabase
+      .from('math_exam_results')
+      .select('score, status, submitted_at, attempt_status')
+      .eq('reference_no', referenceNo)
+      .single();
+
+    if (mathExamRow) {
+      mathExam = {
+        score: mathExamRow.score ?? null,
+        passed: mathExamRow.status === 'Passed',
+        takenAt: mathExamRow.submitted_at,
+        status: mathExamRow.attempt_status,
+      };
+    }
+  }
+
   const workflow = getStageWorkflow(applicant.position_applied, applicant.experience_level);
   const currentStage = applicant.current_stage || 'Initial Screening';
   const currentIdx = workflow.indexOf(currentStage);
@@ -192,7 +210,7 @@ export async function getApplicantStatus(
     };
   });
 
-  return { data: { applicant: applicant as Applicant, roadmap }, error: null, lockedUntil: null };
+  return { data: { applicant: applicant as Applicant, roadmap, mathExam }, error: null, lockedUntil: null };
 }
 
 export async function getApplicantInfo(referenceNo: string): Promise<{ data: any; error: string | null }> {

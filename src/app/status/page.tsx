@@ -5,9 +5,16 @@ import { getApplicantStatus } from '@/lib/actions/applicant';
 import type { StageRoadmapItem } from '@/types';
 import Link from 'next/link';
 
+type MathExamResult = {
+  score: number | null;
+  passed: boolean | null;
+  takenAt: string | null;
+  status: string | null;
+};
+
 export default function StatusPage() {
   const [form, setForm] = useState({ referenceNo: '', birthdate: '' });
-  const [result, setResult] = useState<{ applicant: any; roadmap: StageRoadmapItem[] } | null>(null);
+  const [result, setResult] = useState<{ applicant: any; roadmap: StageRoadmapItem[]; mathExam: MathExamResult | null } | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
@@ -232,6 +239,41 @@ const [autoFetched, setAutoFetched] = useState(false);
                 borderRadius: '20px', fontSize: '13px', fontWeight: '600',
               }}>{result.applicant.application_status || 'Pending'}</span>
             </div>
+
+            {result.mathExam && (
+              <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '14px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <h3 style={{ color: '#163a70', fontSize: '15px', marginBottom: '12px' }}>Math Proficiency Exam</h3>
+                {result.mathExam.status && result.mathExam.status !== 'IN_PROGRESS' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '24px', fontWeight: '800', color: result.mathExam.passed ? '#166534' : '#991b1b', margin: 0 }}>
+                        {result.mathExam.score ?? 0}
+                        <span style={{ fontSize: '14px', color: '#9ca3af' }}>/10</span>
+                      </p>
+                      <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
+                        {result.mathExam.passed ? 'PASSED' : 'FAILED'}
+                        {result.mathExam.takenAt && (
+                          <span style={{ color: '#9ca3af' }}> · {new Date(result.mathExam.takenAt).toLocaleDateString()}</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>Not taken yet</p>
+                    <Link
+                      href="/exam"
+                      style={{
+                        display: 'inline-block', padding: '10px 16px', background: '#163a70', color: '#fff',
+                        borderRadius: '10px', fontSize: '14px', fontWeight: '600', textDecoration: 'none',
+                      }}
+                    >
+                      Take Math Exam
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
 
             <h3 style={{ color: '#163a70', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
