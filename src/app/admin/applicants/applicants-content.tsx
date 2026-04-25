@@ -81,9 +81,7 @@ export default function ApplicantsContent() {
     const counts: Record<string, number> = { all: applicants.length };
     applicants.forEach(app => {
       const s = app.current_stage;
-      if (s) {
-        counts[s] = (counts[s] || 0) + 1;
-      }
+      if (s) counts[s] = (counts[s] || 0) + 1;
     });
     return counts;
   }, [applicants]);
@@ -145,8 +143,13 @@ export default function ApplicantsContent() {
     }
   }
 
-  function formatCount(count: number) {
-    return count > 99 ? '99+' : count;
+  function clearFilters() {
+    setGlobalSearch('');
+    setFilterPosition('');
+    setFilterStage('');
+    setFilterStatus('');
+    setFilterStartDate('');
+    setFilterEndDate('');
   }
 
   const tableHeaders: { key: SortField; label: string }[] = [
@@ -166,219 +169,218 @@ export default function ApplicantsContent() {
     { key: 'remarks', label: 'Remarks' },
   ];
 
+  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate || filterEndDate;
+
   if (loading) {
-    return <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>Loading...</div>;
+    return (
+      <div className="container-fluid py-4">
+        <div className="text-center text-secondary">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ width: '100%', minWidth: '100%' }}>
-      <div style={{
-        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
-      }}>
-        <input
-          value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)}
-          placeholder="Search Name / Reference / Remarks..."
-          style={{ flex: '1 1 200px', padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-        />
-        <input
-          type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)}
-          style={{ padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-        />
-        <input
-          type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)}
-          style={{ padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-        />
+    <div className="container-fluid py-3">
+      {/* Search and Date Filters Row */}
+      <div className="card mb-3 shadow-sm">
+        <div className="card-body">
+          <div className="row g-3 align-items-end">
+            <div className="col-md-4">
+              <label className="form-label small text-muted mb-1">Search</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search name, reference, or remarks..."
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+              />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label small text-muted mb-1">Start Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={filterStartDate}
+                onChange={(e) => setFilterStartDate(e.target.value)}
+              />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label small text-muted mb-1">End Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+              />
+            </div>
+            <div className="col-md-2">
+              {hasFilters && (
+                <button className="btn btn-outline-secondary w-100" onClick={clearFilters}>
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div style={{
-        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Position Filter */}
+      <div className="mb-3">
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          <span className="text-muted small fw-medium me-2">Position:</span>
           <button
+            className={`btn btn-sm ${!filterPosition ? 'btn-dark' : 'btn-outline-secondary'}`}
             onClick={() => setFilterPosition('')}
-            style={{
-              padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-              border: '1px solid', borderColor: filterPosition === '' ? '#8b1e2d' : '#e5e7eb',
-              background: filterPosition === '' ? '#8b1e2d' : '#fff', color: filterPosition === '' ? '#fff' : '#6b7280',
-              cursor: 'pointer',
-            }}
           >
             All ({positionCounts.all})
           </button>
           {POSITIONS.map(p => (
             <button
               key={p}
-              onClick={() => setFilterPosition(filterPosition === p.toLowerCase() ? '' : p)}
-              style={{
-                padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-                border: '1px solid', borderColor: filterPosition.toLowerCase() === p.toLowerCase() ? '#8b1e2d' : '#e5e7eb',
-                background: filterPosition.toLowerCase() === p.toLowerCase() ? '#8b1e2d' : '#fff',
-                color: filterPosition.toLowerCase() === p.toLowerCase() ? '#fff' : '#6b7280',
-                cursor: 'pointer',
-              }}
+              className={`btn btn-sm ${filterPosition.toLowerCase() === p.toLowerCase() ? 'btn-dark' : 'btn-outline-secondary'}`}
+              onClick={() => setFilterPosition(filterPosition === p ? '' : p)}
             >
-              {p} ({formatCount(positionCounts[p])})
+              {p} ({positionCounts[p]})
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{
-        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Stage Filter */}
+      <div className="mb-3">
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          <span className="text-muted small fw-medium me-2">Stage:</span>
           <button
+            className={`btn btn-sm ${!filterStage ? 'btn-dark' : 'btn-outline-secondary'}`}
             onClick={() => setFilterStage('')}
-            style={{
-              padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-              border: '1px solid', borderColor: filterStage === '' ? '#8b1e2d' : '#e5e7eb',
-              background: filterStage === '' ? '#8b1e2d' : '#fff', color: filterStage === '' ? '#fff' : '#6b7280',
-              cursor: 'pointer',
-            }}
           >
-            All Stages
+            All
           </button>
           {availableStages.map(s => (
             <button
               key={s}
+              className={`btn btn-sm ${filterStage === s ? 'btn-dark' : 'btn-outline-secondary'}`}
               onClick={() => setFilterStage(filterStage === s ? '' : s)}
-              style={{
-                padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-                border: '1px solid', borderColor: filterStage === s ? '#8b1e2d' : '#e5e7eb',
-                background: filterStage === s ? '#8b1e2d' : '#fff',
-                color: filterStage === s ? '#fff' : '#6b7280',
-                cursor: 'pointer',
-              }}
             >
-              {s} ({formatCount(stageCounts[s])})
+              {s} ({stageCounts[s]})
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{
-        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Status Filter */}
+      <div className="mb-3">
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          <span className="text-muted small fw-medium me-2">Status:</span>
           <button
+            className={`btn btn-sm ${!filterStatus ? 'btn-dark' : 'btn-outline-secondary'}`}
             onClick={() => setFilterStatus('')}
-            style={{
-              padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-              border: '1px solid', borderColor: filterStatus === '' ? '#8b1e2d' : '#e5e7eb',
-              background: filterStatus === '' ? '#8b1e2d' : '#fff', color: filterStatus === '' ? '#fff' : '#6b7280',
-              cursor: 'pointer',
-            }}
           >
-            All Status
+            All
           </button>
           {availableStatuses.map(s => (
             <button
               key={s}
+              className={`btn btn-sm ${filterStatus === s ? 'btn-dark' : 'btn-outline-secondary'}`}
               onClick={() => setFilterStatus(filterStatus === s ? '' : s)}
-              style={{
-                padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-                border: '1px solid', borderColor: filterStatus === s ? '#8b1e2d' : '#e5e7eb',
-                background: filterStatus === s ? '#8b1e2d' : '#fff',
-                color: filterStatus === s ? '#fff' : '#6b7280',
-                cursor: 'pointer',
-              }}
             >
-              {s} ({formatCount(statusCounts[s])})
+              {s} ({statusCounts[s]})
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '16px', overflow: 'hidden' }}>
-        <div style={{ maxHeight: '560px', overflow: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '1400px' }}>
-            <thead>
-              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                {tableHeaders.map(({ key, label }) => {
-                  const isSortable = key !== 'remarks';
-                  const isActive = sortField === key;
-                  return (
-                    <th
-                      key={key}
-                      onClick={isSortable ? () => handleSort(key as SortField) : undefined}
-                      style={{
-                        padding: '10px 12px', textAlign: 'left', color: '#6b7280', fontWeight: '600',
-                        whiteSpace: 'nowrap', cursor: isSortable ? 'pointer' : 'default',
-                        userSelect: 'none',
-                      }}
-                    >
-                      {label}
-                      {isSortable && (
-                        <span style={{ marginLeft: '4px', color: isActive ? '#8b1e2d' : '#9ca3af' }}>
-                          {isActive ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
-                        </span>
-                      )}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredApplicants.slice(0, 100).map((app) => (
-                <tr key={app.reference_no} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>{app.created_at?.slice(0, 10) || '-'}</td>
-                  <td style={{ padding: '8px 12px' }}>
-                    <Link href={`/admin/applicants/${app.reference_no}`} style={{ color: '#8b1e2d', fontWeight: '700', textDecoration: 'none', cursor: 'pointer' }}>
-                      {app.reference_no}
-                    </Link>
-                  </td>
-                  <td style={{ padding: '8px 12px', color: '#1f2937' }}>{app.displayName}</td>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>{app.position_applied}</td>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>{app.experience_level || '-'}</td>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>{app.current_stage || '-'}</td>
-                  <td style={{ padding: '8px 12px' }}>
-                    <span style={{
-                      padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600',
-                      background: app.application_status === 'Passed' || app.application_status === 'Completed' ? '#ecfdf5' :
-                        app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? '#fef2f2' :
-                          app.application_status === 'Reprofile' ? '#f3e8ff' : '#f0f4ff',
-                      color: app.application_status === 'Passed' ? '#166534' :
-                        app.application_status === 'Failed' ? '#991b1b' :
-                          app.application_status === 'Reprofile' ? '#7c3aed' : '#163a70',
-                    }}>{app.application_status || 'Pending'}</span>
-                  </td>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>{app.height_cm || '-'}</td>
-                  <td style={{ padding: '8px 12px', color: app.initialScreeningResult === 'Passed' ? '#166534' : app.initialScreeningResult === 'Failed' ? '#991b1b' : '#6b7280' }}>
-                    {app.initialScreeningResult}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: app.mathExamResult === 'Passed' ? '#166534' : app.mathExamResult === 'Failed' ? '#991b1b' : '#6b7280' }}>
-                    {app.mathExamResult}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: app.tableTestResult === 'Passed' ? '#166534' : app.tableTestResult === 'Failed' ? '#991b1b' : '#6b7280' }}>
-                    {app.tableTestResult}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: '#6b7280' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
-                  <td style={{ padding: '8px 12px', color: 
-                    app.finalInterviewResult === 'Passed' ? '#166534' :
-                    app.finalInterviewResult === 'Reprofile' ? '#7c3aed' :
-                    app.finalInterviewResult === 'For Pooling' ? '#0891b2' :
-                    app.finalInterviewResult === 'Not Recommended' ? '#991b1b' : '#6b7280' }}>
-                    {app.finalInterviewResult}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: '#6b7280', maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                    {renderFormattedMessage(app.remarks)}
-                  </td>
-                </tr>
-              ))}
-              {filteredApplicants.length === 0 && (
+      {/* Results Table */}
+      <div className="card shadow-sm">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-hover mb-0">
+              <thead className="table-light">
                 <tr>
-                  <td colSpan={14} style={{ padding: '40px', textAlign: 'center', color: '#9ca3af' }}>
-                    No matching applicant records.
-                  </td>
+                  {tableHeaders.map(({ key, label }) => {
+                    const isSortable = key !== 'remarks';
+                    const isActive = sortField === key;
+                    return (
+                      <th
+                        key={key}
+                        className={`${isSortable ? 'cursor-pointer' : ''} text-nowrap`}
+                        onClick={isSortable ? () => handleSort(key as SortField) : undefined}
+                        style={isSortable ? { cursor: 'pointer' } : {}}
+                      >
+                        {label}
+                        {isSortable && (
+                          <span className="ms-1" style={{ color: isActive ? '#8b1e2d' : '#ccc' }}>
+                            {isActive ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                          </span>
+                        )}
+                      </th>
+                    );
+                  })}
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredApplicants.slice(0, 100).map((app) => (
+                  <tr key={app.reference_no}>
+                    <td className="text-muted">{app.created_at?.slice(0, 10) || '-'}</td>
+                    <td>
+                      <Link href={`/admin/applicants/${app.reference_no}`} className="text-decoration-none fw-bold" style={{ color: '#8b1e2d' }}>
+                        {app.reference_no}
+                      </Link>
+                    </td>
+                    <td>{app.displayName}</td>
+                    <td className="text-muted">{app.position_applied}</td>
+                    <td className="text-muted">{app.experience_level || '-'}</td>
+                    <td className="text-muted">{app.current_stage || '-'}</td>
+                    <td>
+                      <span className={`badge rounded-pill ${
+                        app.application_status === 'Passed' || app.application_status === 'Completed' ? 'bg-success' :
+                        app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? 'bg-danger' :
+                        app.application_status === 'Reprofile' ? 'bg-warning text-dark' : 'bg-primary'
+                      }`}>
+                        {app.application_status || 'Pending'}
+                      </span>
+                    </td>
+                    <td className="text-muted">{app.height_cm || '-'}</td>
+                    <td className={app.initialScreeningResult === 'Passed' ? 'text-success' : app.initialScreeningResult === 'Failed' ? 'text-danger' : 'text-muted'}>
+                      {app.initialScreeningResult}
+                    </td>
+                    <td className={app.mathExamResult === 'Passed' ? 'text-success' : app.mathExamResult === 'Failed' ? 'text-danger' : 'text-muted'}>
+                      {app.mathExamResult}
+                    </td>
+                    <td className={app.tableTestResult === 'Passed' ? 'text-success' : app.tableTestResult === 'Failed' ? 'text-danger' : 'text-muted'}>
+                      {app.tableTestResult}
+                    </td>
+                    <td className="text-muted">{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
+                    <td className={
+                      app.finalInterviewResult === 'Passed' ? 'text-success' :
+                      app.finalInterviewResult === 'Reprofile' ? 'text-warning' :
+                      app.finalInterviewResult === 'For Pooling' ? 'text-info' :
+                      app.finalInterviewResult === 'Not Recommended' ? 'text-danger' : 'text-muted'
+                    }>
+                      {app.finalInterviewResult}
+                    </td>
+                    <td className="text-muted" style={{ maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                      {renderFormattedMessage(app.remarks)}
+                    </td>
+                  </tr>
+                ))}
+                {filteredApplicants.length === 0 && (
+                  <tr>
+                    <td colSpan={14} className="text-center text-muted py-4">
+                      No matching applicant records.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '12px' }}>
-        Showing {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}. Use filters to narrow results.
-      </p>
+
+      <div className="mt-3 text-muted small">
+        Showing {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}
+        {hasFilters && <span> (filtered)</span>}
+      </div>
     </div>
   );
 }
