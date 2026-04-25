@@ -8,7 +8,6 @@ interface VisibleField {
   field_key: string;
   field_label: string;
   is_visible: boolean;
-  display_order: number;
 }
 
 interface Department {
@@ -63,6 +62,32 @@ export default function SettingsContent() {
 
     if (!error) {
       setFields(fields.map(f => f.id === field.id ? { ...f, is_visible: !f.is_visible } : f));
+    }
+    setSaving(false);
+  }
+
+  async function toggleDepartment(dept: Department) {
+    setSaving(true);
+    const { error } = await supabase
+      .from('departments')
+      .update({ is_active: !dept.is_active })
+      .eq('id', dept.id);
+
+    if (!error) {
+      setDepartments(departments.map(d => d.id === dept.id ? { ...d, is_active: !d.is_active } : d));
+    }
+    setSaving(false);
+  }
+
+  async function togglePosition(pos: Position) {
+    setSaving(true);
+    const { error } = await supabase
+      .from('positions')
+      .update({ is_active: !pos.is_active })
+      .eq('id', pos.id);
+
+    if (!error) {
+      setPositions(positions.map(p => p.id === pos.id ? { ...p, is_active: !p.is_active } : p));
     }
     setSaving(false);
   }
@@ -191,7 +216,18 @@ export default function SettingsContent() {
               <ul className="list-group list-group-flush">
                 {departments.map(dept => (
                   <li key={dept.id} className="list-group-item d-flex justify-content-between align-items-center py-2">
-                    <span>{dept.name}</span>
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={dept.is_active}
+                          disabled={saving}
+                          onChange={() => toggleDepartment(dept)}
+                        />
+                      </div>
+                      <span className={dept.is_active ? '' : 'text-muted text-decoration-line-through'}>{dept.name}</span>
+                    </div>
                     <button
                       className="btn btn-sm btn-outline-danger"
                       onClick={() => deleteDepartment(dept.id)}
@@ -207,7 +243,7 @@ export default function SettingsContent() {
         </div>
 
         {/* Positions */}
-        <div className="col-md-6">
+        <div className="col-md-12">
           <div className="card">
             <div className="card-header bg-white">
               <h6 className="mb-0">Positions</h6>
@@ -243,10 +279,20 @@ export default function SettingsContent() {
                     <h6 className="text-muted small">{dept.name}</h6>
                     <div className="d-flex flex-wrap gap-2">
                       {deptPositions.map(pos => (
-                        <span key={pos.id} className="badge bg-light text-dark d-flex align-items-center gap-1">
-                          {pos.name}
+                        <span key={pos.id} className={`badge d-flex align-items-center gap-1 ${pos.is_active ? 'bg-light text-dark' : 'bg-secondary'}`}>
+                          <span className={pos.is_active ? '' : 'text-decoration-line-through'}>{pos.name}</span>
+                          <div className="form-check form-switch d-inline-block m-0 ms-1">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              checked={pos.is_active}
+                              disabled={saving}
+                              onChange={() => togglePosition(pos)}
+                              style={{ marginBottom: 0 }}
+                            />
+                          </div>
                           <button
-                            className="btn btn-sm p-0 lh-0"
+                            className="btn btn-sm p-0 lh-0 ms-1"
                             style={{ lineHeight: 1 }}
                             onClick={() => deletePosition(pos.id)}
                             disabled={saving}

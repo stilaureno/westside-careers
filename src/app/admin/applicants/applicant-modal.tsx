@@ -37,6 +37,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose }: Applica
     if (isOpen && referenceNo) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, referenceNo]);
 
   async function loadData() {

@@ -1,12 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { submitApplication } from '@/lib/actions/applicant';
-import { POSITIONS, EXPERIENCE_LEVELS, ALLOWED_GAMES, DEPARTMENTS, TABLE_GAMES_POSITIONS, SLOTS_POSITIONS } from '@/types';
+import { EXPERIENCE_LEVELS, ALLOWED_GAMES } from '@/types';
 import Link from 'next/link';
 import styles from './apply.module.css';
 
+interface Department {
+  id: string;
+  name: string;
+}
+
+interface Position {
+  id: string;
+  department_id: string;
+  name: string;
+}
+
 export default function ApplyPage() {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
   const [step, setStep] = useState<'form' | 'success'>('form');
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [referenceNo, setReferenceNo] = useState('');
@@ -16,20 +30,35 @@ export default function ApplyPage() {
     lastName: '', firstName: '', middleName: '',
     birthdate: '', gender: '', contactNumber: '',
     emailAddress: '', heightCm: '', weightKg: '',
-    department: '', positionApplied: '', experienceLevel: '',
+    departmentId: '', positionApplied: '', experienceLevel: '',
     currentlyEmployed: 'No', currentCompanyName: '',
     currentPosition: '', previousCompanyName: '',
     preferredDepartment: '',
   });
   const [games, setGames] = useState<string[]>([]);
 
-  const isDealer = form.positionApplied === 'Dealer';
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/settings/departments');
+        const data = await res.json();
+        setDepartments(data.departments || []);
+        setPositions(data.positions || []);
+      } catch (err) {
+        console.error('Failed to fetch departments:', err);
+      } finally {
+        setLoadingData(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const selectedDept = departments.find(d => d.id === form.departmentId);
+  const positionOptions = positions.filter(p => p.department_id === form.departmentId);
+
+  const isDealer = selectedDept?.name === 'Dealer';
   const isExperienced = form.experienceLevel === 'Experienced Dealer';
   const isEmployed = form.currentlyEmployed === 'Yes';
-  const isTableGames = form.department === 'Table Games';
-  const isSlots = form.department === 'Slots';
-
-  const positionOptions = isTableGames ? TABLE_GAMES_POSITIONS : isSlots ? SLOTS_POSITIONS : [];
 
   function toggleGame(code: string) {
     setGames((prev) =>
@@ -42,7 +71,7 @@ export default function ApplyPage() {
     setLoading(true);
     setMessage(null);
 
-    if (!form.lastName || !form.firstName || !form.birthdate || !form.gender || !form.contactNumber || !form.department) {
+    if (!form.lastName || !form.firstName || !form.birthdate || !form.gender || !form.contactNumber || !form.departmentId) {
       setMessage({ text: 'Please fill in all required fields.', type: 'error' });
       setLoading(false);
       return;
@@ -76,7 +105,7 @@ export default function ApplyPage() {
       emailAddress: form.emailAddress,
       heightCm: parseFloat(form.heightCm) || undefined,
       weightKg: parseFloat(form.weightKg) || undefined,
-      department: form.department,
+      department: selectedDept?.name || '',
       positionApplied: form.positionApplied,
       experienceLevel: form.experienceLevel,
       games: isExperienced ? games : undefined,
@@ -95,6 +124,18 @@ export default function ApplyPage() {
 
     setMessage({ text: result.error || 'Submission failed. Please try again.', type: 'error' });
     setLoading(false);
+  }
+
+  if (loadingData) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.card}>
+            <p className={styles.message}>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (step === 'success') {
@@ -252,12 +293,12 @@ export default function ApplyPage() {
               <Field label="Department" required>
                 <select
                   className={styles.control}
-                  value={form.department}
-                  onChange={(e) => setForm({ ...form, department: e.target.value, positionApplied: '' })}
+                  value={form.departmentId}
+                  onChange={(e) => setForm({ ...form, departmentId: e.target.value, positionApplied: '', experienceLevel: '' })}
                   required
                 >
                   <option value="">Select Department</option>
-                  {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                  {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
               </Field>
               <Field label="Position Applied" required>
@@ -266,10 +307,10 @@ export default function ApplyPage() {
                   value={form.positionApplied}
                   onChange={(e) => setForm({ ...form, positionApplied: e.target.value, experienceLevel: '' })}
                   required
-                  disabled={!form.department}
+                  disabled={!form.departmentId}
                 >
                   <option value="">Select Position</option>
-                  {positionOptions.map((p) => <option key={p} value={p}>{p}</option>)}
+                  {positionOptions.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
                 </select>
               </Field>
             </div>
