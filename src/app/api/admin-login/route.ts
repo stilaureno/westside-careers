@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     if (allowedDepartments && allowedDepartments.length > 0) {
       response.cookies.set('allowed_departments', JSON.stringify(allowedDepartments), {
         path: '/',
-        httpOnly: true,
+        httpOnly: false,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24,
       });
