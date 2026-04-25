@@ -8,6 +8,8 @@ import Link from 'next/link';
 type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
 
+const POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager'];
+
 export default function ApplicantsContent() {
   const [applicants, setApplicants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,21 +67,38 @@ export default function ApplicantsContent() {
     load();
   }, [supabase]);
 
-  const availableStages = useMemo(() => {
-    const stages = new Set<string>();
+  const positionCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: applicants.length };
+    POSITIONS.forEach(p => { counts[p] = 0; });
     applicants.forEach(app => {
-      if (app.current_stage) stages.add(app.current_stage);
+      const p = app.position_applied;
+      if (p && counts[p] !== undefined) counts[p]++;
     });
-    return Array.from(stages).sort();
+    return counts;
   }, [applicants]);
 
-  const availableStatuses = useMemo(() => {
-    const statuses = new Set<string>();
+  const stageCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: applicants.length };
     applicants.forEach(app => {
-      if (app.application_status) statuses.add(app.application_status);
+      const s = app.current_stage;
+      if (s) {
+        counts[s] = (counts[s] || 0) + 1;
+      }
     });
-    return Array.from(statuses).sort();
+    return counts;
   }, [applicants]);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: applicants.length };
+    applicants.forEach(app => {
+      const s = app.application_status || 'Pending';
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    return counts;
+  }, [applicants]);
+
+  const availableStages = useMemo(() => Object.keys(stageCounts).filter(s => s !== 'all').sort(), [stageCounts]);
+  const availableStatuses = useMemo(() => Object.keys(statusCounts).filter(s => s !== 'all').sort(), [statusCounts]);
 
   const filteredApplicants = useMemo(() => {
     let result = applicants.filter((app) => {
@@ -105,12 +124,10 @@ export default function ApplicantsContent() {
     result.sort((a, b) => {
       let aVal: any = a[sortField];
       let bVal: any = b[sortField];
-
       if (sortField === 'created_at') {
         aVal = aVal || '';
         bVal = bVal || '';
       }
-
       if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
       return 0;
@@ -126,6 +143,10 @@ export default function ApplicantsContent() {
       setSortField(field);
       setSortDir('asc');
     }
+  }
+
+  function formatCount(count: number) {
+    return count > 99 ? '99+' : count;
   }
 
   const tableHeaders: { key: SortField; label: string }[] = [
@@ -151,71 +172,120 @@ export default function ApplicantsContent() {
 
   return (
     <div style={{ width: '100%', minWidth: '100%' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '20px' }}>Applicant Summary</h1>
+      <div style={{
+        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
+      }}>
+        <input
+          value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)}
+          placeholder="Search Name / Reference / Remarks..."
+          style={{ flex: '1 1 200px', padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+        />
+        <input
+          type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)}
+          style={{ padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+        />
+        <input
+          type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)}
+          style={{ padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+        />
+      </div>
 
       <div style={{
-        background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginBottom: '20px',
+        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Search Name / Reference / Remarks</label>
-            <input
-              value={globalSearch} onChange={(e) => setGlobalSearch(e.target.value)}
-              placeholder="Search..."
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Filter by Position</label>
-            <select
-              value={filterPosition} onChange={(e) => setFilterPosition(e.target.value)}
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setFilterPosition('')}
+            style={{
+              padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
+              border: '1px solid', borderColor: filterPosition === '' ? '#8b1e2d' : '#e5e7eb',
+              background: filterPosition === '' ? '#8b1e2d' : '#fff', color: filterPosition === '' ? '#fff' : '#6b7280',
+              cursor: 'pointer',
+            }}
+          >
+            All ({positionCounts.all})
+          </button>
+          {POSITIONS.map(p => (
+            <button
+              key={p}
+              onClick={() => setFilterPosition(filterPosition === p.toLowerCase() ? '' : p)}
+              style={{
+                padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
+                border: '1px solid', borderColor: filterPosition.toLowerCase() === p.toLowerCase() ? '#8b1e2d' : '#e5e7eb',
+                background: filterPosition.toLowerCase() === p.toLowerCase() ? '#8b1e2d' : '#fff',
+                color: filterPosition.toLowerCase() === p.toLowerCase() ? '#fff' : '#6b7280',
+                cursor: 'pointer',
+              }}
             >
-              <option value="">All</option>
-              <option value="Dealer">Dealer</option>
-              <option value="Pit Supervisor">Pit Supervisor</option>
-              <option value="Pit Manager">Pit Manager</option>
-              <option value="Operations Manager">Operations Manager</option>
-            </select>
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Filter by Stage</label>
-            <select
-              value={filterStage} onChange={(e) => setFilterStage(e.target.value)}
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+              {p} ({formatCount(positionCounts[p])})
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{
+        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
+      }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setFilterStage('')}
+            style={{
+              padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
+              border: '1px solid', borderColor: filterStage === '' ? '#8b1e2d' : '#e5e7eb',
+              background: filterStage === '' ? '#8b1e2d' : '#fff', color: filterStage === '' ? '#fff' : '#6b7280',
+              cursor: 'pointer',
+            }}
+          >
+            All Stages
+          </button>
+          {availableStages.map(s => (
+            <button
+              key={s}
+              onClick={() => setFilterStage(filterStage === s ? '' : s)}
+              style={{
+                padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
+                border: '1px solid', borderColor: filterStage === s ? '#8b1e2d' : '#e5e7eb',
+                background: filterStage === s ? '#8b1e2d' : '#fff',
+                color: filterStage === s ? '#fff' : '#6b7280',
+                cursor: 'pointer',
+              }}
             >
-              <option value="">All</option>
-              {availableStages.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Filter by Status</label>
-            <select
-              value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+              {s} ({formatCount(stageCounts[s])})
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{
+        display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap',
+      }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setFilterStatus('')}
+            style={{
+              padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
+              border: '1px solid', borderColor: filterStatus === '' ? '#8b1e2d' : '#e5e7eb',
+              background: filterStatus === '' ? '#8b1e2d' : '#fff', color: filterStatus === '' ? '#fff' : '#6b7280',
+              cursor: 'pointer',
+            }}
+          >
+            All Status
+          </button>
+          {availableStatuses.map(s => (
+            <button
+              key={s}
+              onClick={() => setFilterStatus(filterStatus === s ? '' : s)}
+              style={{
+                padding: '8px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
+                border: '1px solid', borderColor: filterStatus === s ? '#8b1e2d' : '#e5e7eb',
+                background: filterStatus === s ? '#8b1e2d' : '#fff',
+                color: filterStatus === s ? '#fff' : '#6b7280',
+                cursor: 'pointer',
+              }}
             >
-              <option value="">All</option>
-              {availableStatuses.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Start Date</label>
-            <input
-              type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)}
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>End Date</label>
-            <input
-              type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)}
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
-          </div>
+              {s} ({formatCount(statusCounts[s])})
+            </button>
+          ))}
         </div>
       </div>
 
@@ -307,7 +377,7 @@ export default function ApplicantsContent() {
         </div>
       </div>
       <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '12px' }}>
-        Showing up to 100 recent applicants. Use filters to narrow results.
+        Showing {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}. Use filters to narrow results.
       </p>
     </div>
   );
