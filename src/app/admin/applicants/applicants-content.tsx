@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
+import ApplicantModal from './applicant-modal';
 
 type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
@@ -26,6 +26,8 @@ export default function ApplicantsContent() {
 
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [selectedRefNo, setSelectedRefNo] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -162,6 +164,16 @@ export default function ApplicantsContent() {
     setFilterStatus('');
     setFilterStartDate(today);
     setFilterEndDate(today);
+  }
+
+  function openModal(refNo: string) {
+    setSelectedRefNo(refNo);
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setModalOpen(false);
+    setSelectedRefNo('');
   }
 
   const getPositionLabel = (value: string) => {
@@ -326,9 +338,9 @@ export default function ApplicantsContent() {
 <tr key={app.reference_no}>
                     <td className="text-muted" style={{ fontSize: '12px' }}>{app.created_at?.slice(0, 10) || '-'}</td>
                     <td style={{ fontSize: '12px' }}>
-                      <Link href={`/admin/applicants/${app.reference_no}`} className="text-decoration-none fw-bold" style={{ color: '#8b1e2d' }}>
+                      <button className="btn btn-link p-0 fw-bold text-decoration-none" style={{ color: '#8b1e2d' }} onClick={() => openModal(app.reference_no)}>
                         {app.reference_no}
-                      </Link>
+                      </button>
                     </td>
                     <td style={{ fontSize: '12px' }}>{app.displayName}</td>
                     <td className="text-muted" style={{ fontSize: '12px' }}>{app.position_applied}</td>
@@ -384,6 +396,8 @@ export default function ApplicantsContent() {
         Showing {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}
         {hasFilters && <span> (filtered)</span>}
       </div>
+
+      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} />
     </div>
   );
 }
