@@ -210,7 +210,7 @@ export default function ApplicantsContent() {
   }
 
   return (
-    <div className="container-fluid py-3">
+    <div className="container-fluid py-3" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif' }}>
       {/* Filters Row */}
       <div className="card mb-3 shadow-sm">
         <div className="card-body">
@@ -219,7 +219,7 @@ export default function ApplicantsContent() {
               <label className="form-label small text-muted mb-1">Search</label>
               <input
                 type="text"
-                className="form-control"
+                className="form-control form-control-sm"
                 placeholder="Name, reference, remarks..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
@@ -228,7 +228,7 @@ export default function ApplicantsContent() {
             <div className="col-md-2">
               <label className="form-label small text-muted mb-1">Position</label>
               <select
-                className="form-select"
+                className="form-select form-select-sm"
                 value={filterPosition}
                 onChange={(e) => setFilterPosition(e.target.value)}
               >
@@ -241,7 +241,7 @@ export default function ApplicantsContent() {
             <div className="col-md-2">
               <label className="form-label small text-muted mb-1">Stage</label>
               <select
-                className="form-select"
+                className="form-select form-select-sm"
                 value={filterStage}
                 onChange={(e) => setFilterStage(e.target.value)}
               >
@@ -254,7 +254,7 @@ export default function ApplicantsContent() {
             <div className="col-md-2">
               <label className="form-label small text-muted mb-1">Status</label>
               <select
-                className="form-select"
+                className="form-select form-select-sm"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
@@ -268,7 +268,7 @@ export default function ApplicantsContent() {
               <label className="form-label small text-muted mb-1">Start Date</label>
               <input
                 type="date"
-                className="form-control"
+                className="form-control form-control-sm"
                 value={filterStartDate}
                 onChange={(e) => setFilterStartDate(e.target.value)}
               />
@@ -277,7 +277,7 @@ export default function ApplicantsContent() {
               <label className="form-label small text-muted mb-1">End Date</label>
               <input
                 type="date"
-                className="form-control"
+                className="form-control form-control-sm"
                 value={filterEndDate}
                 onChange={(e) => setFilterEndDate(e.target.value)}
               />
@@ -297,7 +297,7 @@ export default function ApplicantsContent() {
       <div className="card shadow-sm">
         <div className="card-body p-0">
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
+            <table className="table table-hover table-sm mb-0">
               <thead className="table-light">
                 <tr>
                   {tableHeaders.map(({ key, label }) => {
@@ -308,7 +308,7 @@ export default function ApplicantsContent() {
                         key={key}
                         className={`${isSortable ? 'cursor-pointer' : ''} text-nowrap`}
                         onClick={isSortable ? () => handleSort(key as SortField) : undefined}
-                        style={isSortable ? { cursor: 'pointer' } : {}}
+                        style={isSortable ? { cursor: 'pointer', fontSize: '13px', fontWeight: '600' } : { fontSize: '13px', fontWeight: '600' }}
                       >
                         {label}
                         {isSortable && (
@@ -324,17 +324,17 @@ export default function ApplicantsContent() {
               <tbody>
                 {filteredApplicants.slice(0, 100).map((app) => (
                   <tr key={app.reference_no}>
-                    <td className="text-muted">{app.created_at?.slice(0, 10) || '-'}</td>
-                    <td>
+                    <td className="text-muted" style={{ fontSize: '13px' }}>{app.created_at?.slice(0, 10) || '-'}</td>
+                    <td style={{ fontSize: '13px' }}>
                       <Link href={`/admin/applicants/${app.reference_no}`} className="text-decoration-none fw-bold" style={{ color: '#8b1e2d' }}>
                         {app.reference_no}
                       </Link>
                     </td>
-                    <td>{app.displayName}</td>
-                    <td className="text-muted">{app.position_applied}</td>
-                    <td className="text-muted">{app.experience_level || '-'}</td>
-                    <td className="text-muted">{app.current_stage || '-'}</td>
-                    <td>
+                    <td style={{ fontSize: '13px' }}>{app.displayName}</td>
+                    <td className="text-muted" style={{ fontSize: '13px' }}>{app.position_applied}</td>
+                    <td className="text-muted" style={{ fontSize: '13px' }}>{app.experience_level || '-'}</td>
+                    <td className="text-muted" style={{ fontSize: '13px' }}>{app.current_stage || '-'}</td>
+                    <td style={{ fontSize: '13px' }}>
                       <span className={`badge rounded-pill ${
                         app.application_status === 'Passed' || app.application_status === 'Completed' ? 'bg-success' :
                         app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? 'bg-danger' :
