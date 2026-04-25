@@ -216,7 +216,7 @@ const workflow = getStageWorkflow(applicant.position_applied, applicant.experien
     return {
       stageName,
       sequence: idx + 1,
-      status: idx < currentIdx ? 'completed' : stageName === currentStage ? 'current' : 'pending',
+      status: idx < currentIdx ? 'completed' : (idx === workflow.length - 1 && allStagesCompleted) ? 'completed' : stageName === currentStage ? 'current' : 'pending',
       result: undefined,
       label: stageData?.current_stage_label,
     };
