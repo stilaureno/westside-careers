@@ -34,11 +34,12 @@ export default function ExamPage() {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
+  const [pendingUnanswered, setPendingUnanswered] = useState<number>(0);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const saveRef = useRef<NodeJS.Timeout | null>(null);
-  const suppressAutoSubmitRef = useRef(false);
   const finishInProgressRef = useRef(false);
 
   const stopTimers = useCallback(() => {
@@ -170,7 +171,7 @@ export default function ExamPage() {
   }
 
   const forceFinish = useCallback(async (reason: string) => {
-    if (suppressAutoSubmitRef.current || finishInProgressRef.current) return;
+    if (finishInProgressRef.current) return;
     finishInProgressRef.current = true;
     stopTimers();
     const currentAnswers = answersRef.current;
@@ -226,28 +227,11 @@ export default function ExamPage() {
     setAnswers(nextAnswers);
   }
 
-  async function submitExam() {
+  async function completeSubmit() {
     if (submitting || finishInProgressRef.current) return;
     setSubmitting(true);
+    setConfirmSubmitOpen(false);
     const currentAnswers = answersRef.current;
-
-    // Check for unanswered questions
-    const unanswered = questions.find(q => !currentAnswers[q.question_no.toString()]);
-    if (unanswered) {
-      suppressAutoSubmitRef.current = true;
-      const confirmed = window.confirm(`You still have ${questions.length - Object.keys(currentAnswers).length} unanswered questions. Are you sure you want to submit?`);
-      suppressAutoSubmitRef.current = false;
-      if (!confirmed) {
-        setSubmitting(false);
-        const el = document.getElementById(`question-${unanswered.question_no}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          el.style.boxShadow = '0 0 0 3px #8b1e2d';
-          setTimeout(() => { el.style.boxShadow = '0 10px 30px rgba(15,23,42,.06)'; }, 2000);
-        }
-        return;
-      }
-    }
 
     finishInProgressRef.current = true;
     stopTimers();
@@ -276,6 +260,27 @@ export default function ExamPage() {
     } finally {
       finishInProgressRef.current = false;
     }
+  }
+
+  function submitExam() {
+    if (submitting || finishInProgressRef.current) return;
+
+    const currentAnswers = answersRef.current;
+    const unanswered = questions.find(q => !currentAnswers[q.question_no.toString()]);
+
+    if (unanswered) {
+      setPendingUnanswered(questions.length - Object.keys(currentAnswers).length);
+      setConfirmSubmitOpen(true);
+      const el = document.getElementById(`question-${unanswered.question_no}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.boxShadow = '0 0 0 3px #8b1e2d';
+        setTimeout(() => { el.style.boxShadow = '0 10px 30px rgba(15,23,42,.06)'; }, 2000);
+      }
+      return;
+    }
+
+    void completeSubmit();
   }
 
   function formatTime(secs: number): string {
@@ -395,6 +400,47 @@ export default function ExamPage() {
             {submitting ? 'Submitting...' : 'Submit Exam'}
           </button>
         </div>
+
+        {confirmSubmitOpen && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.55)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 50,
+          }}>
+            <div style={{
+              width: '100%', maxWidth: '420px', background: '#fff', borderRadius: '20px',
+              padding: '24px', boxShadow: '0 18px 42px rgba(15,23,42,.18)',
+            }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1f2937', margin: '0 0 10px' }}>
+                Unanswered Items
+              </h2>
+              <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.5, margin: '0 0 20px' }}>
+                You still have {pendingUnanswered} unanswered question{pendingUnanswered === 1 ? '' : 's'}. Do you want to submit anyway?
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setConfirmSubmitOpen(false)}
+                  style={{
+                    minHeight: '48px', borderRadius: '12px', border: '1px solid #d1d5db',
+                    background: '#fff', color: '#1f2937', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void completeSubmit()}
+                  style={{
+                    minHeight: '48px', borderRadius: '12px', border: 'none',
+                    background: '#8b1e2d', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+                  }}
+                >
+                  Submit Anyway
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
