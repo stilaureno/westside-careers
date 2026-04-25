@@ -218,8 +218,11 @@ const currentStage = nextStageIndex < workflow.length
 
   let nextStep: string | null = null;
   const lastCompletedStageIdx = completedStages.length;
+  
   if (lastCompletedStageIdx < workflow.length) {
     nextStep = workflow[lastCompletedStageIdx];
+  } else {
+    nextStep = 'Final Remarks - Follow interviewer instructions';
   }
 
   return { data: { applicant: applicant as Applicant, roadmap, mathExam, nextStep }, error: null, lockedUntil: null };
