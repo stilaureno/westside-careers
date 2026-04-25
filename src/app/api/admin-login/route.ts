@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import {
   ADMIN_SESSION_COOKIE,
   ADMIN_SESSION_VALUE,
+  SUPER_ADMIN_SESSION_COOKIE,
+  SUPER_ADMIN_SESSION_VALUE,
   getAdminSessionCookieOptions,
 } from '@/lib/admin-session';
 import { NextResponse } from 'next/server';
@@ -17,22 +19,38 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
     
-    const { data: config } = await supabase
+    const { data: adminConfig } = await supabase
       .from('config')
       .select('value')
       .eq('key', 'ADMIN_PASSWORD')
       .single();
 
-    if (!config || config.value !== password) {
+    const { data: superAdminConfig } = await supabase
+      .from('config')
+      .select('value')
+      .eq('key', 'SUPER_ADMIN_PASSWORD')
+      .single();
+
+    const isSuperAdmin = superAdminConfig?.value === password;
+    const isAdmin = adminConfig?.value === password;
+
+    if (!isAdmin && !isSuperAdmin) {
       return NextResponse.json({ success: false, error: 'Invalid password' }, { status: 401 });
     }
 
-    const response = NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true, isSuperAdmin });
 
     response.cookies.set(ADMIN_SESSION_COOKIE, ADMIN_SESSION_VALUE, {
       ...getAdminSessionCookieOptions(request),
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: 60 * 60 * 24,
     });
+
+    if (isSuperAdmin) {
+      response.cookies.set(SUPER_ADMIN_SESSION_COOKIE, SUPER_ADMIN_SESSION_VALUE, {
+        ...getAdminSessionCookieOptions(request),
+        maxAge: 60 * 60 * 24,
+      });
+    }
 
     return response;
   } catch (err) {

@@ -2,11 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export function AdminHeader() {
   const pathname = usePathname();
   const isApplicantsRoute = pathname.startsWith('/admin/applicants');
   const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    const cookie = document.cookie.split('; ').find(c => c.startsWith('super_admin_session='));
+    setIsSuperAdmin(!!(cookie && cookie.includes('super')));
+  }, []);
 
   return (
     <header style={{
@@ -69,24 +76,46 @@ export function AdminHeader() {
         </Link>
       </nav>
 
-      <form action="/admin/logout" method="post">
-        <button type="submit" style={{
-          display: 'flex', alignItems: 'center', gap: '8px',
-          padding: '8px 16px', background: '#fff', color: '#ef4444',
-          border: '1px solid #fee2e2', borderRadius: '10px', fontSize: '14px',
-          cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.background = '#fef2f2'; }}
-        onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          Logout
-        </button>
-      </form>
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        {isSuperAdmin && (
+          <Link
+            href="/admin/settings"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '8px 16px', background: '#fff', color: '#4b5563',
+              border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '14px',
+              cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s',
+              textDecoration: 'none',
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.background = '#f9fafb'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Settings
+          </Link>
+        )}
+        <form action="/admin/logout" method="post">
+          <button type="submit" style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '8px 16px', background: '#fff', color: '#ef4444',
+            border: '1px solid #fee2e2', borderRadius: '10px', fontSize: '14px',
+            cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s',
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.background = '#fef2f2'; }}
+          onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Logout
+          </button>
+        </form>
+      </div>
     </header>
   );
 }

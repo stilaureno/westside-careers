@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { getApplicant, updateStage } from '@/lib/actions/admin';
+import { createClient } from '@/lib/supabase/client';
 import type { Applicant } from '@/types';
 
 interface ApplicantModalProps {
@@ -11,8 +12,16 @@ interface ApplicantModalProps {
   onClose: () => void;
 }
 
+interface VisibleField {
+  id: string;
+  field_key: string;
+  field_label: string;
+  is_visible: boolean;
+}
+
 export default function ApplicantModal({ referenceNo, isOpen, onClose }: ApplicantModalProps) {
   const [data, setData] = useState<any>(null);
+  const [visibleFields, setVisibleFields] = useState<VisibleField[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -22,6 +31,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose }: Applica
   const [stageLabel, setStageLabel] = useState('');
   const [form, setForm] = useState<any>({});
 
+  const supabase = createClient();
+
   useEffect(() => {
     if (isOpen && referenceNo) {
       loadData();
@@ -30,11 +41,19 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose }: Applica
 
   async function loadData() {
     setLoading(true);
-    const res = await getApplicant(referenceNo, '');
-    if (res.data) {
-      setData(res.data);
+    const [applicantRes, fieldsRes] = await Promise.all([
+      getApplicant(referenceNo, ''),
+      supabase.from('visible_fields').select('*').eq('is_visible', true).order('display_order'),
+    ]);
+    if (applicantRes.data) {
+      setData(applicantRes.data);
     }
+    setVisibleFields(fieldsRes.data || []);
     setLoading(false);
+  }
+
+  function isFieldVisible(fieldKey: string) {
+    return visibleFields.some(f => f.field_key === fieldKey);
   }
 
   function getWorkflow(position: string | undefined, exp: string | undefined): string[] {
@@ -145,23 +164,26 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose }: Applica
                           <h6 className="mb-0">Details</h6>
                         </div>
                         <div className="card-body py-2">
-                          {[
-                            ['Email', applicant?.email_address],
-                            ['Contact', applicant?.contact_number],
-                            ['Gender', applicant?.gender],
-                            ['Birthdate', applicant?.birthdate],
-                            ['Height', applicant?.height_cm ? `${applicant?.height_cm} cm` : '-'],
-                            ['Weight', applicant?.weight_kg ? `${applicant?.weight_kg} kg` : '-'],
-                            ['BMI', applicant?.bmi_value || '-'],
-                            ['Current Stage', applicant?.current_stage || '-'],
-                            ['Status', applicant?.application_status || '-'],
-                            ['Result', applicant?.overall_result || '-'],
-                          ].map(([label, value]) => (
-                            <div key={label as string} className="d-flex justify-content-between py-1 border-bottom">
-                              <span className="text-muted small">{label as string}</span>
-                              <span className="fw-medium">{value as string}</span>
-                            </div>
-                          ))}
+                          {([
+                            ['Gender', applicant?.gender, null],
+                            ['Height', applicant?.height_cm ? `${applicant?.height_cm} cm` : '-', null],
+                            ['Weight', applicant?.weight_kg ? `${applicant?.weight_kg} kg` : '-', null],
+                            ['BMI', applicant?.bmi_value || '-', null],
+                            ['Current Stage', applicant?.current_stage || '-', null],
+                            ['Status', applicant?.application_status || '-', null],
+                            ['Result', applicant?.overall_result || '-', null],
+                            ['Email', applicant?.email_address, 'email_address'],
+                            ['Contact', applicant?.contact_number, 'contact_number'],
+                            ['Birthdate', applicant?.birthdate, 'birthdate'],
+                          ] as [string, string, string | null][]).map(([label, value, fieldKey]) => {
+                            if (fieldKey && !isFieldVisible(fieldKey)) return null;
+                            return (
+                              <div key={label} className="d-flex justify-content-between py-1 border-bottom">
+                                <span className="text-muted small">{label}</span>
+                                <span className="fw-medium">{value}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
