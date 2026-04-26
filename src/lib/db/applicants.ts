@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import type { Applicant, DashboardSummary, StageRoadmapItem, PositionSummary, StageSummary, GenderByPosition } from '@/types';
 
 export interface ApplicantStageSummary {
@@ -102,6 +103,42 @@ export function getNextStage(currentStage: string, position: string, experienceL
   return stages[idx + 1];
 }
 
+export async function getStageWorkflowFromDB(position: string, experienceLevel: string | undefined): Promise<string[]> {
+  try {
+    const expLevel = experienceLevel === 'Experienced Dealer' ? 'Experienced' : 'Non-Experienced';
+    const supabase = createBrowserClient();
+    
+    const { data: positionData } = await supabase
+      .from('positions')
+      .select('id')
+      .eq('name', position)
+      .single();
+    
+    if (!positionData) return getStageWorkflow(position, experienceLevel);
+    
+    const { data: stageData } = await supabase
+      .from('position_stages')
+      .select('stage_id')
+      .eq('position_id', positionData.id)
+      .eq('experience_level', expLevel)
+      .eq('is_enabled', true)
+      .order('stage_order');
+    
+    if (!stageData || stageData.length === 0) return getStageWorkflow(position, experienceLevel);
+    
+    const stageIds = stageData.map(d => d.stage_id);
+    const { data: stages } = await supabase
+      .from('stages')
+      .select('name')
+      .in('id', stageIds)
+      .order('display_order');
+    
+    return stages?.map(s => s.name) || getStageWorkflow(position, experienceLevel);
+  } catch {
+    return getStageWorkflow(position, experienceLevel);
+  }
+}
+
 export function getStageWorkflow(position: string, experienceLevel: string | undefined): string[] {
   if (position === 'Dealer') {
     if (experienceLevel === 'Experienced Dealer') {
@@ -112,7 +149,8 @@ export function getStageWorkflow(position: string, experienceLevel: string | und
   if (position === 'Pit Supervisor' || position === 'Pit Manager' || position === 'Operations Manager') {
     return ['Initial Screening', 'Final Interview'];
   }
-  return ['Initial Screening'];
+  
+  return ['Initial Screening', 'Final Interview'];
 }
 
 export async function getDashboardSummary(
@@ -301,7 +339,7 @@ export async function getApplicantStageRoadmap(referenceNo: string): Promise<Sta
     .eq('reference_no', referenceNo)
     .order('stage_sequence', { ascending: true });
 
-  const workflow = getStageWorkflow(applicant.position_applied, applicant.experience_level);
+  const workflow = await getStageWorkflowFromDB(applicant.position_applied, applicant.experience_level);
   const currentStage = applicant.current_stage || 'Initial Screening';
   const currentIdx = workflow.indexOf(currentStage);
 
