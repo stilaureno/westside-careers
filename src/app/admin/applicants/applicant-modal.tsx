@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { getApplicant, updateStage } from '@/lib/actions/admin';
+import { getStagesForPosition } from '@/lib/db/positions';
 import { createClient } from '@/lib/supabase/client';
 import type { Applicant } from '@/types';
 
@@ -58,17 +59,18 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
     return visibleFields.some(f => f.field_key === fieldKey);
   }
 
-  function getWorkflow(position: string | undefined, exp: string | undefined): string[] {
-    if (position === 'Dealer') {
-      return exp === 'Experienced Dealer'
-        ? ['Initial Screening', 'Math Exam', 'Table Test', 'Final Interview']
-        : ['Initial Screening', 'Math Exam', 'Final Interview'];
+  const [workflow, setWorkflow] = useState<string[]>(['Initial Screening']);
+
+  useEffect(() => {
+    async function loadWorkflow() {
+      const exp = data?.applicant?.experience_level === 'Experienced Dealer' ? 'Experienced' : 'Non-Experienced';
+      const stages = await getStagesForPosition(data?.applicant?.position_applied || '', exp);
+      setWorkflow(stages);
     }
-    if (['Pit Supervisor', 'Pit Manager', 'Operations Manager'].includes(position || '')) {
-      return ['Initial Screening', 'Final Interview'];
+    if (data?.applicant?.position_applied) {
+      loadWorkflow();
     }
-    return ['Initial Screening'];
-  }
+  }, [data?.applicant?.position_applied, data?.applicant?.experience_level]);
 
   function getCompletedStages(stages: any[]): string[] {
     return stages
@@ -87,7 +89,6 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
 
   function handleStageChange(stageName: string) {
     setStage(stageName);
-    const workflow = getWorkflow(data?.applicant?.position_applied, data?.applicant?.experience_level);
     setStageSeq(workflow.indexOf(stageName) + 1);
     updateFormFields(stageName, data?.applicant);
   }
@@ -152,9 +153,18 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
   if (!isOpen) return null;
 
   const { applicant, games, stages, notifications } = data || {};
-  const fullWorkflow = getWorkflow(applicant?.position_applied, applicant?.experience_level);
   const completedStages = stages ? getCompletedStages(stages) : [];
-  const availableStages = getAvailableStages(fullWorkflow, completedStages);
+
+  function computeAvailableStages(wf: string[], completed: string[]): string[] {
+    for (const stage of wf) {
+      if (!completed.includes(stage)) {
+        return wf.slice(wf.indexOf(stage));
+      }
+    }
+    return [];
+  }
+
+  const availableStages = computeAvailableStages(workflow, completedStages);
 
   return (
     <>

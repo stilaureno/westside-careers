@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { getApplicant, updateStage } from '@/lib/actions/admin';
+import { getStagesForPosition } from '@/lib/db/positions';
 import type { Applicant } from '@/types';
 import { useRouter } from 'next/navigation';
 
@@ -15,33 +16,27 @@ export default function DetailContent({ initialData }: { initialData: any }) {
   const [resultStatus, setResultStatus] = useState('Passed');
   const [stageLabel, setStageLabel] = useState('');
   const [form, setForm] = useState<any>({});
+  const [workflow, setWorkflow] = useState<string[]>(['Initial Screening']);
   const router = useRouter();
 
+  useEffect(() => {
+    async function loadWorkflow() {
+      const exp = data?.applicant?.experience_level === 'Experienced Dealer' ? 'Experienced' : 'Non-Experienced';
+      const stages = await getStagesForPosition(data?.applicant?.position_applied || '', exp);
+      setWorkflow(stages);
+    }
+    if (data?.applicant?.position_applied) {
+      loadWorkflow();
+    }
+  }, [data?.applicant?.position_applied, data?.applicant?.experience_level]);
+
   const completedStages = data?.stages ? getCompletedStages(data.stages) : [];
-  const fullWorkflow = getWorkflow(data?.applicant?.position_applied, data?.applicant?.experience_level);
-  const availableStages = getAvailableStages(fullWorkflow, completedStages);
+  const availableStages = getAvailableStages(workflow, completedStages);
 
   function handleStageChange(stageName: string) {
     setStage(stageName);
-    setStageSeq(getStageSeq(stageName, data?.applicant));
+    setStageSeq(workflow.indexOf(stageName) + 1);
     updateFormFields(stageName, data?.applicant);
-  }
-
-  function getStageSeq(stageName: string, app: Applicant): number {
-    const workflow = getWorkflow(app?.position_applied, app?.experience_level);
-    return workflow.indexOf(stageName) + 1;
-  }
-
-  function getWorkflow(position: string | undefined, exp: string | undefined): string[] {
-    if (position === 'Dealer') {
-      return exp === 'Experienced Dealer'
-        ? ['Initial Screening', 'Math Exam', 'Table Test', 'Final Interview']
-        : ['Initial Screening', 'Math Exam', 'Final Interview'];
-    }
-    if (['Pit Supervisor', 'Pit Manager', 'Operations Manager'].includes(position || '')) {
-      return ['Initial Screening', 'Final Interview'];
-    }
-    return ['Initial Screening'];
   }
 
   function getCompletedStages(stages: any[]): string[] {

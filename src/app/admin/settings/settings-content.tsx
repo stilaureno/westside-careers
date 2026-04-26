@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { getStages, getPositionStagesData, savePositionStages, addStage, deleteStage } from '@/lib/db/positions';
 
 interface VisibleField {
   id: string;
@@ -44,6 +45,13 @@ export default function SettingsContent() {
   const [newPosName, setNewPosName] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
   const [newAdminPassword, setNewAdminPassword] = useState('');
+
+  // Stage management state
+  const [selectedPosition, setSelectedPosition] = useState('');
+  const [expLevel, setExpLevel] = useState<'Non-Experienced' | 'Experienced'>('Non-Experienced');
+  const [positionStages, setPositionStages] = useState<string[]>([]);
+  const [availableStages, setAvailableStages] = useState<{ id: string; name: string }[]>([]);
+  const [newStageName, setNewStageName] = useState('');
 
   useEffect(() => {
     loadData();
@@ -99,6 +107,71 @@ export default function SettingsContent() {
 
     if (!error) {
       setPositions(positions.map(p => p.id === pos.id ? { ...p, is_active: !p.is_active } : p));
+    }
+    setSaving(false);
+  }
+
+  async function handlePositionChange(positionName: string) {
+    setSelectedPosition(positionName);
+    if (positionName) {
+      const data = await getPositionStagesData(positionName);
+      setPositionStages(data[expLevel] || []);
+      setAvailableStages(data.availableStages || []);
+    } else {
+      setPositionStages([]);
+      setAvailableStages([]);
+    }
+  }
+
+  async function handleExpLevelChange(level: 'Non-Experienced' | 'Experienced') {
+    setExpLevel(level);
+    if (selectedPosition) {
+      const data = await getPositionStagesData(selectedPosition);
+      setPositionStages(data[level] || []);
+    }
+  }
+
+  async function toggleStageInPosition(stageName: string) {
+    if (positionStages.includes(stageName)) {
+      setPositionStages(positionStages.filter(s => s !== stageName));
+    } else {
+      setPositionStages([...positionStages, stageName]);
+    }
+  }
+
+  async function saveStages() {
+    if (!selectedPosition) return;
+    setSaving(true);
+    await savePositionStages(selectedPosition, expLevel, positionStages);
+    setMessage({ text: 'Stages saved', type: 'success' });
+    setSaving(false);
+  }
+
+  async function handleAddStage() {
+    if (!newStageName.trim()) return;
+    setSaving(true);
+    const result = await addStage(newStageName.trim());
+    if (result.success) {
+      setNewStageName('');
+      await loadData();
+      const stages = await getStages();
+      setAvailableStages(stages.map(s => ({ id: s.id, name: s.name })));
+      setMessage({ text: 'Stage added', type: 'success' });
+    } else {
+      setMessage({ text: result.error || 'Failed to add stage', type: 'error' });
+    }
+    setSaving(false);
+  }
+
+  async function handleDeleteStage(stageId: string) {
+    if (!confirm('Delete this stage? It will be removed from all positions.')) return;
+    setSaving(true);
+    const result = await deleteStage(stageId);
+    if (result.success) {
+      await loadData();
+      setMessage({ text: 'Stage deleted', type: 'success' });
+    } else {
+      setMessage({ text: result.error || 'Failed to delete stage', type: 'error' });
     }
     setSaving(false);
   }
@@ -230,6 +303,9 @@ export default function SettingsContent() {
 
   const getPositionsForDept = (deptId: string) => positions.filter(p => p.department_id === deptId);
 
+  // Get unique stage names for delete dropdown
+  const allStagesForDelete = availableStages.length > 0 ? availableStages : [];
+
   if (loading) {
     return (
       <div className="container-fluid py-4">
@@ -271,6 +347,108 @@ export default function SettingsContent() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Stages per Position */}
+        <div className="col-md-6">
+          <div className="card border-primary">
+            <div className="card-header bg-primary text-white">
+              <h6 className="mb-0">Stages per Position</h6>
+              <small className="text-white-50">Configure stages for each position and experience level</small>
+            </div>
+            <div className="card-body">
+              {/* Position selector */}
+              <div className="mb-3">
+                <label className="form-label small">Select Position</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={selectedPosition}
+                  onChange={(e) => handlePositionChange(e.target.value)}
+                >
+                  <option value="">-- Select Position --</option>
+                  {positions.filter(p => p.is_active).map(pos => (
+                    <option key={pos.id} value={pos.name}>{pos.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedPosition && (
+                <>
+                  {/* Experience level tabs */}
+                  <div className="mb-3">
+                    <div className="btn-group btn-group-sm w-100">
+                      <button
+                        className={`btn ${expLevel === 'Non-Experienced' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => handleExpLevelChange('Non-Experienced')}
+                      >
+                        Non-Experienced
+                      </button>
+                      <button
+                        className={`btn ${expLevel === 'Experienced' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => handleExpLevelChange('Experienced')}
+                      >
+                        Experienced
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Stage checkboxes - load available stages */}
+                  <div className="mb-3">
+                    {availableStages.length === 0 && selectedPosition && (
+                      <div className="text-center py-2">
+                        <span className="text-muted small">Loading stages...</span>
+                      </div>
+                    )}
+                    {availableStages.map(stage => (
+                      <div key={stage.id} className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id={`stage-${stage.id}`}
+                          checked={positionStages.includes(stage.name)}
+                          onChange={() => toggleStageInPosition(stage.name)}
+                          disabled={saving}
+                        />
+                        <label className="form-check-label" htmlFor={`stage-${stage.id}`}>
+                          {stage.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Save button */}
+                  <button
+                    className="btn btn-sm btn-primary w-100 mb-3"
+                    onClick={saveStages}
+                    disabled={saving || !selectedPosition}
+                  >
+                    {saving ? 'Saving...' : 'Save Stages'}
+                  </button>
+
+                  {/* Add new stage (available to all positions) */}
+                  <div className="border-top pt-3 mt-3">
+                    <label className="form-label small fw-bold">Add New Stage (Available to All Positions)</label>
+                    <div className="d-flex gap-2">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder="New stage name..."
+                        value={newStageName}
+                        onChange={(e) => setNewStageName(e.target.value)}
+                      />
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={handleAddStage}
+                        disabled={saving || !newStageName.trim()}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
