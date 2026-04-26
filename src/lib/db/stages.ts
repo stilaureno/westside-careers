@@ -98,11 +98,23 @@ export async function upsertStageResult(payload: {
     if (error) return { success: false, error: error.message };
   }
 
+  const { data: allStageResults } = await supabase
+    .from('stage_results')
+    .select('stage_name, result_status')
+    .eq('reference_no', payload.referenceNo)
+    .order('stage_sequence', { ascending: true });
+
+  const dynamicStatus = calculateApplicationStatus(
+    allStageResults || [],
+    position_applied || '',
+    experience_level
+  );
+
   await supabase
     .from('applicants')
     .update({
       current_stage: isFinalInterview ? 'Completed' : payload.stageName,
-      application_status: applicationStatus,
+      application_status: dynamicStatus,
       overall_result: overallResult,
       updated_at: new Date().toISOString(),
     })
@@ -123,7 +135,7 @@ export async function upsertStageResult(payload: {
   return { success: true };
 }
 
-async function getApplicantMeta(referenceNo: string) {
+async function getApplicantMeta(referenceNo: string): Promise<{ applicant_id?: string; position_applied?: string; experience_level?: string }> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('applicants')
@@ -131,6 +143,64 @@ async function getApplicantMeta(referenceNo: string) {
     .eq('reference_no', referenceNo)
     .single();
   return data as { applicant_id?: string; position_applied?: string; experience_level?: string } || {};
+}
+
+export function calculateApplicationStatus(
+  stageResults: { stage_name: string; result_status: string }[],
+  position: string,
+  experienceLevel?: string | null
+): string {
+  if (!stageResults || stageResults.length === 0) return 'Pending';
+
+  const workflow = position === 'Dealer' 
+    ? ['Initial Screening', 'Math Exam', 'Table Test', 'Sweaty Palm', 'Final Interview'] 
+    : ['Initial Screening', 'Math Exam', 'Table Test', 'Final Interview'];
+
+  const lastResult = stageResults[stageResults.length - 1];
+  const lastStageName = lastResult?.stage_name;
+  const lastStatus = lastResult?.result_status;
+
+  const finalStageIdx = workflow.indexOf('Final Interview');
+  const lastStageIdx = workflow.indexOf(lastStageName);
+
+  if (lastStageIdx === finalStageIdx && finalStageIdx !== -1) {
+    if (lastStatus === 'Passed') return 'Completed';
+    if (lastStatus === 'Reprofile') return 'Reprofile';
+    if (lastStatus === 'For Pooling') return 'For Pooling';
+    if (lastStatus === 'Not Recommended') return 'Not Recommended';
+    if (lastStatus === 'Failed') return 'Failed';
+    return lastStatus;
+  }
+
+  if (lastStatus === 'Passed') return 'Ongoing';
+  if (lastStatus === 'Failed') return 'Failed';
+  if (lastStatus === 'Reprofile') return 'Reprofile';
+  if (lastStatus === 'For Pooling') return 'For Pooling';
+  if (lastStatus === 'Not Recommended') return 'Not Recommended';
+
+  return lastStatus || 'Pending';
+}
+
+function calculateDealerStatus(stageResults: { stage_name: string; result_status: string }[]): string {
+  const stageNames: Record<string, string[]> = {
+    'Initial Screening': ['Passed', 'Failed'],
+    'Math Exam': ['Passed', 'Failed'],
+    'Table Test': ['Passed', 'Failed'],
+    'Sweaty Palm': ['Passed', 'Failed'],
+    'Final Interview': ['Passed', 'Reprofile', 'For Pooling', 'Not Recommended', 'Failed'],
+  };
+  const order = ['Initial Screening', 'Math Exam', 'Table Test', 'Sweaty Palm', 'Final Interview'];
+  for (let i = order.length - 1; i >= 0; i--) {
+    const s = stageResults.find(r => r.stage_name === order[i]);
+    if (s) {
+      if (s.result_status === 'Passed') {
+        if (order[i] === 'Final Interview') return 'Completed';
+        return 'Ongoing';
+      }
+      return s.result_status;
+    }
+  }
+  return 'Pending';
 }
 
 function getApplicationStatus(stageName: string, resultStatus: string): string {
