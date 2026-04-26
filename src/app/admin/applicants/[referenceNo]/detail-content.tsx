@@ -115,7 +115,6 @@ export default function DetailContent({ initialData }: { initialData: any }) {
   }
 
   const { applicant, games, stages, notifications } = data;
-  const workflow = getWorkflow(applicant.position_applied, applicant.experience_level);
 
   return (
     <div style={{ padding: '0' }}>
