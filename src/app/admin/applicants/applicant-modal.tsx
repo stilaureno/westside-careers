@@ -31,7 +31,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
   const [stageSeq, setStageSeq] = useState(1);
   const [resultStatus, setResultStatus] = useState('Passed');
   const [stageLabel, setStageLabel] = useState('');
-  const [form, setForm] = useState<any>({});
+  const [form, setForm] = useState<any>({ evaluatedBy: '' });
 
   const supabase = createClient();
 
