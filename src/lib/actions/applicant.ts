@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
-import { computeBMI, buildDuplicateKey, generateReferenceNo, generateApplicantId, getStageWorkflow, getNextStage } from '@/lib/db/applicants';
+import { computeBMI, buildDuplicateKey, generateReferenceNo, generateApplicantId, getStageWorkflow, getStageWorkflowFromDB, getNextStage } from '@/lib/db/applicants';
 import type { ApplicationFormData, Applicant, StageRoadmapItem } from '@/types';
 
 const STATUS_CHECK_FAILURES_COOKIE = 'status_check_failures';
@@ -208,7 +208,7 @@ export async function getApplicantStatus(
     }
   }
 
-const workflow = getStageWorkflow(applicant.position_applied, applicant.experience_level);
+const workflow = await getStageWorkflowFromDB(applicant.position_applied, applicant.experience_level);
   
   const completedStages = stageRows?.filter(s => isCompletedStageResult(s.stage_name, s.result_status)) || [];
   const lastCompletedIdx = completedStages.length;
