@@ -91,6 +91,23 @@ export default function ApplyPage() {
       return;
     }
 
+    function checkAge(birthdate: string): number {
+      const today = new Date();
+      const birth = new Date(birthdate);
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    if (checkAge(form.birthdate) < 21) {
+      setMessage({ text: 'You must be at least 21 years old to apply.', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
     if (!form.positionApplied) {
       setMessage({ text: 'Please select a position.', type: 'error' });
       setLoading(false);
