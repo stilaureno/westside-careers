@@ -6,6 +6,7 @@ import { getApplicant, updateStage } from '@/lib/actions/admin';
 import { getStagesForPosition } from '@/lib/db/positions';
 import { createClient } from '@/lib/supabase/client';
 import type { Applicant } from '@/types';
+import styles from './applicant-modal.module.css';
 
 interface ApplicantModalProps {
   referenceNo: string;
@@ -32,6 +33,13 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
   const [resultStatus, setResultStatus] = useState('Passed');
   const [stageLabel, setStageLabel] = useState('');
   const [form, setForm] = useState<any>({ evaluatedBy: '' });
+
+  const finalResultOptions = [
+    { value: 'Passed', label: 'Passed', icon: '✓' },
+    { value: 'Reprofile', label: 'Reprofile', icon: '↻' },
+    { value: 'For Pooling', label: 'For Pooling', icon: '☰' },
+    { value: 'Not Recommended', label: 'Not Recommended', icon: '✕' },
+  ];
 
   const supabase = createClient();
 
@@ -352,10 +360,25 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
                               </div>
                             )}
                             <div className={`col-md-${data?.applicant?.position_applied === 'Dealer' ? 6 : 12}`}>
-                              <label className="form-label small">Final Result</label>
-                              <select className="form-select form-select-sm" value={resultStatus} onChange={(e) => setResultStatus(e.target.value)}>
-                                <option>Passed</option><option>Reprofile</option><option>For Pooling</option><option>Not Recommended</option>
-                              </select>
+                              <label className="form-label small fw-bold text-dark">FINAL RESULT</label>
+                              <div className={styles.finalResultContainer}>
+                                {finalResultOptions.map((option) => (
+                                  <label
+                                    key={option.value}
+                                    className={`${styles.radioCard} ${styles[option.value === 'Passed' ? 'passed' : option.value === 'Reprofile' ? 'reprofile' : option.value === 'For Pooling' ? 'pooling' : 'notRecommended']} ${resultStatus === option.value ? styles.selected : ''}`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name="finalResult"
+                                      value={option.value}
+                                      checked={resultStatus === option.value}
+                                      onChange={(e) => setResultStatus(e.target.value)}
+                                    />
+                                    <span className={styles.icon}>{option.icon}</span>
+                                    <span className={styles.label}>{option.label}</span>
+                                  </label>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         )}

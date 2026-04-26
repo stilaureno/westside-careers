@@ -1,0 +1,93 @@
+.finalResultContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.radioCard {
+  position: relative;
+  padding: 14px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  background: #fff;
+}
+
+.radioCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.radioCard input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+
+.radioCard .icon {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.radioCard .label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Passed - Green */
+.radioCard.passed { border-color: #28a745; }
+.radioCard.passed .icon,
+.radioCard.passed .label { color: #28a745; }
+.radioCard.passed.selected {
+  background: #28a745;
+  border-color: #28a745;
+}
+.radioCard.passed.selected .icon,
+.radioCard.passed.selected .label { color: #fff; }
+
+/* Reprofile - Orange */
+.radioCard.reprofile { border-color: #fd7e14; }
+.radioCard.reprofile .icon,
+.radioCard.reprofile .label { color: #fd7e14; }
+.radioCard.reprofile.selected {
+  background: #fd7e14;
+  border-color: #fd7e14;
+}
+.radioCard.reprofile.selected .icon,
+.radioCard.reprofile.selected .label { color: #fff; }
+
+/* For Pooling - Blue */
+.radioCard.pooling { border-color: #0d6efd; }
+.radioCard.pooling .icon,
+.radioCard.pooling .label { color: #0d6efd; }
+.radioCard.pooling.selected {
+  background: #0d6efd;
+  border-color: #0d6efd;
+}
+.radioCard.pooling.selected .icon,
+.radioCard.pooling.selected .label { color: #fff; }
+
+/* Not Recommended - Red */
+.radioCard.notRecommended { border-color: #dc3545; }
+.radioCard.notRecommended .icon,
+.radioCard.notRecommended .label { color: #dc3545; }
+.radioCard.notRecommended.selected {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+.radioCard.notRecommended.selected .icon,
+.radioCard.notRecommended.selected .label { color: #fff; }
+
+@media (max-width: 768px) {
+  .finalResultContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
