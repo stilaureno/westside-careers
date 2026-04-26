@@ -197,3 +197,18 @@ export async function deleteStage(stageId: string): Promise<{ success: boolean; 
   
   return { success: true };
 }
+
+export async function updateStageOrder(stageId: string, newOrder: number): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  const { error } = await supabase
+    .from('stages')
+    .update({ display_order: newOrder })
+    .eq('id', stageId);
+  
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true };
+}

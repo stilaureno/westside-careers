@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { getStages, getPositionStagesData, savePositionStages, addStage, deleteStage } from '@/lib/db/positions';
+import { getStages, getPositionStagesData, savePositionStages, addStage, deleteStage, updateStageOrder } from '@/lib/db/positions';
 
 interface VisibleField {
   id: string;
@@ -51,6 +51,7 @@ export default function SettingsContent() {
   const [expLevel, setExpLevel] = useState<'Non-Experienced' | 'Experienced'>('Non-Experienced');
   const [positionStages, setPositionStages] = useState<string[]>([]);
   const [availableStages, setAvailableStages] = useState<{ id: string; name: string }[]>([]);
+  const [allStages, setAllStages] = useState<{ id: string; name: string; display_order: number }[]>([]);
   const [newStageName, setNewStageName] = useState('');
   const [newStageOrder, setNewStageOrder] = useState<number>(0);
 
@@ -60,16 +61,18 @@ export default function SettingsContent() {
 
   async function loadData() {
     setLoading(true);
-    const [fieldsRes, deptsRes, possRes, adminPassRes] = await Promise.all([
+    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes] = await Promise.all([
       supabase.from('visible_fields').select('*').order('display_order'),
       supabase.from('departments').select('*').order('name'),
       supabase.from('positions').select('*').order('name'),
       supabase.from('config').select('*').like('key', 'ADMIN_PASSWORD%').neq('key', 'SUPER_ADMIN_PASSWORD'),
+      supabase.from('stages').select('*').order('display_order'),
     ]);
     setFields(fieldsRes.data || []);
     setDepartments(deptsRes.data || []);
     setPositions(possRes.data || []);
     setAdminPasswords(adminPassRes.data || []);
+    setAllStages(stagesRes.data || []);
     setLoading(false);
   }
 
@@ -177,9 +180,27 @@ export default function SettingsContent() {
     const result = await deleteStage(stageId);
     if (result.success) {
       await loadData();
+      const stages = await getStages();
+      setAllStages(stages);
+      setAvailableStages(stages.map(s => ({ id: s.id, name: s.name })));
       setMessage({ text: 'Stage deleted', type: 'success' });
     } else {
       setMessage({ text: result.error || 'Failed to delete stage', type: 'error' });
+    }
+    setSaving(false);
+  }
+
+  async function handleUpdateStageOrder(stageId: string, newOrder: number) {
+    if (!newOrder || newOrder < 1) return;
+    setSaving(true);
+    const result = await updateStageOrder(stageId, newOrder);
+    if (result.success) {
+      await loadData();
+      const stages = await getStages();
+      setAllStages(stages);
+      setMessage({ text: 'Stage order updated', type: 'success' });
+    } else {
+      setMessage({ text: result.error || 'Failed to update order', type: 'error' });
     }
     setSaving(false);
   }
@@ -437,7 +458,44 @@ export default function SettingsContent() {
 
                   {/* Add new stage (available to all positions) */}
                   <div className="border-top pt-3 mt-3">
-                    <label className="form-label small fw-bold">Add New Stage (Available to All Positions)</label>
+                    <label className="form-label small fw-bold">Current Stages (Master List)</label>
+                    <table className="table table-sm table-striped">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '60px' }}>Order</th>
+                          <th>Stage Name</th>
+                          <th style={{ width: '100px' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allStages.map(stage => (
+                          <tr key={stage.id}>
+                            <td>
+                              <input
+                                type="number"
+                                className="form-control form-control-sm"
+                                min="1"
+                                defaultValue={stage.display_order}
+                                onBlur={(e) => handleUpdateStageOrder(stage.id, parseInt(e.target.value))}
+                                style={{ width: '60px' }}
+                              />
+                            </td>
+                            <td>{stage.name}</td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleDeleteStage(stage.id)}
+                                disabled={saving}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    <label className="form-label small fw-bold mt-3">Add New Stage (Available to All Positions)</label>
                     <div className="row g-2">
                       <div className="col-7">
                         <input
