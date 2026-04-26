@@ -52,6 +52,7 @@ export default function SettingsContent() {
   const [positionStages, setPositionStages] = useState<string[]>([]);
   const [availableStages, setAvailableStages] = useState<{ id: string; name: string }[]>([]);
   const [newStageName, setNewStageName] = useState('');
+  const [newStageOrder, setNewStageOrder] = useState<number>(0);
 
   useEffect(() => {
     loadData();
@@ -155,9 +156,11 @@ export default function SettingsContent() {
   async function handleAddStage() {
     if (!newStageName.trim()) return;
     setSaving(true);
-    const result = await addStage(newStageName.trim());
+    const order = newStageOrder > 0 ? newStageOrder : 0;
+    const result = await addStage(newStageName.trim(), order);
     if (result.success) {
       setNewStageName('');
+      setNewStageOrder(0);
       await loadData();
       const stages = await getStages();
       setAvailableStages(stages.map(s => ({ id: s.id, name: s.name })));
@@ -435,21 +438,35 @@ export default function SettingsContent() {
                   {/* Add new stage (available to all positions) */}
                   <div className="border-top pt-3 mt-3">
                     <label className="form-label small fw-bold">Add New Stage (Available to All Positions)</label>
-                    <div className="d-flex gap-2">
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        placeholder="New stage name..."
-                        value={newStageName}
-                        onChange={(e) => setNewStageName(e.target.value)}
-                      />
-                      <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={handleAddStage}
-                        disabled={saving || !newStageName.trim()}
-                      >
-                        Add
-                      </button>
+                    <div className="row g-2">
+                      <div className="col-7">
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          placeholder="New stage name..."
+                          value={newStageName}
+                          onChange={(e) => setNewStageName(e.target.value)}
+                        />
+                      </div>
+                      <div className="col-3">
+                        <input
+                          type="number"
+                          className="form-control form-control-sm"
+                          placeholder="Order"
+                          min="1"
+                          value={newStageOrder || ''}
+                          onChange={(e) => setNewStageOrder(parseInt(e.target.value) || 0)}
+                        />
+                      </div>
+                      <div className="col-2">
+                        <button
+                          className="btn btn-sm btn-outline-primary w-100"
+                          onClick={handleAddStage}
+                          disabled={saving || !newStageName.trim()}
+                        >
+                          Add
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </>
