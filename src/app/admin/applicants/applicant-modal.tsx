@@ -13,6 +13,7 @@ interface ApplicantModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaved?: () => Promise<void> | void;
+  isSuperAdmin?: boolean;
 }
 
 interface VisibleField {
@@ -22,7 +23,7 @@ interface VisibleField {
   is_visible: boolean;
 }
 
-export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }: ApplicantModalProps) {
+export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, isSuperAdmin = false }: ApplicantModalProps) {
   const [data, setData] = useState<any>(null);
   const [visibleFields, setVisibleFields] = useState<VisibleField[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,20 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
     { value: 'For Pooling', label: 'For Pooling', icon: '☰' },
     { value: 'Not Recommended', label: 'Not Recommended', icon: '✕' },
   ];
+
+  function getStatusClass(status: string | undefined) {
+    if (!status) return styles.statusPending;
+    const s = status.toLowerCase();
+    if (s === 'passed') return styles.statusPassed;
+    if (s === 'failed') return styles.statusFailed;
+    if (s === 'pending') return styles.statusPending;
+    if (s === 'ongoing') return styles.statusOngoing;
+    if (s === 'reprofile') return styles.statusReprofile;
+    if (s === 'for pooling') return styles.statusForPooling;
+    if (s === 'not recommended') return styles.statusNotRecommended;
+    if (s === 'completed') return styles.statusCompleted;
+    return styles.statusPending;
+  }
 
   const supabase = createClient();
 
@@ -207,18 +222,19 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
                             ['Weight', applicant?.weight_kg ? `${applicant?.weight_kg} kg` : '-', null],
                             ['BMI', applicant?.bmi_value || '-', null],
                             ['Current Stage', applicant?.current_stage || '-', null],
-                            ['Status', applicant?.application_status || '-', null],
-                            ['Result', applicant?.overall_result || '-', null],
+                            ['Status', applicant?.application_status || '-', 'application_status'],
+                            ['Result', applicant?.overall_result || '-', 'overall_result'],
                             ['Email', applicant?.email_address, 'email_address'],
                             ['Contact', applicant?.contact_number, 'contact_number'],
                             ['Birthdate', applicant?.birthdate, 'birthdate'],
                             ['Age', applicant?.age ? `${applicant?.age}` : '-', 'age'],
                           ] as [string, string, string | null][]).map(([label, value, fieldKey]) => {
                             if (fieldKey && !isFieldVisible(fieldKey)) return null;
+                            const isStatus = label === 'Status' || label === 'Result';
                             return (
                               <div key={label} className="d-flex justify-content-between py-1 border-bottom">
                                 <span className="text-muted small">{label}</span>
-                                <span className="fw-medium">{value}</span>
+                                <span className={isStatus ? getStatusClass(value) : 'fw-medium'}>{value}</span>
                               </div>
                             );
                           })}
@@ -264,6 +280,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
                     </div>
                   </div>
 
+                  {(isSuperAdmin || !completedStages.includes('Final Interview')) && (
                   <div className="card">
                     <div className="card-header bg-white">
                       <h6 className="mb-0">Update Stage Result</h6>
@@ -401,6 +418,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
                       </form>
                     </div>
                   </div>
+                )}
 
                   {notifications && notifications.length > 0 && (
                     <div className="card mt-3">

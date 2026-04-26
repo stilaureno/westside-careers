@@ -439,7 +439,7 @@ export default function ApplicantsContent({
         {hasFilters && <span> (filtered)</span>}
       </div>
 
-      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} />
+      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} />
     </div>
   );
 }

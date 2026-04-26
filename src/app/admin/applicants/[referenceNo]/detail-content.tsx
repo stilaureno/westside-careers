@@ -7,7 +7,7 @@ import { getStagesForPosition } from '@/lib/db/positions';
 import type { Applicant } from '@/types';
 import { useRouter } from 'next/navigation';
 
-export default function DetailContent({ initialData }: { initialData: any }) {
+export default function DetailContent({ initialData, isSuperAdmin = false }: { initialData: any; isSuperAdmin?: boolean }) {
   const [data, setData] = useState<any>(initialData);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -193,8 +193,9 @@ export default function DetailContent({ initialData }: { initialData: any }) {
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px', color: '#1f2937' }}>Update Stage Result</h3>
+      {(isSuperAdmin || !completedStages.includes('Final Interview')) && (
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px', color: '#1f2937' }}>Update Stage Result</h3>
 
         {message && (
           <div style={{
@@ -325,7 +326,8 @@ export default function DetailContent({ initialData }: { initialData: any }) {
             {saving ? 'Saving...' : 'Save Stage Result'}
           </button>
         </form>
-      </div>
+        </div>
+        )}
 
       {notifications && notifications.length > 0 && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginTop: '20px' }}>
