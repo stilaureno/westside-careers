@@ -117,20 +117,25 @@ export async function savePositionStages(
   
   const { data: stageRecords } = await supabase
     .from('stages')
-    .select('id, name')
+    .select('id, name, display_order')
     .in('name', stages);
   
   const stageMap = new Map(stageRecords?.map(s => [s.name, s.id]));
+  const stageDisplayOrder = new Map(stageRecords?.map(s => [s.name, s.display_order]));
+  
+  // Sort stages by their display_order before saving
+  const sortedStages = [...stages].sort((a, b) => (stageDisplayOrder.get(a) || 0) - (stageDisplayOrder.get(b) || 0));
   
   await supabase
     .from('position_stages')
     .update({ is_enabled: false })
     .eq('position_id', position.id)
     .eq('experience_level', experienceLevel);
-  
-  for (let i = 0; i < stages.length; i++) {
-    const stageId = stageMap.get(stages[i]);
+
+  for (let i = 0; i < sortedStages.length; i++) {
+    const stageId = stageMap.get(sortedStages[i]);
     if (!stageId) continue;
+    const stageOrder = stageDisplayOrder.get(sortedStages[i]) || i + 1;
     
     await supabase
       .from('position_stages')
@@ -138,7 +143,7 @@ export async function savePositionStages(
         position_id: position.id,
         stage_id: stageId,
         experience_level: experienceLevel,
-        stage_order: i + 1,
+        stage_order: stageOrder,
         is_enabled: true,
       }, {
         onConflict: 'position_id,stage_id,experience_level',
