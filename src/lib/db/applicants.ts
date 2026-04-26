@@ -118,7 +118,7 @@ export async function getStageWorkflowFromDB(position: string, experienceLevel: 
     
     const { data: stageData } = await supabase
       .from('position_stages')
-      .select('stage_id')
+      .select('stage_id, stage_order')
       .eq('position_id', positionData.id)
       .eq('experience_level', expLevel)
       .eq('is_enabled', true)
@@ -126,14 +126,20 @@ export async function getStageWorkflowFromDB(position: string, experienceLevel: 
     
     if (!stageData || stageData.length === 0) return getStageWorkflow(position, experienceLevel);
     
+    // Get stage names - map directly from the IDs we already have in order
     const stageIds = stageData.map(d => d.stage_id);
-    const { data: stages } = await supabase
+    const { data: allStages } = await supabase
       .from('stages')
-      .select('name')
-      .in('id', stageIds)
-      .order('display_order');
+      .select('id, name');
     
-    return stages?.map(s => s.name) || getStageWorkflow(position, experienceLevel);
+    // Build ordered stage name array
+    const orderedStages: string[] = [];
+    for (const stage of stageData) {
+      const stageName = allStages?.find(s => s.id === stage.stage_id)?.name;
+      if (stageName) orderedStages.push(stageName);
+    }
+    
+    return orderedStages.length > 0 ? orderedStages : getStageWorkflow(position, experienceLevel);
   } catch {
     return getStageWorkflow(position, experienceLevel);
   }
