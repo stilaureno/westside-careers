@@ -256,9 +256,6 @@ const [autoFetched, setAutoFetched] = useState(false);
                 ) : (
                   <div>
                     <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>Not taken yet</p>
-                    <Link href="/exam" style={{ display: 'inline-block', padding: '10px 16px', background: '#163a70', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>
-                      Take Math Exam
-                    </Link>
                   </div>
                 )}
               </div>
@@ -272,6 +269,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                   padding: '12px 16px', borderRadius: '12px',
                   background: item.status === 'completed' ? '#ecfdf3' : item.status === 'current' ? '#fffbeb' : '#f9fafb',
                   border: `2px solid ${item.status === 'completed' ? '#86efac' : item.status === 'current' ? '#fcd34d' : '#e5e7eb'}`,
+                  position: 'relative',
                 }}>
                   <div style={{
                     width: '28px', height: '28px', borderRadius: '50%', display: 'flex',
@@ -292,6 +290,30 @@ const [autoFetched, setAutoFetched] = useState(false);
                       ? (item.stageName === 'Initial Screening' ? 'Completed' : 'Done') 
                       : item.status === 'current' ? 'Current' : 'Pending'}
                   </span>
+                  {item.stageName === 'Math Exam' && item.status === 'current' && (
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('examRef', result.applicant.reference_no);
+                        window.location.href = '/exam';
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        padding: '8px 14px',
+                        background: '#163a70',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Take Exam →
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

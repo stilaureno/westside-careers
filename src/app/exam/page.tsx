@@ -49,6 +49,14 @@ export default function ExamPage() {
   }, []);
 
   useEffect(() => {
+    const savedRef = localStorage.getItem('examRef');
+    if (savedRef) {
+      setRefInput(savedRef);
+      localStorage.removeItem('examRef');
+    }
+  }, []);
+
+  useEffect(() => {
     activeReferenceRef.current = applicant?.referenceNo || refInput.trim();
   }, [applicant, refInput]);
 
