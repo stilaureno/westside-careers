@@ -179,6 +179,9 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                     color: s.result_status === 'Passed' ? '#166534' : '#991b1b',
                   }}>{s.result_status}</span>
                 </div>
+                {s.stage_name === 'Math Exam' && s.termination_reason === 'WINDOWS_LOST_FOCUS' && (
+                  <p style={{ fontSize: '12px', color: '#dc3545', fontWeight: '700', margin: '4px 0 0' }}>Auto submitted due to lost window focus</p>
+                )}
                 {s.remarks && (
                   <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0' }}>
                     {renderFormattedMessage(s.remarks)}

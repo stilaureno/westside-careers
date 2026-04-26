@@ -268,6 +268,9 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                                   <span className="fw-medium">{s.stage_name}</span>
                                   <span className={s.result_status === 'Passed' ? 'text-success' : 'text-danger'}>{s.result_status}</span>
                                 </div>
+                                {s.stage_name === 'Math Exam' && s.termination_reason === 'WINDOWS_LOST_FOCUS' && (
+                                  <p className="text-danger small mb-0 fw-bold">Auto submitted due to lost window focus</p>
+                                )}
                                 {s.remarks && <p className="text-muted small mb-0">{renderFormattedMessage(s.remarks)}</p>}
                                 <p className="text-muted small mb-0">{s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}</p>
                               </div>
