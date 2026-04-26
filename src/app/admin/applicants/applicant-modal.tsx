@@ -194,7 +194,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
                             ['Email', applicant?.email_address, 'email_address'],
                             ['Contact', applicant?.contact_number, 'contact_number'],
                             ['Birthdate', applicant?.birthdate, 'birthdate'],
-                            ['Age', applicant?.age ? `${applicant?.age}` : '-', null],
+                            ['Age', applicant?.age ? `${applicant?.age}` : '-', 'age'],
                           ] as [string, string, string | null][]).map(([label, value, fieldKey]) => {
                             if (fieldKey && !isFieldVisible(fieldKey)) return null;
                             return (
