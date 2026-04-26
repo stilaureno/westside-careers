@@ -17,6 +17,10 @@ export default function DetailContent({ initialData }: { initialData: any }) {
   const [form, setForm] = useState<any>({});
   const router = useRouter();
 
+  const completedStages = data?.stages ? getCompletedStages(data.stages) : [];
+  const fullWorkflow = getWorkflow(data?.applicant?.position_applied, data?.applicant?.experience_level);
+  const availableStages = getAvailableStages(fullWorkflow, completedStages);
+
   function handleStageChange(stageName: string) {
     setStage(stageName);
     setStageSeq(getStageSeq(stageName, data?.applicant));
@@ -38,6 +42,21 @@ export default function DetailContent({ initialData }: { initialData: any }) {
       return ['Initial Screening', 'Final Interview'];
     }
     return ['Initial Screening'];
+  }
+
+  function getCompletedStages(stages: any[]): string[] {
+    return stages
+      .filter((s: any) => s.result_status === 'Passed' || s.result_status === 'Failed' || s.result_status === 'Reprofile' || s.result_status === 'For Pooling' || s.result_status === 'Not Recommended')
+      .map((s: any) => s.stage_name);
+  }
+
+  function getAvailableStages(workflow: string[], completed: string[]): string[] {
+    for (const stage of workflow) {
+      if (!completed.includes(stage)) {
+        return workflow.slice(workflow.indexOf(stage));
+      }
+    }
+    return [];
   }
 
   function updateFormFields(stageName: string, app: Applicant) {
@@ -200,7 +219,8 @@ export default function DetailContent({ initialData }: { initialData: any }) {
                 width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '14px',
               }}>
                 <option value="">Select Stage</option>
-                {workflow.map((s) => <option key={s} value={s}>{s}</option>)}
+                {availableStages.length === 0 && <option disabled>No stages available</option>}
+                {availableStages.map((s: string) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>

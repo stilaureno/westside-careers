@@ -70,6 +70,21 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
     return ['Initial Screening'];
   }
 
+  function getCompletedStages(stages: any[]): string[] {
+    return stages
+      .filter((s: any) => s.result_status === 'Passed' || s.result_status === 'Failed' || s.result_status === 'Reprofile' || s.result_status === 'For Pooling' || s.result_status === 'Not Recommended')
+      .map((s: any) => s.stage_name);
+  }
+
+  function getAvailableStages(workflow: string[], completed: string[]): string[] {
+    for (const stage of workflow) {
+      if (!completed.includes(stage)) {
+        return workflow.slice(workflow.indexOf(stage));
+      }
+    }
+    return [];
+  }
+
   function handleStageChange(stageName: string) {
     setStage(stageName);
     const workflow = getWorkflow(data?.applicant?.position_applied, data?.applicant?.experience_level);
@@ -137,7 +152,9 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
   if (!isOpen) return null;
 
   const { applicant, games, stages, notifications } = data || {};
-  const workflow = getWorkflow(applicant?.position_applied, applicant?.experience_level);
+  const fullWorkflow = getWorkflow(applicant?.position_applied, applicant?.experience_level);
+  const completedStages = stages ? getCompletedStages(stages) : [];
+  const availableStages = getAvailableStages(fullWorkflow, completedStages);
 
   return (
     <>
@@ -244,7 +261,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
                             <label className="form-label small">Stage *</label>
                             <select className="form-select form-select-sm" value={stage} onChange={(e) => handleStageChange(e.target.value)}>
                               <option value="">Select Stage</option>
-                              {workflow.map((s) => <option key={s} value={s}>{s}</option>)}
+                              {availableStages.length === 0 && <option disabled>No stages available</option>}
+                              {availableStages.map((s: string) => <option key={s} value={s}>{s}</option>)}
                             </select>
                           </div>
                           <div className="col-md-4">
