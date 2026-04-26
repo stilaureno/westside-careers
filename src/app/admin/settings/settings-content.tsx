@@ -113,9 +113,10 @@ export default function SettingsContent() {
 
   async function handlePositionChange(positionName: string) {
     setSelectedPosition(positionName);
+    setExpLevel('Non-Experienced');
     if (positionName) {
       const data = await getPositionStagesData(positionName);
-      setPositionStages(data[expLevel] || []);
+      setPositionStages(data['Non-Experienced'] || []);
       setAvailableStages(data.availableStages || []);
     } else {
       setPositionStages([]);
@@ -143,6 +144,10 @@ export default function SettingsContent() {
     if (!selectedPosition) return;
     setSaving(true);
     await savePositionStages(selectedPosition, expLevel, positionStages);
+    // Reload to refresh UI
+    const data = await getPositionStagesData(selectedPosition);
+    setPositionStages(data[expLevel] || []);
+    setAvailableStages(data.availableStages || []);
     setMessage({ text: 'Stages saved', type: 'success' });
     setSaving(false);
   }
