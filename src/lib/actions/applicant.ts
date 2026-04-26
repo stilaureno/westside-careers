@@ -75,6 +75,8 @@ function isCompletedStageResult(stageName: string, resultStatus?: string | null)
 }
 
 export async function submitApplication(formData: ApplicationFormData): Promise<{ success: boolean; referenceNo?: string; error?: string }> {
+  const supabase = await createClient();
+
   const age = Math.floor((Date.now() - new Date(formData.birthdate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
   if (age < 21) {
     return { success: false, error: 'You must be at least 21 years old to apply.' };
