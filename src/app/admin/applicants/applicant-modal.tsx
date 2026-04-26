@@ -343,13 +343,15 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved }
 
                         {stage === 'Final Interview' && (
                           <div className="row g-3 mb-3">
-                            <div className="col-md-6">
-                              <label className="form-label small">Sweaty Palm</label>
-                              <select className="form-select form-select-sm" value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })}>
-                                <option>Passed</option><option>Failed</option>
-                              </select>
-                            </div>
-                            <div className="col-md-6">
+                            {data?.applicant?.position_applied === 'Dealer' && (
+                              <div className="col-md-6">
+                                <label className="form-label small">Sweaty Palm</label>
+                                <select className="form-select form-select-sm" value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })}>
+                                  <option>Passed</option><option>Failed</option>
+                                </select>
+                              </div>
+                            )}
+                            <div className={`col-md-${data?.applicant?.position_applied === 'Dealer' ? 6 : 12}`}>
                               <label className="form-label small">Final Result</label>
                               <select className="form-select form-select-sm" value={resultStatus} onChange={(e) => setResultStatus(e.target.value)}>
                                 <option>Passed</option><option>Reprofile</option><option>For Pooling</option><option>Not Recommended</option>
