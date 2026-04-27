@@ -61,6 +61,14 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24,
     });
 
+    // Store the admin key for column visibility lookup
+    response.cookies.set('admin_key', matchedAdmin.key, {
+      path: '/',
+      httpOnly: false,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24,
+    });
+
     if (allowedDepartments && allowedDepartments.length > 0) {
       response.cookies.set('allowed_departments', JSON.stringify(allowedDepartments), {
         path: '/',

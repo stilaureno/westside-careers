@@ -442,3 +442,14 @@ export async function getApplicantsPageData(options?: {
     };
   });
 }
+
+export async function getAdminPasswordConfig(adminKey: string): Promise<{ column_visibility: string[] | null } | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('config')
+    .select('column_visibility')
+    .eq('key', adminKey)
+    .single();
+  
+  return data;
+}

@@ -6,7 +6,7 @@ import {
   SUPER_ADMIN_SESSION_COOKIE,
   SUPER_ADMIN_SESSION_VALUE,
 } from '@/lib/admin-session';
-import { getApplicantsPageData } from '@/lib/db/applicants';
+import { getApplicantsPageData, getAdminPasswordConfig } from '@/lib/db/applicants';
 import ApplicantsContent from './applicants-content';
 
 export default async function ApplicantsPage() {
@@ -20,7 +20,9 @@ export default async function ApplicantsPage() {
 
   const isSuperAdmin = superSession?.value === SUPER_ADMIN_SESSION_VALUE;
   const allowedDepartmentsCookie = cookieStore.get('allowed_departments')?.value;
+  const adminKeyCookie = cookieStore.get('admin_key')?.value;
   let allowedDepartments: string[] = [];
+  let columnVisibility: string[] | null = null;
 
   if (allowedDepartmentsCookie) {
     try {
@@ -30,6 +32,14 @@ export default async function ApplicantsPage() {
       }
     } catch {
       allowedDepartments = [];
+    }
+  }
+
+  // Get custom column visibility for this admin (non-super-admin)
+  if (!isSuperAdmin && adminKeyCookie) {
+    const adminConfig = await getAdminPasswordConfig(adminKeyCookie);
+    if (adminConfig?.column_visibility) {
+      columnVisibility = adminConfig.column_visibility;
     }
   }
 
@@ -44,6 +54,7 @@ export default async function ApplicantsPage() {
       initialApplicants={initialApplicants}
       isSuperAdmin={isSuperAdmin}
       allowedDepartments={allowedDepartments}
+      columnVisibility={columnVisibility}
     />
   );
 }

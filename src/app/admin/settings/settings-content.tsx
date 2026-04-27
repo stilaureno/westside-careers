@@ -30,6 +30,7 @@ interface AdminPassword {
   key: string;
   value: string;
   allowed_departments: string[] | null;
+  column_visibility?: string[] | null;
 }
 
 export default function SettingsContent() {
@@ -373,6 +374,55 @@ export default function SettingsContent() {
     }
     setSaving(false);
   }
+
+  async function toggleAdminColumnVisibility(admin: AdminPassword, fieldKey: string) {
+    const currentCols = admin.column_visibility || tableColumns.filter(f => f.is_visible).map(f => f.field_key);
+    const hasField = currentCols.includes(fieldKey);
+    const newCols = hasField
+      ? currentCols.filter(c => c !== fieldKey)
+      : [...currentCols, fieldKey];
+
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .update({ column_visibility: newCols })
+      .eq('key', admin.key);
+
+    if (!error) {
+      setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, column_visibility: newCols } : a));
+      setMessage({ text: 'Column visibility updated', type: 'success' });
+    }
+    setSaving(false);
+  }
+
+  async function setAllAdminColumnVisibility(admin: AdminPassword, show: boolean) {
+    const newCols = show 
+      ? tableColumns.map(f => f.field_key)
+      : tableColumns.filter(f => protectedColumns.includes(f.field_key)).map(f => f.field_key);
+
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .update({ column_visibility: newCols })
+      .eq('key', admin.key);
+
+    if (!error) {
+      setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, column_visibility: newCols } : a));
+      setMessage({ text: show ? 'All columns shown' : 'Protected columns shown', type: 'success' });
+    }
+    setSaving(false);
+  }
+
+  // Get default column visibility (all visible)
+  const getDefaultVisibility = (): string[] => tableColumns.map(f => f.field_key);
+
+  // Get effective visibility for an admin (custom or default)
+  const getEffectiveVisibility = (admin: AdminPassword): string[] => {
+    if (admin.column_visibility && admin.column_visibility.length > 0) {
+      return admin.column_visibility;
+    }
+    return getDefaultVisibility();
+  };
 
   const getPositionsForDept = (deptId: string) => positions.filter(p => p.department_id === deptId);
 
@@ -748,11 +798,11 @@ export default function SettingsContent() {
         <div className="col-md-12">
           <div className="card border-dark">
             <div className="card-header bg-dark text-white">
-              <h5 className="mb-0">Admin Passwords & Department Access</h5>
+              <h5 className="mb-0">Admin Passwords, Departments & Column Access</h5>
             </div>
             <div className="card-body">
               <p className="text-muted small mb-3">
-                Manage admin passwords and assign which departments each one can access. Super admin sees all departments by default.
+                Manage admin passwords, department access, and custom table column visibility for each admin.
               </p>
 
               {/* Add new password */}
@@ -802,9 +852,28 @@ export default function SettingsContent() {
                               }}
                             />
                           </div>
-                          <div>
+
+                          {/* Tabs for Departments and Column Visibility */}
+                          <ul className="nav nav-tabs small mb-2" role="tablist">
+                            <li className="nav-item" role="presentation">
+                              <button
+                                className="nav-link text-secondary px-2 py-1"
+                                style={{ fontSize: '11px' }}
+                              >
+                                Departments
+                              </button>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                              <span className="nav-link text-secondary px-2 py-1" style={{ fontSize: '11px', cursor: 'pointer' }}>
+                                Columns
+                              </span>
+                            </li>
+                          </ul>
+
+                          {/* Departments Section */}
+                          <div className="mb-3">
                             <label className="form-label small fw-bold">Allowed Departments:</label>
-                            <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                            <div className="border rounded p-2" style={{ maxHeight: '120px', overflowY: 'auto' }}>
                               {departments.filter(d => d.is_active).length === 0 ? (
                                 <span className="text-muted small">No active departments</span>
                               ) : (
@@ -828,6 +897,55 @@ export default function SettingsContent() {
                                 })
                               )}
                             </div>
+                          </div>
+
+                          {/* Column Visibility Section */}
+                          <div>
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                              <label className="form-label small fw-bold mb-0">Table Columns:</label>
+                              <div>
+                                <button
+                                  className="btn btn-sm btn-outline-secondary py-0 px-2"
+                                  style={{ fontSize: '10px' }}
+                                  onClick={() => setAllAdminColumnVisibility(admin, true)}
+                                  disabled={saving}
+                                >
+                                  All
+                                </button>
+                                <button
+                                  className="btn btn-sm btn-outline-secondary py-0 px-2 ms-1"
+                                  style={{ fontSize: '10px' }}
+                                  onClick={() => setAllAdminColumnVisibility(admin, false)}
+                                  disabled={saving}
+                                >
+                                  Protected
+                                </button>
+                              </div>
+                            </div>
+                            <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                              {tableColumns.map(field => {
+                                const isProtected = protectedColumns.includes(field.field_key);
+                                const effectiveVis = getEffectiveVisibility(admin);
+                                const isChecked = effectiveVis.includes(field.field_key);
+                                return (
+                                  <div key={field.id} className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      id={`${admin.key}-col-${field.id}`}
+                                      checked={isChecked}
+                                      disabled={saving || isProtected}
+                                      onChange={() => toggleAdminColumnVisibility(admin, field.field_key)}
+                                    />
+                                    <label className={`form-check-label ${isProtected ? 'text-muted' : ''}`} htmlFor={`${admin.key}-col-${field.id}`}>
+                                      {field.field_label}
+                                      {isProtected && <span className="text-danger ms-1">*</span>}
+                                    </label>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <small className="text-muted">* Always visible</small>
                           </div>
                         </div>
                       </div>

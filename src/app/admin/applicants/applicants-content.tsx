@@ -33,19 +33,26 @@ type ApplicantsContentProps = {
   initialApplicants: ApplicantListItem[];
   isSuperAdmin: boolean;
   allowedDepartments: string[];
+  columnVisibility?: string[] | null;
 };
 
 export default function ApplicantsContent({
   initialApplicants,
   isSuperAdmin,
   allowedDepartments,
+  columnVisibility,
 }: ApplicantsContentProps) {
   const [applicants, setApplicants] = useState<ApplicantListItem[]>(initialApplicants);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
-  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-    new Set(Object.keys(COLUMN_KEY_MAP))
-  );
+  
+  // Use custom column visibility from props, or load from DB
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
+    if (columnVisibility && columnVisibility.length > 0) {
+      return new Set(columnVisibility);
+    }
+    return new Set(Object.keys(COLUMN_KEY_MAP));
+  });
 
   const today = new Date().toISOString().split('T')[0];
 
