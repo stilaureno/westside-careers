@@ -577,12 +577,21 @@ export default function SettingsContent() {
                   const isProtected = protectedColumns.includes(field.field_key);
                   return (
                     <div key={field.id} className="col-6 col-md-4">
-                      <div 
-                        className="form-check py-2 px-3 border rounded"
+                      <label
+                        className="d-flex align-items-center gap-2 py-2 px-3 border rounded"
                         style={{ 
                           background: isProtected ? '#f3f4f6' : '#fff',
                           transition: 'all 0.15s ease',
-                          cursor: isProtected ? 'not-allowed' : 'pointer'
+                          cursor: isProtected ? 'not-allowed' : 'pointer',
+                          fontSize: '12px',
+                          color: isProtected ? '#9ca3af' : '#374151'
+                        }}
+                        htmlFor={`table-col-${field.id}`}
+                        onMouseOver={(e) => {
+                          if (!isProtected) e.currentTarget.style.background = '#f0f0f0';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.background = isProtected ? '#f3f4f6' : '#fff';
                         }}
                       >
                         <input
@@ -597,19 +606,9 @@ export default function SettingsContent() {
                             cursor: isProtected ? 'not-allowed' : 'pointer'
                           }}
                         />
-                        <label 
-                          className={`form-check-label ms-2 ${isProtected ? 'text-muted' : ''}`}
-                          style={{ 
-                            fontSize: '12px',
-                            color: isProtected ? '#9ca3af' : '#374151',
-                            cursor: isProtected ? 'not-allowed' : 'pointer'
-                          }} 
-                          htmlFor={`table-col-${field.id}`}
-                        >
-                          {field.field_label}
-                          {isProtected && <span className="ms-2" style={{ color: '#8b1e2d', fontSize: '11px' }}>🔒</span>}
-                        </label>
-                      </div>
+                        {field.field_label}
+                        {isProtected && <span className="ms-1" style={{ color: '#8b1e2d', fontSize: '11px' }}>🔒</span>}
+                      </label>
                     </div>
                   );
                 })}
