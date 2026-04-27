@@ -1023,7 +1023,7 @@ export default function SettingsContent() {
                               </div>
                             </div>
                             <div 
-                              className="border rounded p-2" 
+                              className="border rounded p-3" 
                               style={{ 
                                 maxHeight: '180px', 
                                 overflowY: 'auto',
@@ -1038,10 +1038,11 @@ export default function SettingsContent() {
                                 return (
                                   <div 
                                     key={field.id} 
-                                    className="form-check py-1 px-2 rounded mb-1"
+                                    className="form-check py-2 px-3 rounded mb-2"
                                     style={{ 
                                       cursor: isProtected ? 'not-allowed' : 'pointer',
-                                      transition: 'background 0.15s ease'
+                                      transition: 'background 0.15s ease',
+                                      marginBottom: '8px'
                                     }}
                                     onMouseOver={(e) => {
                                       if (!isProtected) e.currentTarget.style.background = '#f0f0f0';
@@ -1116,15 +1117,15 @@ export default function SettingsContent() {
                               </span>
                             </div>
                             <div 
-                              className="border rounded p-2" 
+                              className="border rounded p-3" 
                               style={{ 
                                 background: '#fafafa',
                                 borderColor: '#e5e7eb'
                               }}
                             >
                               <div 
-                                className="form-check py-1 px-2 rounded mb-1"
-                                style={{ cursor: 'pointer' }}
+                                className="form-check py-2 px-3 rounded mb-2"
+                                style={{ cursor: 'pointer', marginBottom: '8px' }}
                               >
                                 <input
                                   className="form-check-input"
