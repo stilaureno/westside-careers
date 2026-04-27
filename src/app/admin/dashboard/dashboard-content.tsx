@@ -321,37 +321,35 @@ export default function DashboardContent() {
 
   return (
     <div style={{ padding: '0' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#000080', marginBottom: '20px' }}>Dashboard</h1>
-
-      {/* Date Filter */}
-      <div style={{
-        background: '#000080', border: '1px solid #FFD700', borderRadius: '18px',
-        padding: '16px', marginBottom: '20px',
-      }}>
-        <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px', color: '#FFD700' }}>Dashboard Date Filter</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Start Date</label>
-            <input
-              type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>End Date</label>
-            <input
-              type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-              style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
-            />
-          </div>
-          <button onClick={clearFilters} style={{
-            padding: '10px 18px', background: '#fff', color: '#1f2937', border: '1px solid #e5e7eb',
-            borderRadius: '12px', fontSize: '14px', cursor: 'pointer',
-          }}>Clear Filter</button>
+      {/* Header with inline filters */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#000080', margin: 0 }}>Dashboard</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }}
+          />
+          <span style={{ color: '#6b7280', fontSize: '13px' }}>to</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }}
+          />
+          {(startDate || endDate) && (
+            <button
+              onClick={clearFilters}
+              style={{
+                padding: '8px 14px', background: '#fff', color: '#8b1e2d', border: '1px solid #8b1e2d',
+                borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '500',
+              }}
+            >
+              Clear
+            </button>
+          )}
         </div>
-        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>
-          Filters the dashboard counts based on applicant application date.
-        </p>
       </div>
 
       {deptNames.length === 0 && (
