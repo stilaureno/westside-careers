@@ -1198,39 +1198,41 @@ export default function SettingsContent() {
                             <div 
                               className="border rounded p-3" 
                               style={{ 
-                                maxHeight: '180px', 
+                                maxHeight: '250px', 
                                 overflowY: 'auto',
                                 background: '#fafafa',
                                 borderColor: '#e5e7eb'
                               }}
                             >
-                              {tableColumns.map(field => {
-                                const isProtected = protectedColumns.includes(field.field_key);
-                                const effectiveVis = getEffectiveVisibility(admin);
-                                const isChecked = effectiveVis.includes(field.field_key);
-                                return (
-                                  <div 
-                                    key={field.id} 
-                                    className="form-check py-2 px-3 rounded mb-2"
-                                    style={{ 
-                                      cursor: isProtected ? 'not-allowed' : 'pointer',
-                                      transition: 'background 0.15s ease',
-                                      marginBottom: '8px'
-                                    }}
-                                    onMouseOver={(e) => {
-                                      if (!isProtected) e.currentTarget.style.background = '#f0f0f0';
-                                    }}
-                                    onMouseOut={(e) => {
-                                      e.currentTarget.style.background = 'transparent';
-                                    }}
-                                  >
-                                    <input
-                                      className="form-check-input"
-                                      type="checkbox"
-                                      id={`${admin.key}-col-${field.id}`}
-                                      checked={isChecked}
-                                      disabled={saving || isProtected}
-                                      onChange={() => toggleAdminColumnVisibility(admin, field.field_key)}
+                              <div className="row g-2">
+                                {tableColumns.map(field => {
+                                  const isProtected = protectedColumns.includes(field.field_key);
+                                  const effectiveVis = getEffectiveVisibility(admin);
+                                  const isChecked = effectiveVis.includes(field.field_key);
+                                  return (
+                                    <div key={field.id} className="col-6 col-md-4 col-lg-3">
+                                      <div 
+                                        className="form-check py-2 px-2 rounded"
+                                        style={{ 
+                                          cursor: isProtected ? 'not-allowed' : 'pointer',
+                                          transition: 'background 0.15s ease',
+                                          background: isProtected ? '#f3f4f6' : '#fff',
+                                          border: '1px solid #e5e7eb'
+                                        }}
+                                        onMouseOver={(e) => {
+                                          if (!isProtected) e.currentTarget.style.background = '#f0f0f0';
+                                        }}
+                                        onMouseOut={(e) => {
+                                          e.currentTarget.style.background = isProtected ? '#f3f4f6' : '#fff';
+                                        }}
+                                      >
+                                        <input
+                                          className="form-check-input"
+                                          type="checkbox"
+                                          id={`${admin.key}-col-${field.id}`}
+                                          checked={isChecked}
+                                          disabled={saving || isProtected}
+                                          onChange={() => toggleAdminColumnVisibility(admin, field.field_key)}
                                       style={{ 
                                         accentColor: '#8b1e2d',
                                         cursor: isProtected ? 'not-allowed' : 'pointer'
@@ -1260,9 +1262,11 @@ export default function SettingsContent() {
                                         </span>
                                       )}
                                     </label>
-                                  </div>
-                                );
-                              })}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
                             <div className="d-flex align-items-center gap-2 mt-2">
                               <span style={{ color: '#8b1e2d', fontSize: '12px' }}>🔒</span>
