@@ -57,10 +57,10 @@ interface DashboardData {
   [deptName: string]: DeptData;
 }
 
-function SummaryCard({ label, value, color = '#1f2937' }: { label: string; value: number; color?: string }) {
+function SummaryCard({ label, value, color = '#000080' }: { label: string; value: number; color?: string }) {
   return (
     <div style={{
-      background: '#fff', border: '1px solid #e5e7eb', borderRadius: '14px',
+      background: '#f8f9fa', border: '1px solid #FFD700', borderRadius: '14px',
       padding: '12px', textAlign: 'center', minHeight: '88px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
     }}>
       <p style={{ fontSize: '11px', color: '#6b7280', margin: '0 0 6px', lineHeight: 1.3 }}>{label}</p>
@@ -72,12 +72,12 @@ function SummaryCard({ label, value, color = '#1f2937' }: { label: string; value
 function PositionSection({ title, summary }: { title: string; summary: PositionSummary }) {
   return (
     <div style={{ marginBottom: '20px' }}>
-      <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#1f2937' }}>{title}</h3>
+      <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#000080' }}>{title}</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
         <SummaryCard label="Total" value={summary.total} />
         <SummaryCard label="Pending" value={summary.pending} color="#6b7280" />
         <SummaryCard label="Ongoing" value={summary.ongoing} color="#d97706" />
-        <SummaryCard label="Qualified" value={summary.qualified} color="#166534" />
+        <SummaryCard label="Qualified" value={summary.qualified} color="#DAA520" />
         <SummaryCard label="Reprofile" value={summary.reprofile} color="#7c3aed" />
         <SummaryCard label="Pooling" value={summary.pooling} color="#0891b2" />
         <SummaryCard label="Failed" value={summary.failed} color="#991b1b" />
@@ -103,10 +103,10 @@ function StageSection({ title, summary }: { title: string; summary: StageSummary
 function GenderRow({ label, male, female }: { label: string; male: number; female: number }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
-      <span style={{ fontSize: '13px', color: '#6b7280' }}>{label}</span>
+      <span style={{ fontSize: '13px', color: '#000080' }}>{label}</span>
       <span style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', fontWeight: '600' }}>
-        <span style={{ color: '#1d4ed8' }}>M {male}</span>
-        <span style={{ color: '#dc2626' }}>F {female}</span>
+        <span style={{ color: '#FFD700' }}>M {male}</span>
+        <span style={{ color: '#FFA07A' }}>F {female}</span>
       </span>
     </div>
   );
@@ -115,8 +115,8 @@ function GenderRow({ label, male, female }: { label: string; male: number; femal
 function AgeBandRow({ label, value, isLast = false }: { label: string; value: number; isLast?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: isLast ? 'none' : '1px solid #e5e7eb' }}>
-      <span style={{ fontSize: '13px', color: '#6b7280' }}>{label}</span>
-      <span style={{ fontSize: '13px', fontWeight: '600' }}>{value}</span>
+      <span style={{ fontSize: '13px', color: '#000080' }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '600', color: '#000080' }}>{value}</span>
     </div>
   );
 }
@@ -321,14 +321,14 @@ export default function DashboardContent() {
 
   return (
     <div style={{ padding: '0' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '20px' }}>Dashboard</h1>
+      <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#000080', marginBottom: '20px' }}>Dashboard</h1>
 
       {/* Date Filter */}
       <div style={{
-        background: '#fff7f8', border: '1px solid #f3cdd3', borderRadius: '18px',
+        background: '#000080', border: '1px solid #FFD700', borderRadius: '18px',
         padding: '16px', marginBottom: '20px',
       }}>
-        <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>Dashboard Date Filter</div>
+        <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px', color: '#FFD700' }}>Dashboard Date Filter</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
           <div>
             <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '6px' }}>Start Date</label>
@@ -360,25 +360,26 @@ export default function DashboardContent() {
         </div>
       )}
 
-      {deptNames.map(deptName => {
+{deptNames.map(deptName => {
         const deptData = dashboardData[deptName];
         const positions = deptPositions[deptName] || [];
+        const deptHeaderColor = deptName === 'Table Games' ? '#800000' : deptName === 'Slots' ? '#FF8C00' : '#000080';
         
         return (
           <div key={deptName} style={{
-            background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px', marginBottom: '20px',
+            background: '#f0f4f8', border: '1px solid #FFD700', borderRadius: '18px', padding: '20px', marginBottom: '20px',
           }}>
             {/* Department Header */}
             <div style={{
-              background: '#8b1e2d', color: '#fff', borderRadius: '12px', padding: '16px',
+              background: deptHeaderColor, color: '#FFD700', borderRadius: '12px', padding: '16px',
               marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{deptName}</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: deptName === 'Table Games' || deptName === 'Slots' ? '#000' : '#FFD700' }}>{deptName}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                 <SummaryCard label="Total" value={deptData.total} />
                 <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" />
                 <SummaryCard label="Ongoing" value={deptData.ongoing} color="#d97706" />
-                <SummaryCard label="Qualified" value={deptData.qualified} color="#90EE90" />
+                <SummaryCard label="Qualified" value={deptData.qualified} color="#FFD700" />
                 <SummaryCard label="Reprofile" value={deptData.reprofile} color="#d8b4fe" />
                 <SummaryCard label="Pooling" value={deptData.pooling} color="#67e8f9" />
                 <SummaryCard label="Failed" value={deptData.failed} color="#fca5a5" />
@@ -392,12 +393,12 @@ export default function DashboardContent() {
               
               return (
                 <div key={posName} style={{ marginBottom: '20px' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#1f2937' }}>{posName}</h3>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#000080' }}>{posName}</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                     <SummaryCard label="Total" value={posSummary.total} />
                     <SummaryCard label="Pending" value={posSummary.pending} color="#6b7280" />
                     <SummaryCard label="Ongoing" value={posSummary.ongoing} color="#d97706" />
-                    <SummaryCard label="Qualified" value={posSummary.qualified} color="#166534" />
+                    <SummaryCard label="Qualified" value={posSummary.qualified} color="#DAA520" />
                     <SummaryCard label="Reprofile" value={posSummary.reprofile} color="#7c3aed" />
                     <SummaryCard label="Pooling" value={posSummary.pooling} color="#0891b2" />
                     <SummaryCard label="Failed" value={posSummary.failed} color="#991b1b" />
