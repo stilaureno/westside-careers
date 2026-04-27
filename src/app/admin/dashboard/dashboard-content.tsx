@@ -329,14 +329,16 @@ export default function DashboardContent() {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            style={{ padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }}
+            placeholder="Start date"
+            style={{ padding: '8px 12px', border: '1px solid #FFD700', borderRadius: '8px', fontSize: '13px', background: '#fff' }}
           />
-          <span style={{ color: '#6b7280', fontSize: '13px' }}>to</span>
+          <span style={{ color: '#FFD700', fontSize: '13px' }}>to</span>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            style={{ padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }}
+            placeholder="End date"
+            style={{ padding: '8px 12px', border: '1px solid #FFD700', borderRadius: '8px', fontSize: '13px', background: '#fff' }}
           />
           {(startDate || endDate) && (
             <button
