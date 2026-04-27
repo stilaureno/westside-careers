@@ -445,11 +445,16 @@ export async function getApplicantsPageData(options?: {
 
 export async function getAdminPasswordConfig(adminKey: string): Promise<{ column_visibility: string[] | null } | null> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('config')
     .select('column_visibility')
     .eq('key', adminKey)
-    .single();
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error fetching admin config:', error);
+    return null;
+  }
   
   return data;
 }
