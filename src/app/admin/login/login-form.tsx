@@ -61,21 +61,15 @@ export default function LoginForm() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <div style={{ 
-            background: '#fff', 
-            width: '100px', 
-            height: '100px', 
-            borderRadius: '20px', 
             margin: '0 auto 20px', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            padding: '12px'
           }}>
             <img
               src="/WESTSIDE LOGO COLORED.png"
               alt="Logo"
-              style={{ maxWidth: '100%', height: 'auto', objectFit: 'contain' }}
+              style={{ width: '140px', height: 'auto', objectFit: 'contain' }}
             />
           </div>
           <h1 style={{ 

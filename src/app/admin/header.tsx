@@ -21,7 +21,7 @@ export function AdminHeader({ isSuperAdmin, adminLabel }: { isSuperAdmin: boolea
         <img
           src="/WESTSIDE LOGO COLORED.png"
           alt="Logo"
-          style={{ width: '44px', height: '44px', objectFit: 'contain' }}
+          style={{ width: '56px', height: '56px', objectFit: 'contain' }}
         />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '18px', fontWeight: '800', color: '#8b1e2d', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
