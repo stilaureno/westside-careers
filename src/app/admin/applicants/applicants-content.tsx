@@ -123,17 +123,26 @@ export default function ApplicantsContent({
 
     const { data: apps } = await applicantsQuery;
     const referenceNumbers = (apps || []).map((app) => app.reference_no).filter(Boolean);
-    const { data: stages } = referenceNumbers.length > 0
-      ? await supabase
-          .from('stage_results')
-          .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks')
-          .in('reference_no', referenceNumbers)
-      : { data: [] };
+    
+    const stagesQuery = referenceNumbers.length > 0
+      ? supabase.from('stage_results').select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks').in('reference_no', referenceNumbers)
+      : null;
+    const examQuery = referenceNumbers.length > 0
+      ? supabase.from('math_exam_results').select('reference_no, score, termination_reason').in('reference_no', referenceNumbers)
+      : null;
+
+    const stagesResult = stagesQuery ? await stagesQuery : { data: [] as any };
+    const examResult = examQuery ? await examQuery : { data: [] as any };
 
     const stageMap: Record<string, ApplicantListItem['stages']> = {};
-    stages?.forEach((s) => {
+    (stagesResult.data || []).forEach((s: any) => {
       if (!stageMap[s.reference_no]) stageMap[s.reference_no] = [];
       stageMap[s.reference_no].push(s);
+    });
+
+    const examMap: Record<string, { score: number; termination_reason: string | null }> = {};
+    (examResult.data || []).forEach((e: any) => {
+      examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason };
     });
 
     const enriched = (apps || []).map((app) => {
@@ -142,11 +151,14 @@ export default function ApplicantsContent({
         const s = appStages.find((x) => x.stage_name === stage);
         return s?.result_status || '-';
       };
+      const exam = examMap[app.reference_no];
       return {
         ...app,
         displayName: `${app.first_name} ${app.last_name}`,
         initialScreeningResult: getStageResult('Initial Screening'),
         mathExamResult: getStageResult('Math Exam'),
+        mathExamScore: exam?.score,
+        mathExamTerminationReason: exam?.termination_reason,
         tableTestResult: getStageResult('Table Test'),
         sweatyPalmResult: appStages.find((x) => x.stage_name === 'Final Interview')?.result_status || '-',
         finalInterviewResult: getStageResult('Final Interview'),
@@ -506,7 +518,14 @@ export default function ApplicantsContent({
                       </td>
                     )}
                     {visibleColumns.has('applicants_table_mathExamResult') && (
-                      <td className={app.mathExamResult === 'Passed' ? 'text-success' : app.mathExamResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
+                      <td 
+                        className={app.mathExamResult === 'Passed' ? 'text-success' : app.mathExamResult === 'Failed' ? 'text-danger' : 'text-muted'} 
+                        style={{ fontSize: '12px' }}
+                        title={app.mathExamScore !== undefined 
+                          ? `Score: ${app.mathExamScore}/10${app.mathExamTerminationReason ? `\n⚠️ Terminated: ${app.mathExamTerminationReason}` : ''}`
+                          : 'No exam record'
+                        }
+                      >
                         {app.mathExamResult}
                       </td>
                     )}
