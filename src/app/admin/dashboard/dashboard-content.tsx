@@ -374,7 +374,7 @@ export default function DashboardContent() {
               background: deptHeaderColor, color: '#FFD700', borderRadius: '12px', padding: '16px',
               marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: deptName === 'Table Games' || deptName === 'Slots' ? '#000' : '#FFD700' }}>{deptName}</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: deptName === 'Table Games' ? '#fff' : deptName === 'Slots' ? '#000' : '#FFD700' }}>{deptName}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                 <SummaryCard label="Total" value={deptData.total} />
                 <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" />
