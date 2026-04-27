@@ -411,7 +411,7 @@ export async function getApplicantsPageData(options?: {
   const { data: stages } = referenceNumbers.length > 0
     ? await supabase
         .from('stage_results')
-        .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks')
+        .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks, sweaty_palm_result')
         .in('reference_no', referenceNumbers)
     : { data: [] as ApplicantStageSummary[] };
 
