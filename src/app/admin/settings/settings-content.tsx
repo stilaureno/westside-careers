@@ -66,6 +66,9 @@ export default function SettingsContent() {
   // Protected columns that cannot be hidden
   const protectedColumns = ['applicants_table_reference_no', 'applicants_table_displayName'];
 
+  // Admin password tab state
+  const [activeAdminTab, setActiveAdminTab] = useState<Record<string, 'departments' | 'columns'>>({});
+
   useEffect(() => {
     loadData();
   }, []);
@@ -1071,66 +1074,75 @@ export default function SettingsContent() {
                           {/* Tabs for Departments and Column Visibility */}
                           <ul className="nav nav-tabs small mb-3" role="tablist">
                             <li className="nav-item" role="presentation">
-                              <span
+                              <button
                                 className="nav-link px-3 py-2"
                                 style={{ 
                                   fontSize: '12px', 
                                   fontWeight: '600',
                                   cursor: 'pointer',
-                                  borderBottom: '2px solid #8b1e2d',
-                                  color: '#8b1e2d',
+                                  border: 'none',
+                                  borderBottom: (activeAdminTab[admin.key] || 'departments') === 'departments' ? '2px solid #8b1e2d' : '2px solid transparent',
+                                  color: (activeAdminTab[admin.key] || 'departments') === 'departments' ? '#8b1e2d' : '#6b7280',
                                   background: 'transparent'
                                 }}
+                                onClick={() => setActiveAdminTab(prev => ({ ...prev, [admin.key]: 'departments' }))}
                               >
                                 Departments
-                              </span>
+                              </button>
                             </li>
                             <li className="nav-item" role="presentation">
-                              <span
+                              <button
                                 className="nav-link px-3 py-2"
                                 style={{ 
                                   fontSize: '12px', 
                                   fontWeight: '600',
                                   cursor: 'pointer',
-                                  borderBottom: '2px solid transparent',
-                                  color: '#6b7280',
+                                  border: 'none',
+                                  borderBottom: activeAdminTab[admin.key] === 'columns' ? '2px solid #8b1e2d' : '2px solid transparent',
+                                  color: activeAdminTab[admin.key] === 'columns' ? '#8b1e2d' : '#6b7280',
+                                  background: 'transparent'
                                 }}
+                                onClick={() => setActiveAdminTab(prev => ({ ...prev, [admin.key]: 'columns' }))}
                               >
                                 Columns
-                              </span>
+                              </button>
                             </li>
                           </ul>
 
-                          {/* Departments Section */}
-                          <div className="mb-3">
-                            <label className="form-label small fw-bold">Allowed Departments:</label>
-                            <div className="border rounded p-2" style={{ maxHeight: '120px', overflowY: 'auto' }}>
-                              {departments.filter(d => d.is_active).length === 0 ? (
-                                <span className="text-muted small">No active departments</span>
-                              ) : (
-                                departments.filter(d => d.is_active).map(dept => {
-                                  const isChecked = (admin.allowed_departments || []).includes(dept.name);
-                                  return (
-                                    <div key={dept.id} className="form-check">
-                                      <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        id={`${admin.key}-${dept.id}`}
-                                        checked={isChecked}
-                                        disabled={saving}
-                                        onChange={() => toggleAdminDept(admin, dept.name)}
-                                      />
-                                      <label className="form-check-label" htmlFor={`${admin.key}-${dept.id}`}>
-                                        {dept.name}
-                                      </label>
-                                    </div>
-                                  );
-                                })
-                              )}
+                          {/* Departments Section - Show when tab is 'departments' or default */}
+                          {(activeAdminTab[admin.key] || 'departments') === 'departments' && (
+                            <div className="mb-3">
+                              <label className="form-label small fw-bold">Allowed Departments:</label>
+                              <div className="border rounded p-3" style={{ maxHeight: '150px', overflowY: 'auto', background: '#fff' }}>
+                                {departments.filter(d => d.is_active).length === 0 ? (
+                                  <span className="text-muted small">No active departments</span>
+                                ) : (
+                                  departments.filter(d => d.is_active).map(dept => {
+                                    const isChecked = (admin.allowed_departments || []).includes(dept.name);
+                                    return (
+                                      <div key={dept.id} className="form-check py-2 px-3 rounded mb-2" style={{ cursor: 'pointer' }}>
+                                        <input
+                                          className="form-check-input"
+                                          type="checkbox"
+                                          id={`${admin.key}-${dept.id}`}
+                                          checked={isChecked}
+                                          disabled={saving}
+                                          onChange={() => toggleAdminDept(admin, dept.name)}
+                                          style={{ accentColor: '#8b1e2d' }}
+                                        />
+                                        <label className="form-check-label ms-2" style={{ fontSize: '13px', color: '#374151' }} htmlFor={`${admin.key}-${dept.id}`}>
+                                          {dept.name}
+                                        </label>
+                                      </div>
+                                    );
+                                  })
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )}
 
-                          {/* Column Visibility Section */}
+                          {/* Column Visibility Section - Show when tab is 'columns' */}
+                          {activeAdminTab[admin.key] === 'columns' && (
                           <div>
                             <div className="d-flex justify-content-between align-items-center mb-3">
                               <div className="d-flex align-items-center gap-2">
@@ -1257,6 +1269,7 @@ export default function SettingsContent() {
                               <small style={{ color: '#6b7280', fontSize: '11px' }}>Protected columns are always visible and cannot be hidden</small>
                             </div>
                           </div>
+                          )}
 
                           {/* Modal Sections Section */}
                           <div className="mt-3 pt-3" style={{ borderTop: '1px dashed #e5e7eb' }}>
