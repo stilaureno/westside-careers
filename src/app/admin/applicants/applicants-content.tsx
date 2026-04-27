@@ -70,8 +70,8 @@ export default function ApplicantsContent({
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
-  const pageSizeOptions = [50, 100, 300, 0]; // 0 = All
+  const [pageSize, setPageSize] = useState(10);
+  const pageSizeOptions = [25, 50, 100];
 
   // Load column visibility from database (only for super admins or if no prop provided)
   useEffect(() => {
@@ -563,10 +563,10 @@ export default function ApplicantsContent({
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
-              <option value={300}>300</option>
-              <option value={0}>All</option>
             </select>
           </div>
 
