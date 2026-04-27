@@ -478,8 +478,8 @@ export default function ApplicantsContent({
                   <tr key={app.reference_no}>
                     {visibleColumns.has('applicants_table_created_at') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.created_at?.slice(0, 10) || '-'}</td>}
                     {visibleColumns.has('applicants_table_reference_no') && (
-                      <td style={{ fontSize: '12px' }}>
-                        <button className="btn btn-link p-0 fw-bold text-decoration-none" style={{ color: '#8b1e2d' }} onClick={() => openModal(app.reference_no)}>
+                      <td>
+                        <button className="btn btn-link p-0 fw-bold text-decoration-none" style={{ color: '#8b1e2d', fontSize: '12px' }} onClick={() => openModal(app.reference_no)}>
                           {app.reference_no}
                         </button>
                       </td>
