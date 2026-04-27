@@ -261,6 +261,22 @@ export default function ApplicantsContent({
     setCurrentPage(1);
   }, [filterPosition, filterStage, filterStatus, filterStartDate, filterEndDate, globalSearch]);
 
+  // Keyboard navigation for pagination
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (pageSize === 0 || totalPages <= 1) return;
+      
+      if (e.key === 'ArrowLeft' && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
+        setCurrentPage(prev => prev + 1);
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage, totalPages, pageSize]);
+
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
     setCurrentPage(1);
