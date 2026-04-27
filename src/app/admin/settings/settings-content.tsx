@@ -9,6 +9,7 @@ interface VisibleField {
   field_key: string;
   field_label: string;
   is_visible: boolean;
+  location?: string;
 }
 
 interface Department {
@@ -55,6 +56,13 @@ export default function SettingsContent() {
   const [newStageName, setNewStageName] = useState('');
   const [newStageOrder, setNewStageOrder] = useState<number>(0);
 
+  // Table column visibility state
+  const [tableColumns, setTableColumns] = useState<VisibleField[]>([]);
+  const [modalFields, setModalFields] = useState<VisibleField[]>([]);
+
+  // Protected columns that cannot be hidden
+  const protectedColumns = ['applicants_table_reference_no', 'applicants_table_displayName'];
+
   useEffect(() => {
     loadData();
   }, []);
@@ -68,7 +76,12 @@ export default function SettingsContent() {
       supabase.from('config').select('*').like('key', 'ADMIN_PASSWORD%').neq('key', 'SUPER_ADMIN_PASSWORD'),
       supabase.from('stages').select('*').order('display_order'),
     ]);
-    setFields(fieldsRes.data || []);
+    
+    const allFields = fieldsRes.data || [];
+    setFields(allFields);
+    setModalFields(allFields.filter((f: VisibleField) => !f.location || f.location === 'applicant_modal'));
+    setTableColumns(allFields.filter((f: VisibleField) => f.location === 'applicants_table'));
+    
     setDepartments(deptsRes.data || []);
     setPositions(possRes.data || []);
     setAdminPasswords(adminPassRes.data || []);
@@ -84,8 +97,39 @@ export default function SettingsContent() {
       .eq('id', field.id);
 
     if (!error) {
-      setFields(fields.map(f => f.id === field.id ? { ...f, is_visible: !f.is_visible } : f));
+      setModalFields(modalFields.map(f => f.id === field.id ? { ...f, is_visible: !f.is_visible } : f));
     }
+    setSaving(false);
+  }
+
+  async function toggleTableColumn(field: VisibleField) {
+    if (protectedColumns.includes(field.field_key)) return;
+    
+    setSaving(true);
+    const { error } = await supabase
+      .from('visible_fields')
+      .update({ is_visible: !field.is_visible })
+      .eq('id', field.id);
+
+    if (!error) {
+      setTableColumns(tableColumns.map(f => f.id === field.id ? { ...f, is_visible: !f.is_visible } : f));
+      setMessage({ text: 'Column visibility updated', type: 'success' });
+    }
+    setSaving(false);
+  }
+
+  async function toggleAllTableColumns(show: boolean) {
+    setSaving(true);
+    const updates = tableColumns
+      .filter(f => !protectedColumns.includes(f.field_key))
+      .map(f => supabase.from('visible_fields').update({ is_visible: show }).eq('id', f.id));
+
+    await Promise.all(updates);
+    setTableColumns(tableColumns.map(f => ({
+      ...f,
+      is_visible: protectedColumns.includes(f.field_key) ? f.is_visible : show
+    })));
+    setMessage({ text: show ? 'All columns shown' : 'All columns hidden', type: 'success' });
     setSaving(false);
   }
 
@@ -362,7 +406,7 @@ export default function SettingsContent() {
               <small className="text-muted">Toggle fields to show in Details section</small>
             </div>
             <div className="card-body">
-              {fields.map(field => (
+              {modalFields.map(field => (
                 <div key={field.id} className="d-flex justify-content-between align-items-center py-2 border-bottom">
                   <span>{field.field_label}</span>
                   <div className="form-check form-switch">
@@ -376,6 +420,58 @@ export default function SettingsContent() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Table Column Visibility */}
+        <div className="col-md-6">
+          <div className="card border-success">
+            <div className="card-header bg-success text-white">
+              <h6 className="mb-0">Table Column Visibility (Applicants Tab)</h6>
+              <small className="text-white-50">Show or hide columns in the applicants table</small>
+            </div>
+            <div className="card-body">
+              <div className="mb-3">
+                <button 
+                  className="btn btn-sm btn-outline-light me-2" 
+                  onClick={() => toggleAllTableColumns(true)}
+                  disabled={saving}
+                >
+                  Select All
+                </button>
+                <button 
+                  className="btn btn-sm btn-outline-light" 
+                  onClick={() => toggleAllTableColumns(false)}
+                  disabled={saving}
+                >
+                  Clear All
+                </button>
+              </div>
+              <div className="row g-2">
+                {tableColumns.map(field => {
+                  const isProtected = protectedColumns.includes(field.field_key);
+                  return (
+                    <div key={field.id} className="col-6 col-md-4">
+                      <div className={`form-check py-2 px-2 border rounded ${isProtected ? 'bg-light' : ''}`}>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id={`table-col-${field.id}`}
+                          checked={field.is_visible}
+                          disabled={saving || isProtected}
+                          onChange={() => toggleTableColumn(field)}
+                        />
+                        <label className={`form-check-label ${isProtected ? 'text-muted' : ''}`} htmlFor={`table-col-${field.id}`}>
+                          {field.field_label}
+                          {isProtected && <span className="text-danger ms-1">*</span>}
+                        </label>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <small className="text-muted mt-2 d-block">* Always visible</small>
             </div>
           </div>
         </div>

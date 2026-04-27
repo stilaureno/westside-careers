@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
@@ -10,6 +10,24 @@ type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_appli
 type SortDir = 'asc' | 'desc';
 
 const POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager'];
+
+// Map config field_key to data key
+const COLUMN_KEY_MAP: Record<string, keyof ApplicantListItem | 'displayName'> = {
+  'applicants_table_created_at': 'created_at',
+  'applicants_table_reference_no': 'reference_no',
+  'applicants_table_displayName': 'displayName',
+  'applicants_table_position_applied': 'position_applied',
+  'applicants_table_experience_level': 'experience_level',
+  'applicants_table_current_stage': 'current_stage',
+  'applicants_table_application_status': 'application_status',
+  'applicants_table_height_cm': 'height_cm',
+  'applicants_table_initialScreeningResult': 'initialScreeningResult',
+  'applicants_table_mathExamResult': 'mathExamResult',
+  'applicants_table_tableTestResult': 'tableTestResult',
+  'applicants_table_sweatyPalmResult': 'sweatyPalmResult',
+  'applicants_table_finalInterviewResult': 'finalInterviewResult',
+  'applicants_table_remarks': 'remarks',
+};
 
 type ApplicantsContentProps = {
   initialApplicants: ApplicantListItem[];
@@ -25,6 +43,9 @@ export default function ApplicantsContent({
   const [applicants, setApplicants] = useState<ApplicantListItem[]>(initialApplicants);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
+    new Set(Object.keys(COLUMN_KEY_MAP))
+  );
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -39,6 +60,25 @@ export default function ApplicantsContent({
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Load column visibility from database
+  useEffect(() => {
+    async function loadColumnVisibility() {
+      const { data } = await supabase
+        .from('visible_fields')
+        .select('field_key, is_visible')
+        .eq('location', 'applicants_table');
+      
+      if (data) {
+        const visible = new Set<string>();
+        data.forEach((f) => {
+          if (f.is_visible) visible.add(f.field_key);
+        });
+        setVisibleColumns(visible);
+      }
+    }
+    loadColumnVisibility();
+  }, []);
 
   const loadApplicants = useCallback(async () => {
     setLoading(true);
@@ -236,21 +276,21 @@ export default function ApplicantsContent({
     return `${value} (${count})`;
   };
 
-  const tableHeaders: { key: SortField; label: string }[] = [
-    { key: 'created_at', label: 'Application Date' },
-    { key: 'reference_no', label: 'Reference No' },
-    { key: 'displayName', label: 'Name' },
-    { key: 'position_applied', label: 'Position' },
-    { key: 'experience_level', label: 'Experience' },
-    { key: 'current_stage', label: 'Current Stage' },
-    { key: 'application_status', label: 'Status' },
-    { key: 'height_cm', label: 'Height' },
-    { key: 'initialScreeningResult', label: 'Initial Screening' },
-    { key: 'mathExamResult', label: 'Math Exam' },
-    { key: 'tableTestResult', label: 'Table Test' },
-    { key: 'sweatyPalmResult', label: 'Sweaty Palm' },
-    { key: 'finalInterviewResult', label: 'Final Interview' },
-    { key: 'remarks', label: 'Remarks' },
+  const tableHeaders: { key: SortField; label: string; fieldKey: string }[] = [
+    { key: 'created_at', label: 'Application Date', fieldKey: 'applicants_table_created_at' },
+    { key: 'reference_no', label: 'Reference No', fieldKey: 'applicants_table_reference_no' },
+    { key: 'displayName', label: 'Name', fieldKey: 'applicants_table_displayName' },
+    { key: 'position_applied', label: 'Position', fieldKey: 'applicants_table_position_applied' },
+    { key: 'experience_level', label: 'Experience', fieldKey: 'applicants_table_experience_level' },
+    { key: 'current_stage', label: 'Current Stage', fieldKey: 'applicants_table_current_stage' },
+    { key: 'application_status', label: 'Status', fieldKey: 'applicants_table_application_status' },
+    { key: 'height_cm', label: 'Height', fieldKey: 'applicants_table_height_cm' },
+    { key: 'initialScreeningResult', label: 'Initial Screening', fieldKey: 'applicants_table_initialScreeningResult' },
+    { key: 'mathExamResult', label: 'Math Exam', fieldKey: 'applicants_table_mathExamResult' },
+    { key: 'tableTestResult', label: 'Table Test', fieldKey: 'applicants_table_tableTestResult' },
+    { key: 'sweatyPalmResult', label: 'Sweaty Palm', fieldKey: 'applicants_table_sweatyPalmResult' },
+    { key: 'finalInterviewResult', label: 'Final Interview', fieldKey: 'applicants_table_finalInterviewResult' },
+    { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
   ];
 
   const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== today || filterEndDate !== today;
@@ -354,7 +394,7 @@ export default function ApplicantsContent({
             <table className="table table-hover table-sm mb-0">
               <thead className="table-light">
                 <tr>
-                  {tableHeaders.map(({ key, label }) => {
+                  {tableHeaders.filter(h => visibleColumns.has(h.fieldKey)).map(({ key, label }) => {
                     const isSortable = key !== 'remarks';
                     const isActive = sortField === key;
                     return (
@@ -375,55 +415,71 @@ export default function ApplicantsContent({
                   })}
                 </tr>
               </thead>
-              <tbody>
+<tbody>
                 {filteredApplicants.slice(0, 100).map((app) => (
-<tr key={app.reference_no}>
-                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.created_at?.slice(0, 10) || '-'}</td>
-                    <td style={{ fontSize: '12px' }}>
-                      <button className="btn btn-link p-0 fw-bold text-decoration-none" style={{ color: '#8b1e2d' }} onClick={() => openModal(app.reference_no)}>
-                        {app.reference_no}
-                      </button>
-                    </td>
-                    <td style={{ fontSize: '12px' }}>{app.displayName}</td>
-                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.position_applied}</td>
-                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.experience_level || '-'}</td>
-                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.current_stage || '-'}</td>
-                    <td style={{ fontSize: '12px' }}>
-                      <span className={`badge rounded-pill ${
-                        app.application_status === 'Passed' || app.application_status === 'Completed' ? 'bg-success' :
-                        app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? 'bg-danger' :
-                        app.application_status === 'Reprofile' ? 'bg-warning text-dark' : 'bg-primary'
-                      }`}>
-                        {app.application_status || 'Pending'}
-                      </span>
-                    </td>
-                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.height_cm || '-'}</td>
-                    <td className={app.initialScreeningResult === 'Passed' ? 'text-success' : app.initialScreeningResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
-                      {app.initialScreeningResult}
-                    </td>
-                    <td className={app.mathExamResult === 'Passed' ? 'text-success' : app.mathExamResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
-                      {app.mathExamResult}
-                    </td>
-                    <td className={app.tableTestResult === 'Passed' ? 'text-success' : app.tableTestResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
-                      {app.tableTestResult}
-                    </td>
-                    <td className="text-muted" style={{ fontSize: '12px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
-                    <td className={
-                      app.finalInterviewResult === 'Passed' ? 'text-success' :
-                      app.finalInterviewResult === 'Reprofile' ? 'text-warning' :
-                      app.finalInterviewResult === 'For Pooling' ? 'text-info' :
-                      app.finalInterviewResult === 'Not Recommended' ? 'text-danger' : 'text-muted'
-                    } style={{ fontSize: '12px' }}>
-                      {app.finalInterviewResult}
-                    </td>
-                    <td className="text-muted" style={{ maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '12px' }}>
-                      {renderFormattedMessage(app.remarks)}
-                    </td>
+                  <tr key={app.reference_no}>
+                    {visibleColumns.has('applicants_table_created_at') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.created_at?.slice(0, 10) || '-'}</td>}
+                    {visibleColumns.has('applicants_table_reference_no') && (
+                      <td style={{ fontSize: '12px' }}>
+                        <button className="btn btn-link p-0 fw-bold text-decoration-none" style={{ color: '#8b1e2d' }} onClick={() => openModal(app.reference_no)}>
+                          {app.reference_no}
+                        </button>
+                      </td>
+                    )}
+                    {visibleColumns.has('applicants_table_displayName') && <td style={{ fontSize: '12px' }}>{app.displayName}</td>}
+                    {visibleColumns.has('applicants_table_position_applied') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.position_applied}</td>}
+                    {visibleColumns.has('applicants_table_experience_level') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.experience_level || '-'}</td>}
+                    {visibleColumns.has('applicants_table_current_stage') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.current_stage || '-'}</td>}
+                    {visibleColumns.has('applicants_table_application_status') && (
+                      <td style={{ fontSize: '12px' }}>
+                        <span className={`badge rounded-pill ${
+                          app.application_status === 'Passed' || app.application_status === 'Completed' ? 'bg-success' :
+                          app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? 'bg-danger' :
+                          app.application_status === 'Reprofile' ? 'bg-warning text-dark' : 'bg-primary'
+                        }`}>
+                          {app.application_status || 'Pending'}
+                        </span>
+                      </td>
+                    )}
+                    {visibleColumns.has('applicants_table_height_cm') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.height_cm || '-'}</td>}
+                    {visibleColumns.has('applicants_table_initialScreeningResult') && (
+                      <td className={app.initialScreeningResult === 'Passed' ? 'text-success' : app.initialScreeningResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
+                        {app.initialScreeningResult}
+                      </td>
+                    )}
+                    {visibleColumns.has('applicants_table_mathExamResult') && (
+                      <td className={app.mathExamResult === 'Passed' ? 'text-success' : app.mathExamResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
+                        {app.mathExamResult}
+                      </td>
+                    )}
+                    {visibleColumns.has('applicants_table_tableTestResult') && (
+                      <td className={app.tableTestResult === 'Passed' ? 'text-success' : app.tableTestResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
+                        {app.tableTestResult}
+                      </td>
+                    )}
+                    {visibleColumns.has('applicants_table_sweatyPalmResult') && (
+                      <td className="text-muted" style={{ fontSize: '12px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
+                    )}
+                    {visibleColumns.has('applicants_table_finalInterviewResult') && (
+                      <td className={
+                        app.finalInterviewResult === 'Passed' ? 'text-success' :
+                        app.finalInterviewResult === 'Reprofile' ? 'text-warning' :
+                        app.finalInterviewResult === 'For Pooling' ? 'text-info' :
+                        app.finalInterviewResult === 'Not Recommended' ? 'text-danger' : 'text-muted'
+                      } style={{ fontSize: '12px' }}>
+                        {app.finalInterviewResult}
+                      </td>
+                    )}
+                    {visibleColumns.has('applicants_table_remarks') && (
+                      <td className="text-muted" style={{ maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '12px' }}>
+                        {renderFormattedMessage(app.remarks)}
+                      </td>
+                    )}
                   </tr>
                 ))}
                 {filteredApplicants.length === 0 && (
                   <tr>
-                    <td colSpan={14} className="text-center text-muted py-4">
+                    <td colSpan={visibleColumns.size} className="text-center text-muted py-4">
                       No matching applicant records.
                     </td>
                   </tr>
