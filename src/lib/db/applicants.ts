@@ -444,11 +444,11 @@ export async function getApplicantsPageData(options?: {
   });
 }
 
-export async function getAdminPasswordConfig(adminKey: string): Promise<{ column_visibility: string[] | null } | null> {
+export async function getAdminPasswordConfig(adminKey: string): Promise<{ column_visibility: string[] | null; modal_section_visibility: string[] | null } | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('config')
-    .select('column_visibility')
+    .select('column_visibility, modal_section_visibility')
     .eq('key', adminKey)
     .maybeSingle();
   

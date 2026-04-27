@@ -14,6 +14,7 @@ interface ApplicantModalProps {
   onClose: () => void;
   onSaved?: () => Promise<void> | void;
   isSuperAdmin?: boolean;
+  modalSectionVisibility?: string[] | null;
 }
 
 interface VisibleField {
@@ -23,7 +24,7 @@ interface VisibleField {
   is_visible: boolean;
 }
 
-export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, isSuperAdmin = false }: ApplicantModalProps) {
+export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, isSuperAdmin = false, modalSectionVisibility }: ApplicantModalProps) {
   const [data, setData] = useState<any>(null);
   const [visibleFields, setVisibleFields] = useState<VisibleField[]>([]);
   const [loading, setLoading] = useState(true);
@@ -423,7 +424,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                   </div>
                 )}
 
-                  {notifications && notifications.length > 0 && (
+                  {notifications && notifications.length > 0 && (isSuperAdmin || (modalSectionVisibility || []).includes('notifications')) && (
                     <div className="card mt-3">
                       <div className="card-header bg-white py-2">
                         <h6 className="mb-0">Notifications</h6>

@@ -23,6 +23,7 @@ export default async function ApplicantsPage() {
   const adminKeyCookie = cookieStore.get('admin_key')?.value;
   let allowedDepartments: string[] = [];
   let columnVisibility: string[] | null = null;
+  let modalSectionVisibility: string[] | null = null;
 
   // Debug: Log what's happening
   if (process.env.NODE_ENV === 'development') {
@@ -47,6 +48,9 @@ export default async function ApplicantsPage() {
     if (adminConfig?.column_visibility) {
       columnVisibility = adminConfig.column_visibility;
     }
+    if (adminConfig?.modal_section_visibility) {
+      modalSectionVisibility = adminConfig.modal_section_visibility;
+    }
   }
 
   const initialApplicants = await getApplicantsPageData({
@@ -61,6 +65,7 @@ export default async function ApplicantsPage() {
       isSuperAdmin={isSuperAdmin}
       allowedDepartments={allowedDepartments}
       columnVisibility={columnVisibility}
+      modalSectionVisibility={modalSectionVisibility}
     />
   );
 }

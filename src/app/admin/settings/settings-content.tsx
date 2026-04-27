@@ -32,6 +32,7 @@ interface AdminPassword {
   allowed_departments: string[] | null;
   column_visibility?: string[] | null;
   label: string | null;
+  modal_section_visibility?: string[] | null;
 }
 
 export default function SettingsContent() {
@@ -431,6 +432,28 @@ export default function SettingsContent() {
 
   // Get default column visibility (all visible)
   const getDefaultVisibility = (): string[] => tableColumns.map(f => f.field_key);
+
+  async function toggleAdminModalSectionVisibility(admin: AdminPassword, sectionKey: string) {
+    const currentSections = admin.modal_section_visibility || [];
+    const hasSection = currentSections.includes(sectionKey);
+    const newSections = hasSection
+      ? currentSections.filter(s => s !== sectionKey)
+      : [...currentSections, sectionKey];
+
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .update({ modal_section_visibility: newSections })
+      .eq('key', admin.key);
+
+    if (!error) {
+      setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, modal_section_visibility: newSections } : a));
+      setMessage({ text: 'Modal section visibility updated', type: 'success' });
+    } else {
+      setMessage({ text: error.message, type: 'error' });
+    }
+    setSaving(false);
+  }
 
   // Get effective visibility for an admin (custom or default)
   const getEffectiveVisibility = (admin: AdminPassword): string[] => {
@@ -977,6 +1000,27 @@ export default function SettingsContent() {
                               })}
                             </div>
                             <small className="text-muted">* Always visible</small>
+                          </div>
+
+                          {/* Modal Sections Section */}
+                          <div className="mt-3">
+                            <label className="form-label small fw-bold">Modal Sections (Hidden by default):</label>
+                            <div className="border rounded p-2">
+                              <div className="form-check">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id={`${admin.key}-modal-notifications`}
+                                  checked={(admin.modal_section_visibility || []).includes('notifications')}
+                                  disabled={saving}
+                                  onChange={() => toggleAdminModalSectionVisibility(admin, 'notifications')}
+                                />
+                                <label className="form-check-label" htmlFor={`${admin.key}-modal-notifications`}>
+                                  Notifications
+                                </label>
+                              </div>
+                            </div>
+                            <small className="text-muted">Enable to show Notifications section in applicant modal</small>
                           </div>
                         </div>
                       </div>

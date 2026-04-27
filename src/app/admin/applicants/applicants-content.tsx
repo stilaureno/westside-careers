@@ -34,6 +34,7 @@ type ApplicantsContentProps = {
   isSuperAdmin: boolean;
   allowedDepartments: string[];
   columnVisibility?: string[] | null;
+  modalSectionVisibility?: string[] | null;
 };
 
 export default function ApplicantsContent({
@@ -41,6 +42,7 @@ export default function ApplicantsContent({
   isSuperAdmin,
   allowedDepartments,
   columnVisibility,
+  modalSectionVisibility,
 }: ApplicantsContentProps) {
   const [applicants, setApplicants] = useState<ApplicantListItem[]>(initialApplicants);
   const [loading, setLoading] = useState(false);
@@ -616,7 +618,7 @@ export default function ApplicantsContent({
         </div>
       </div>
 
-      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} />
+      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
     </div>
   );
 }
