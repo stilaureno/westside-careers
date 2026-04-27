@@ -497,7 +497,7 @@ export default function ApplicantsContent({
                         </span>
                       </td>
                     )}
-                    {visibleColumns.has('applicants_table_height_cm') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.height_cm || '-'}</td>}
+                    {visibleColumns.has('applicants_table_height_cm') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.height_cm ? `${app.height_cm}cm` : '-'}</td>}
                     {visibleColumns.has('applicants_table_initialScreeningResult') && (
                       <td className={app.initialScreeningResult === 'Passed' ? 'text-success' : app.initialScreeningResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>
                         {app.initialScreeningResult}
