@@ -1211,13 +1211,15 @@ export default function SettingsContent() {
                                   const isChecked = effectiveVis.includes(field.field_key);
                                   return (
                                     <div key={field.id} className="col-6 col-md-4 col-lg-3">
-                                      <div 
-                                        className="form-check py-2 px-2 rounded"
+                                      <label
+                                        className="d-flex align-items-center gap-2 py-2 px-2 rounded"
                                         style={{ 
                                           cursor: isProtected ? 'not-allowed' : 'pointer',
                                           transition: 'background 0.15s ease',
                                           background: isProtected ? '#f3f4f6' : '#fff',
-                                          border: '1px solid #e5e7eb'
+                                          border: '1px solid #e5e7eb',
+                                          fontSize: '12px',
+                                          color: isProtected ? '#9ca3af' : '#374151'
                                         }}
                                         onMouseOver={(e) => {
                                           if (!isProtected) e.currentTarget.style.background = '#f0f0f0';
@@ -1225,44 +1227,35 @@ export default function SettingsContent() {
                                         onMouseOut={(e) => {
                                           e.currentTarget.style.background = isProtected ? '#f3f4f6' : '#fff';
                                         }}
+                                        htmlFor={`${admin.key}-col-${field.id}`}
                                       >
-                                        <input
+<input
                                           className="form-check-input"
                                           type="checkbox"
                                           id={`${admin.key}-col-${field.id}`}
                                           checked={isChecked}
                                           disabled={saving || isProtected}
                                           onChange={() => toggleAdminColumnVisibility(admin, field.field_key)}
-                                      style={{ 
-                                        accentColor: '#8b1e2d',
-                                        cursor: isProtected ? 'not-allowed' : 'pointer'
-                                      }}
-                                    />
-                                    <label 
-                                      className={`form-check-label ms-2 ${isProtected ? 'text-muted' : ''}`}
-                                      style={{ 
-                                        fontSize: '12px',
-                                        cursor: isProtected ? 'not-allowed' : 'pointer',
-                                        color: isProtected ? '#9ca3af' : '#374151'
-                                      }} 
-                                      htmlFor={`${admin.key}-col-${field.id}`}
-                                    >
-                                      {field.field_label}
-                                      {isProtected && (
-                                        <span 
-                                          className="ms-2" 
                                           style={{ 
-                                            color: '#8b1e2d',
-                                            fontSize: '10px',
-                                            fontWeight: '600'
+                                            accentColor: '#8b1e2d',
+                                            cursor: isProtected ? 'not-allowed' : 'pointer'
                                           }}
-                                          title="This column is always visible"
-                                        >
-                                          🔒
-                                        </span>
-                                      )}
-                                    </label>
-                                      </div>
+                                        />
+                                        {field.field_label}
+                                        {isProtected && (
+                                          <span 
+                                            className="ms-1" 
+                                            style={{ 
+                                              color: '#8b1e2d',
+                                              fontSize: '10px',
+                                              fontWeight: '600'
+                                            }}
+                                            title="This column is always visible"
+                                          >
+                                            🔒
+                                          </span>
+                                        )}
+                                      </label>
                                     </div>
                                   );
                                 })}
