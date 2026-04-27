@@ -68,6 +68,11 @@ export default function ApplicantsContent({
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const pageSizeOptions = [50, 100, 300, 0]; // 0 = All
+
   // Load column visibility from database (only for super admins or if no prop provided)
   useEffect(() => {
     async function loadColumnVisibility() {
@@ -244,6 +249,26 @@ export default function ApplicantsContent({
 
     return result;
   }, [filteredBySearch, filterPosition, filterStage, filterStatus, sortField, sortDir, isSuperAdmin, allowedDepartments]);
+
+  // Pagination logic
+  const totalPages = pageSize === 0 ? 1 : Math.ceil(filteredApplicants.length / pageSize);
+  const paginatedApplicants = pageSize === 0 
+    ? filteredApplicants 
+    : filteredApplicants.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterPosition, filterStage, filterStatus, filterStartDate, filterEndDate, globalSearch]);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   function handleSort(field: SortField) {
     if (sortField === field) {
@@ -431,7 +456,7 @@ export default function ApplicantsContent({
                 </tr>
               </thead>
 <tbody>
-                {filteredApplicants.slice(0, 100).map((app) => (
+                {paginatedApplicants.map((app) => (
                   <tr key={app.reference_no}>
                     {visibleColumns.has('applicants_table_created_at') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.created_at?.slice(0, 10) || '-'}</td>}
                     {visibleColumns.has('applicants_table_reference_no') && (
@@ -505,9 +530,71 @@ export default function ApplicantsContent({
         </div>
       </div>
 
-      <div className="mt-3 text-muted small">
-        Showing {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}
-        {hasFilters && <span> (filtered)</span>}
+      <div className="mt-3 d-flex justify-content-between align-items-center">
+        <div className="text-muted small">
+          Showing {paginatedApplicants.length} of {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}
+          {hasFilters && <span> (filtered)</span>}
+        </div>
+        
+        {/* Pagination Controls */}
+        <div className="d-flex align-items-center gap-2">
+          {/* Page Size Dropdown */}
+          <div className="d-flex align-items-center gap-1">
+            <span className="text-muted small">Show:</span>
+            <select
+              className="form-select form-select-sm"
+              style={{ width: '80px' }}
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+            >
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={300}>300</option>
+              <option value={0}>All</option>
+            </select>
+          </div>
+
+          {/* Page Navigation */}
+          {pageSize !== 0 && totalPages > 1 && (
+            <div className="d-flex align-items-center gap-1">
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(1)}
+                style={{ padding: '4px 8px', fontSize: '12px' }}
+              >
+                ««
+              </button>
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                style={{ padding: '4px 8px', fontSize: '12px' }}
+              >
+                «
+              </button>
+              <span className="text-muted small mx-1">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                style={{ padding: '4px 8px', fontSize: '12px' }}
+              >
+                »
+              </button>
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(totalPages)}
+                style={{ padding: '4px 8px', fontSize: '12px' }}
+              >
+                »»
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} />
