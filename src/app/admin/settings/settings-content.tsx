@@ -31,6 +31,7 @@ interface AdminPassword {
   value: string;
   allowed_departments: string[] | null;
   column_visibility?: string[] | null;
+  label: string | null;
 }
 
 export default function SettingsContent() {
@@ -318,7 +319,7 @@ export default function SettingsContent() {
 
     const { error } = await supabase
       .from('config')
-      .insert({ key: `ADMIN_PASSWORD${newKey}`, value: newAdminPassword.trim(), allowed_departments: [], column_visibility: [] });
+      .insert({ key: `ADMIN_PASSWORD${newKey}`, value: newAdminPassword.trim(), allowed_departments: [], column_visibility: [], label: null });
 
     if (!error) {
       setNewAdminPassword('');
@@ -349,10 +350,23 @@ export default function SettingsContent() {
       .eq('key', admin.key);
 
     if (!error) {
-      setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, value: newValue } : a));
-      setMessage({ text: 'Password updated', type: 'success' });
+      await loadData();
+    }
+    setSaving(false);
+  }
+
+  async function updateAdminPasswordLabel(admin: AdminPassword, newLabel: string) {
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .update({ label: newLabel || null })
+      .eq('key', admin.key);
+
+    if (!error) {
+      setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, label: newLabel || null } : a));
+      setMessage({ text: 'Label updated', type: 'success' });
     } else {
-      setMessage({ text: 'Failed to update password', type: 'error' });
+      setMessage({ text: 'Failed to update label', type: 'error' });
     }
     setSaving(false);
   }
@@ -840,6 +854,21 @@ export default function SettingsContent() {
                           </button>
                         </div>
                         <div className="card-body py-2">
+                          <div className="mb-2">
+                            <label className="form-label small fw-bold">Label:</label>
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              defaultValue={admin.label || ''}
+                              placeholder="e.g., Slots Admin"
+                              onBlur={(e) => {
+                                if (e.target.value !== (admin.label || '')) {
+                                  updateAdminPasswordLabel(admin, e.target.value);
+                                }
+                              }}
+                            />
+                          </div>
+
                           <div className="mb-2">
                             <label className="form-label small fw-bold">Password:</label>
                             <input

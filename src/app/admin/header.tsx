@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export function AdminHeader({ isSuperAdmin }: { isSuperAdmin: boolean }) {
+export function AdminHeader({ isSuperAdmin, adminLabel }: { isSuperAdmin: boolean; adminLabel: string | null }) {
   const pathname = usePathname();
   const isApplicantsRoute = pathname.startsWith('/admin/applicants');
   const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
+
+  const portalLabel = isSuperAdmin ? 'Super Admin' : (adminLabel || 'Admin Portal');
 
   return (
     <header style={{
@@ -26,7 +28,7 @@ export function AdminHeader({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             Westside Careers
           </span>
           <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500', marginTop: '-2px' }}>
-            Administrative Portal
+            {portalLabel}
           </span>
         </div>
       </div>
