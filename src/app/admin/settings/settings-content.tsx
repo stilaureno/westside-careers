@@ -515,22 +515,54 @@ export default function SettingsContent() {
 
         {/* Table Column Visibility */}
         <div className="col-md-6">
-          <div className="card border-success">
-            <div className="card-header bg-success text-white">
-              <h6 className="mb-0">Table Column Visibility (Applicants Tab)</h6>
-              <small className="text-white-50">Show or hide columns in the applicants table</small>
+          <div className="card border-dark">
+            <div className="card-header" style={{ background: '#8b1e2d', color: '#fff' }}>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="mb-0" style={{ color: '#fff' }}>Table Column Visibility</h6>
+                  <small className="text-white-50">Show or hide columns in the applicants table</small>
+                </div>
+                <span 
+                  className="badge" 
+                  style={{ 
+                    background: '#FFD700', 
+                    color: '#1f2937', 
+                    fontSize: '12px', 
+                    padding: '4px 10px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {tableColumns.filter(f => f.is_visible).length} visible
+                </span>
+              </div>
             </div>
-            <div className="card-body">
-              <div className="mb-3">
+            <div className="card-body" style={{ background: '#fafafa' }}>
+              <div className="mb-3 d-flex gap-2">
                 <button 
-                  className="btn btn-sm btn-outline-light me-2" 
+                  className="btn btn-sm py-1 px-3"
+                  style={{ 
+                    background: '#FFD700',
+                    color: '#1f2937',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    fontSize: '12px'
+                  }}
                   onClick={() => toggleAllTableColumns(true)}
                   disabled={saving}
                 >
-                  Select All
+                  ☑ Select All
                 </button>
                 <button 
-                  className="btn btn-sm btn-outline-light" 
+                  className="btn btn-sm py-1 px-3"
+                  style={{ 
+                    background: '#f3f4f6',
+                    color: '#6b7280',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '6px',
+                    fontWeight: '500',
+                    fontSize: '12px'
+                  }}
                   onClick={() => toggleAllTableColumns(false)}
                   disabled={saving}
                 >
@@ -542,7 +574,14 @@ export default function SettingsContent() {
                   const isProtected = protectedColumns.includes(field.field_key);
                   return (
                     <div key={field.id} className="col-6 col-md-4">
-                      <div className={`form-check py-2 px-2 border rounded ${isProtected ? 'bg-light' : ''}`}>
+                      <div 
+                        className="form-check py-2 px-3 border rounded"
+                        style={{ 
+                          background: isProtected ? '#f3f4f6' : '#fff',
+                          transition: 'all 0.15s ease',
+                          cursor: isProtected ? 'not-allowed' : 'pointer'
+                        }}
+                      >
                         <input
                           className="form-check-input"
                           type="checkbox"
@@ -550,17 +589,32 @@ export default function SettingsContent() {
                           checked={field.is_visible}
                           disabled={saving || isProtected}
                           onChange={() => toggleTableColumn(field)}
+                          style={{ 
+                            accentColor: '#8b1e2d',
+                            cursor: isProtected ? 'not-allowed' : 'pointer'
+                          }}
                         />
-                        <label className={`form-check-label ${isProtected ? 'text-muted' : ''}`} htmlFor={`table-col-${field.id}`}>
+                        <label 
+                          className={`form-check-label ms-2 ${isProtected ? 'text-muted' : ''}`}
+                          style={{ 
+                            fontSize: '12px',
+                            color: isProtected ? '#9ca3af' : '#374151',
+                            cursor: isProtected ? 'not-allowed' : 'pointer'
+                          }} 
+                          htmlFor={`table-col-${field.id}`}
+                        >
                           {field.field_label}
-                          {isProtected && <span className="text-danger ms-1">*</span>}
+                          {isProtected && <span className="ms-2" style={{ color: '#8b1e2d', fontSize: '11px' }}>🔒</span>}
                         </label>
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <small className="text-muted mt-2 d-block">* Always visible</small>
+              <div className="d-flex align-items-center gap-2 mt-3 pt-2" style={{ borderTop: '1px solid #e5e7eb' }}>
+                <span style={{ color: '#8b1e2d', fontSize: '12px' }}>🔒</span>
+                <small style={{ color: '#6b7280', fontSize: '11px' }}>Protected columns are always visible</small>
+              </div>
             </div>
           </div>
         </div>
