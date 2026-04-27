@@ -23,10 +23,8 @@ export default function HomePage() {
         <img
           src="/WESTSIDE LOGO COLORED.png"
           alt="Westside Careers Logo"
-          style={{ width: '160px', margin: '0 auto 16px', display: 'block' }}
+          style={{ width: '160px', margin: '0 auto 24px', display: 'block' }}
         />
-        <h1 style={{ fontSize: '26px', marginBottom: '8px', color: '#163a70' }}>Westside Resort</h1>
-        <p style={{ fontSize: '15px', color: '#555', marginBottom: '24px' }}>Table Games Hiring Portal</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <Link href="/apply" style={{
             display: 'block',

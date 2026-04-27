@@ -214,11 +214,11 @@ export default function ApplyPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div className={styles.hero}>
-          <h1 className={styles.heroTitle}>Westside Resort</h1>
-          <p className={styles.heroSubtitle}>Table Games Hiring Portal — Apply Now</p>
-        </div>
-
+        <img
+          src="/WESTSIDE LOGO WHITE.png"
+          alt="Westside Careers Logo"
+          style={{ width: '160px', margin: '0 auto 24px', display: 'block' }}
+        />
         <form onSubmit={handleSubmit} className={`${styles.card} ${styles.formCard}`}>
           {message && (
             <div className={`${styles.message} ${message.type === 'success' ? styles.messageSuccess : styles.messageError}`}>
