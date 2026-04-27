@@ -822,14 +822,31 @@ export default function SettingsContent() {
 
         {/* Positions */}
         <div className="col-md-12">
-          <div className="card">
-            <div className="card-header bg-white">
-              <h6 className="mb-0">Positions</h6>
+          <div className="card border-dark">
+            <div className="card-header" style={{ background: '#8b1e2d', color: '#fff' }}>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="mb-0" style={{ color: '#fff' }}>Positions</h6>
+                </div>
+                <span 
+                  className="badge" 
+                  style={{ 
+                    background: '#FFD700', 
+                    color: '#1f2937', 
+                    fontSize: '12px', 
+                    padding: '4px 10px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {positions.filter(p => p.is_active).length} active
+                </span>
+              </div>
             </div>
-            <div className="card-body">
-              <div className="d-flex gap-2 mb-3">
+            <div className="card-body" style={{ background: '#fafafa' }}>
+              <div className="d-flex gap-2 mb-4">
                 <select
                   className="form-select form-select-sm"
+                  style={{ maxWidth: '200px' }}
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
                 >
@@ -845,19 +862,44 @@ export default function SettingsContent() {
                   value={newPosName}
                   onChange={(e) => setNewPosName(e.target.value)}
                 />
-                <button className="btn btn-sm btn-dark" onClick={addPosition} disabled={saving || !selectedDept}>
-                  Add
+                <button 
+                  className="btn btn-sm py-1 px-3"
+                  style={{ 
+                    background: '#FFD700',
+                    color: '#1f2937',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    fontSize: '12px'
+                  }}
+                  onClick={addPosition} 
+                  disabled={saving || !selectedDept}
+                >
+                  + Add Position
                 </button>
               </div>
               {departments.map(dept => {
                 const deptPositions = getPositionsForDept(dept.id);
                 if (deptPositions.length === 0) return null;
                 return (
-                  <div key={dept.id} className="mb-3">
-                    <h6 className="text-muted small">{dept.name}</h6>
+                  <div key={dept.id} className="mb-4 pb-3" style={{ borderBottom: '1px solid #e5e7eb' }}>
+                    <h6 className="fw-bold mb-3" style={{ color: '#8b1e2d', fontSize: '14px' }}>
+                      <span style={{ color: '#FFD700' }}>▎</span> {dept.name}
+                    </h6>
                     <div className="d-flex flex-wrap gap-2">
                       {deptPositions.map(pos => (
-                        <span key={pos.id} className={`badge d-flex align-items-center gap-1 ${pos.is_active ? 'bg-light text-dark' : 'bg-secondary'}`}>
+                        <span 
+                          key={pos.id} 
+                          className="badge d-flex align-items-center gap-2"
+                          style={{ 
+                            background: pos.is_active ? '#fff' : '#f3f4f6',
+                            color: pos.is_active ? '#1f2937' : '#9ca3af',
+                            border: '1px solid #e5e7eb',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }}
+                        >
                           <span className={pos.is_active ? '' : 'text-decoration-line-through'}>{pos.name}</span>
                           <div className="form-check form-switch d-inline-block m-0 ms-1">
                             <input
@@ -866,16 +908,25 @@ export default function SettingsContent() {
                               checked={pos.is_active}
                               disabled={saving}
                               onChange={() => togglePosition(pos)}
-                              style={{ marginBottom: 0 }}
+                              style={{ 
+                                marginBottom: 0,
+                                accentColor: '#8b1e2d',
+                                cursor: saving ? 'not-allowed' : 'pointer'
+                              }}
                             />
                           </div>
                           <button
                             className="btn btn-sm p-0 lh-0 ms-1"
-                            style={{ lineHeight: 1 }}
+                            style={{ 
+                              lineHeight: 1,
+                              color: '#ef4444',
+                              cursor: saving ? 'not-allowed' : 'pointer'
+                            }}
                             onClick={() => deletePosition(pos.id)}
                             disabled={saving}
+                            title="Delete position"
                           >
-                            ×
+                            ✕
                           </button>
                         </span>
                       ))}
