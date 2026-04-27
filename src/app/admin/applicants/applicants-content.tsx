@@ -68,9 +68,17 @@ export default function ApplicantsContent({
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Load column visibility from database
+  // Load column visibility from database (only for super admins or if no prop provided)
   useEffect(() => {
     async function loadColumnVisibility() {
+      // If we have columnVisibility from props (per-admin customization), use it
+      if (columnVisibility && columnVisibility.length > 0) {
+        console.log('[DEBUG] Using columnVisibility from props:', columnVisibility);
+        setVisibleColumns(new Set(columnVisibility));
+        return;
+      }
+      
+      // Otherwise, load from visible_fields (global default, mainly for super admins)
       const { data } = await supabase
         .from('visible_fields')
         .select('field_key, is_visible')
@@ -78,14 +86,14 @@ export default function ApplicantsContent({
       
       if (data) {
         const visible = new Set<string>();
-        data.forEach((f) => {
+        data.forEach((f: any) => {
           if (f.is_visible) visible.add(f.field_key);
         });
         setVisibleColumns(visible);
       }
     }
     loadColumnVisibility();
-  }, []);
+  }, [columnVisibility]);
 
   const loadApplicants = useCallback(async () => {
     setLoading(true);

@@ -24,6 +24,12 @@ export default async function ApplicantsPage() {
   let allowedDepartments: string[] = [];
   let columnVisibility: string[] | null = null;
 
+  // Debug: Log what's happening
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[DEBUG] Applicants page - isSuperAdmin:', isSuperAdmin);
+    console.log('[DEBUG] Applicants page - adminKeyCookie:', adminKeyCookie);
+  }
+
   if (allowedDepartmentsCookie) {
     try {
       const parsed = JSON.parse(allowedDepartmentsCookie);
