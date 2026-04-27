@@ -9,6 +9,7 @@ export interface ApplicantStageSummary {
   result_status: string | null;
   current_stage_label: string | null;
   remarks: string | null;
+  sweaty_palm_result?: string | null;
 }
 
 export interface ApplicantListItem extends Applicant {
@@ -435,7 +436,7 @@ export async function getApplicantsPageData(options?: {
       initialScreeningResult: getStageResult('Initial Screening'),
       mathExamResult: getStageResult('Math Exam'),
       tableTestResult: getStageResult('Table Test'),
-      sweatyPalmResult: applicantStages.find((item) => item.stage_name === 'Final Interview')?.result_status || '-',
+      sweatyPalmResult: applicantStages.find((item) => item.stage_name === 'Final Interview')?.sweaty_palm_result || '-',
       finalInterviewResult: getStageResult('Final Interview'),
       remarks: applicant.remarks,
       stages: applicantStages,
