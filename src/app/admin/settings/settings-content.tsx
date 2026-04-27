@@ -939,27 +939,51 @@ export default function SettingsContent() {
         </div>
 
         {/* Admin Passwords */}
-        <div className="col-md-12">
+        <div className="col-12">
           <div className="card border-dark">
-            <div className="card-header bg-dark text-white">
-              <h5 className="mb-0">Admin Passwords, Departments & Column Access</h5>
+            <div className="card-header" style={{ background: '#8b1e2d', color: '#fff' }}>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 className="mb-0" style={{ color: '#fff' }}>Admin Passwords, Departments & Column Access</h5>
+                  <small className="text-white-50">Manage admin passwords, department access, and column visibility per admin</small>
+                </div>
+                <span 
+                  className="badge" 
+                  style={{ 
+                    background: '#FFD700', 
+                    color: '#1f2937', 
+                    fontSize: '12px', 
+                    padding: '4px 12px',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {adminPasswords.length} admins
+                </span>
+              </div>
             </div>
-            <div className="card-body">
-              <p className="text-muted small mb-3">
-                Manage admin passwords, department access, and custom table column visibility for each admin.
-              </p>
-
+            <div className="card-body" style={{ background: '#fafafa' }}>
               {/* Add new password */}
-              <div className="d-flex gap-2 mb-4 p-3 bg-light rounded">
+              <div className="d-flex gap-2 mb-4 p-3 bg-white rounded border" style={{ borderColor: '#e5e7eb' }}>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="New admin password..."
+                  placeholder="Enter new admin password..."
                   value={newAdminPassword}
                   onChange={(e) => setNewAdminPassword(e.target.value)}
                 />
-                <button className="btn btn-dark" onClick={addAdminPassword} disabled={saving || !newAdminPassword.trim()}>
-                  Add Password
+                <button 
+                  className="btn btn-sm py-2 px-4"
+                  style={{ 
+                    background: '#FFD700',
+                    color: '#1f2937',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: '600'
+                  }}
+                  onClick={addAdminPassword} 
+                  disabled={saving || !newAdminPassword.trim()}
+                >
+                  + Add Password
                 </button>
               </div>
 
@@ -967,18 +991,50 @@ export default function SettingsContent() {
               {adminPasswords.length === 0 ? (
                 <p className="text-muted">No admin passwords configured yet.</p>
               ) : (
-                <div className="row g-3">
+                <div className="d-flex flex-column gap-4">
                   {adminPasswords.map(admin => (
-                    <div key={admin.key} className="col-md-6 col-lg-4">
-                      <div className="card h-100">
-                        <div className="card-header d-flex justify-content-between align-items-center py-2">
-                          <span className="fw-bold">{admin.key}</span>
+                    <div key={admin.key} className="card" style={{ border: '1px solid #e5e7eb', borderRadius: '12px', background: '#fff' }}>
+                        <div 
+                          className="card-header d-flex justify-content-between align-items-center py-3"
+                          style={{ 
+                            background: '#8b1e2d', 
+                            borderRadius: '12px 12px 0 0'
+                          }}
+                        >
+                          <div className="d-flex align-items-center gap-3">
+                            <span 
+                              className="fw-bold" 
+                              style={{ color: '#FFD700', fontSize: '14px' }}
+                            >
+                              {admin.key}
+                            </span>
+                            {admin.label && (
+                              <span 
+                                className="badge" 
+                                style={{ 
+                                  background: '#fff', 
+                                  color: '#8b1e2d', 
+                                  fontSize: '11px',
+                                  padding: '3px 10px'
+                                }}
+                              >
+                                {admin.label}
+                              </span>
+                            )}
+                          </div>
                           <button
-                            className="btn btn-sm btn-outline-danger"
+                            className="btn btn-sm"
+                            style={{ 
+                              background: 'transparent', 
+                              color: '#fca5a5',
+                              border: '1px solid #fca5a5',
+                              fontSize: '12px',
+                              padding: '4px 12px'
+                            }}
                             onClick={() => deleteAdminPassword(admin.key)}
                             disabled={saving}
                           >
-                            Delete
+                            ✕ Delete
                           </button>
                         </div>
                         <div className="card-body py-2">
@@ -1256,7 +1312,6 @@ export default function SettingsContent() {
                           </div>
                         </div>
                       </div>
-                    </div>
                   ))}
                 </div>
               )}
