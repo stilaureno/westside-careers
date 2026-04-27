@@ -908,17 +908,33 @@ export default function SettingsContent() {
                           </div>
 
                           {/* Tabs for Departments and Column Visibility */}
-                          <ul className="nav nav-tabs small mb-2" role="tablist">
+                          <ul className="nav nav-tabs small mb-3" role="tablist">
                             <li className="nav-item" role="presentation">
-                              <button
-                                className="nav-link text-secondary px-2 py-1"
-                                style={{ fontSize: '11px' }}
+                              <span
+                                className="nav-link px-3 py-2"
+                                style={{ 
+                                  fontSize: '12px', 
+                                  fontWeight: '600',
+                                  cursor: 'pointer',
+                                  borderBottom: '2px solid #8b1e2d',
+                                  color: '#8b1e2d',
+                                  background: 'transparent'
+                                }}
                               >
                                 Departments
-                              </button>
+                              </span>
                             </li>
                             <li className="nav-item" role="presentation">
-                              <span className="nav-link text-secondary px-2 py-1" style={{ fontSize: '11px', cursor: 'pointer' }}>
+                              <span
+                                className="nav-link px-3 py-2"
+                                style={{ 
+                                  fontSize: '12px', 
+                                  fontWeight: '600',
+                                  cursor: 'pointer',
+                                  borderBottom: '2px solid transparent',
+                                  color: '#6b7280',
+                                }}
+                              >
                                 Columns
                               </span>
                             </li>
@@ -955,34 +971,85 @@ export default function SettingsContent() {
 
                           {/* Column Visibility Section */}
                           <div>
-                            <div className="d-flex justify-content-between align-items-center mb-2">
-                              <label className="form-label small fw-bold mb-0">Table Columns:</label>
-                              <div>
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                              <div className="d-flex align-items-center gap-2">
+                                <label className="form-label small fw-bold mb-0" style={{ color: '#1f2937', fontSize: '13px' }}>
+                                  <span style={{ color: '#8b1e2d' }}>▎</span> Table Columns
+                                </label>
+                                <span 
+                                  className="badge" 
+                                  style={{ 
+                                    background: '#8b1e2d', 
+                                    color: '#fff', 
+                                    fontSize: '10px', 
+                                    padding: '2px 8px',
+                                    borderRadius: '10px'
+                                  }}
+                                >
+                                  {getEffectiveVisibility(admin).filter(f => !protectedColumns.includes(f)).length}
+                                </span>
+                              </div>
+                              <div className="d-flex gap-1">
                                 <button
-                                  className="btn btn-sm btn-outline-secondary py-0 px-2"
-                                  style={{ fontSize: '10px' }}
+                                  className="btn btn-sm py-1 px-3"
+                                  style={{ 
+                                    fontSize: '11px',
+                                    background: '#FFD700',
+                                    color: '#1f2937',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontWeight: '600'
+                                  }}
                                   onClick={() => setAllAdminColumnVisibility(admin, true)}
                                   disabled={saving}
                                 >
-                                  All
+                                  ☑ All
                                 </button>
                                 <button
-                                  className="btn btn-sm btn-outline-secondary py-0 px-2 ms-1"
-                                  style={{ fontSize: '10px' }}
+                                  className="btn btn-sm py-1 px-3"
+                                  style={{ 
+                                    fontSize: '11px',
+                                    background: '#f3f4f6',
+                                    color: '#6b7280',
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '6px',
+                                    fontWeight: '500'
+                                  }}
                                   onClick={() => setAllAdminColumnVisibility(admin, false)}
                                   disabled={saving}
                                 >
-                                  Protected
+                                  🔒 Protected
                                 </button>
                               </div>
                             </div>
-                            <div className="border rounded p-2" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                            <div 
+                              className="border rounded p-2" 
+                              style={{ 
+                                maxHeight: '180px', 
+                                overflowY: 'auto',
+                                background: '#fafafa',
+                                borderColor: '#e5e7eb'
+                              }}
+                            >
                               {tableColumns.map(field => {
                                 const isProtected = protectedColumns.includes(field.field_key);
                                 const effectiveVis = getEffectiveVisibility(admin);
                                 const isChecked = effectiveVis.includes(field.field_key);
                                 return (
-                                  <div key={field.id} className="form-check">
+                                  <div 
+                                    key={field.id} 
+                                    className="form-check py-1 px-2 rounded mb-1"
+                                    style={{ 
+                                      cursor: isProtected ? 'not-allowed' : 'pointer',
+                                      transition: 'background 0.15s ease'
+                                    }}
+                                    onMouseOver={(e) => {
+                                      if (!isProtected) e.currentTarget.style.background = '#f0f0f0';
+                                    }}
+                                    onMouseOut={(e) => {
+                                      e.currentTarget.style.background = 'transparent';
+                                    }}
+                                  >
                                     <input
                                       className="form-check-input"
                                       type="checkbox"
@@ -990,23 +1057,75 @@ export default function SettingsContent() {
                                       checked={isChecked}
                                       disabled={saving || isProtected}
                                       onChange={() => toggleAdminColumnVisibility(admin, field.field_key)}
+                                      style={{ 
+                                        accentColor: '#8b1e2d',
+                                        cursor: isProtected ? 'not-allowed' : 'pointer'
+                                      }}
                                     />
-                                    <label className={`form-check-label ${isProtected ? 'text-muted' : ''}`} htmlFor={`${admin.key}-col-${field.id}`}>
+                                    <label 
+                                      className={`form-check-label ms-2 ${isProtected ? 'text-muted' : ''}`}
+                                      style={{ 
+                                        fontSize: '12px',
+                                        cursor: isProtected ? 'not-allowed' : 'pointer',
+                                        color: isProtected ? '#9ca3af' : '#374151'
+                                      }} 
+                                      htmlFor={`${admin.key}-col-${field.id}`}
+                                    >
                                       {field.field_label}
-                                      {isProtected && <span className="text-danger ms-1">*</span>}
+                                      {isProtected && (
+                                        <span 
+                                          className="ms-2" 
+                                          style={{ 
+                                            color: '#8b1e2d',
+                                            fontSize: '10px',
+                                            fontWeight: '600'
+                                          }}
+                                          title="This column is always visible"
+                                        >
+                                          🔒
+                                        </span>
+                                      )}
                                     </label>
                                   </div>
                                 );
                               })}
                             </div>
-                            <small className="text-muted">* Always visible</small>
+                            <div className="d-flex align-items-center gap-2 mt-2">
+                              <span style={{ color: '#8b1e2d', fontSize: '12px' }}>🔒</span>
+                              <small style={{ color: '#6b7280', fontSize: '11px' }}>Protected columns are always visible and cannot be hidden</small>
+                            </div>
                           </div>
 
                           {/* Modal Sections Section */}
-                          <div className="mt-3">
-                            <label className="form-label small fw-bold">Modal Sections (Hidden by default):</label>
-                            <div className="border rounded p-2">
-                              <div className="form-check">
+                          <div className="mt-3 pt-3" style={{ borderTop: '1px dashed #e5e7eb' }}>
+                            <div className="d-flex align-items-center gap-2 mb-2">
+                              <label className="form-label small fw-bold mb-0" style={{ color: '#1f2937', fontSize: '13px' }}>
+                                <span style={{ color: '#FFD700' }}>▎</span> Modal Sections
+                              </label>
+                              <span 
+                                className="badge" 
+                                style={{ 
+                                  background: '#10b981', 
+                                  color: '#fff', 
+                                  fontSize: '10px', 
+                                  padding: '2px 8px',
+                                  borderRadius: '10px'
+                                }}
+                              >
+                                {(admin.modal_section_visibility || []).length} enabled
+                              </span>
+                            </div>
+                            <div 
+                              className="border rounded p-2" 
+                              style={{ 
+                                background: '#fafafa',
+                                borderColor: '#e5e7eb'
+                              }}
+                            >
+                              <div 
+                                className="form-check py-1 px-2 rounded mb-1"
+                                style={{ cursor: 'pointer' }}
+                              >
                                 <input
                                   className="form-check-input"
                                   type="checkbox"
@@ -1014,13 +1133,20 @@ export default function SettingsContent() {
                                   checked={(admin.modal_section_visibility || []).includes('notifications')}
                                   disabled={saving}
                                   onChange={() => toggleAdminModalSectionVisibility(admin, 'notifications')}
+                                  style={{ accentColor: '#8b1e2d' }}
                                 />
-                                <label className="form-check-label" htmlFor={`${admin.key}-modal-notifications`}>
-                                  Notifications
+                                <label 
+                                  className="form-check-label ms-2" 
+                                  style={{ fontSize: '12px', color: '#374151' }} 
+                                  htmlFor={`${admin.key}-modal-notifications`}
+                                >
+                                  🔔 Notifications
                                 </label>
                               </div>
                             </div>
-                            <small className="text-muted">Enable to show Notifications section in applicant modal</small>
+                            <small className="text-muted d-block mt-2" style={{ fontSize: '11px' }}>
+                              These sections are hidden by default for non-super admins
+                            </small>
                           </div>
                         </div>
                       </div>
