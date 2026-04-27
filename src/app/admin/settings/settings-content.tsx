@@ -318,7 +318,7 @@ export default function SettingsContent() {
 
     const { error } = await supabase
       .from('config')
-      .insert({ key: `ADMIN_PASSWORD${newKey}`, value: newAdminPassword.trim(), allowed_departments: [] });
+      .insert({ key: `ADMIN_PASSWORD${newKey}`, value: newAdminPassword.trim(), allowed_departments: [], column_visibility: [] });
 
     if (!error) {
       setNewAdminPassword('');
@@ -391,6 +391,8 @@ export default function SettingsContent() {
     if (!error) {
       setAdminPasswords(adminPasswords.map(a => a.key === admin.key ? { ...a, column_visibility: newCols } : a));
       setMessage({ text: 'Column visibility updated', type: 'success' });
+    } else {
+      setMessage({ text: error.message, type: 'error' });
     }
     setSaving(false);
   }
