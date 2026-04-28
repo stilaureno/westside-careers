@@ -109,6 +109,7 @@ type ExamApplicantInfo =
       middleName: string | null;
       alreadyTaken: boolean;
       previousResult: any;
+      examAuthorized: string;
     };
 
 function getExamWriteErrorMessage(context: string, error: { message?: string } | null): string {
@@ -120,7 +121,7 @@ export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInf
 
   const { data: applicant, error } = await supabase
     .from('applicants')
-    .select('reference_no, last_name, first_name, middle_name, position_applied, application_status')
+    .select('reference_no, last_name, first_name, middle_name, position_applied, application_status, exam_authorized')
     .eq('reference_no', referenceNo)
     .single();
 
@@ -130,6 +131,10 @@ export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInf
 
   if (applicant.position_applied !== 'Dealer') {
     return { error: 'Math exam is only available for Dealer applicants' };
+  }
+
+  if (applicant.exam_authorized !== 'Yes') {
+    return { error: 'examNotAuthorized' };
   }
 
   if (applicant.application_status === 'Completed' || applicant.application_status === 'Not Recommended') {
@@ -160,6 +165,7 @@ export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInf
     middleName: applicant.middle_name,
     alreadyTaken: !!attempt && attempt.attempt_status !== 'IN_PROGRESS',
     previousResult: attempt,
+    examAuthorized: applicant.exam_authorized || 'No',
   };
 }
 

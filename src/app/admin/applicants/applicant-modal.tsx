@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
-import { getApplicant, updateStage } from '@/lib/actions/admin';
+import { getApplicant, updateStage, allowExam } from '@/lib/actions/admin';
 import { getStagesForPosition } from '@/lib/db/positions';
 import { createClient } from '@/lib/supabase/client';
 import type { Applicant } from '@/types';
@@ -30,6 +30,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [authorizing, setAuthorizing] = useState(false);
   const [stage, setStage] = useState('');
   const [stageSeq, setStageSeq] = useState(1);
   const [resultStatus, setResultStatus] = useState('Passed');
@@ -133,6 +134,20 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       remarks: '',
       evaluatedBy: 'HR',
     });
+  }
+
+  async function handleAllowExam() {
+    setAuthorizing(true);
+    setMessage(null);
+    const res = await allowExam(data.applicant.reference_no, '');
+    if (res.success) {
+      setMessage({ text: 'Exam authorized successfully!', type: 'success' });
+      await onSaved?.();
+      await loadData();
+    } else {
+      setMessage({ text: res.error || 'Failed to authorize exam.', type: 'error' });
+    }
+    setAuthorizing(false);
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -369,6 +384,19 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                               <label className="form-label small">Max Score</label>
                               <input type="number" className="form-control form-control-sm" value={form.maxScore} onChange={(e) => setForm({ ...form, maxScore: e.target.value })} />
                             </div>
+                          </div>
+                        )}
+
+                        {stage === 'Math Exam' && data?.applicant?.exam_authorized !== 'Yes' && (
+                          <div className="mb-3">
+                            <button
+                              type="button"
+                              className="btn btn-warning"
+                              onClick={handleAllowExam}
+                              disabled={authorizing}
+                            >
+                              {authorizing ? 'Authorizing...' : 'Allow Exam'}
+                            </button>
                           </div>
                         )}
 

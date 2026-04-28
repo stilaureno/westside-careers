@@ -325,7 +325,7 @@ const [autoFetched, setAutoFetched] = useState(false);
               ))}
             </div>
 
-{result.nextStep && result.applicant?.application_status === 'Completed' ? (
+{result.nextStep && (result.applicant?.application_status === 'Completed' || result.applicant?.application_status === 'Passed') ? (
               <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
                 <p style={{ fontSize: '13px', color: '#1e40af', margin: '0 0 8px' }}>
                   <span style={{ fontWeight: '600' }}>Next Step: </span>

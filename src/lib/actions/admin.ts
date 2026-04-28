@@ -79,3 +79,19 @@ export async function updateStage(
     remarks: payload.remarks,
   });
 }
+
+export async function allowExam(
+  referenceNo: string,
+  _adminPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('applicants')
+    .update({ exam_authorized: 'Yes', updated_at: new Date().toISOString() })
+    .eq('reference_no', referenceNo);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}

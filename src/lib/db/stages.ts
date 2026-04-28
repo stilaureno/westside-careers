@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type { StageResult } from '@/types';
-import { getNextStage } from './applicants';
+import { getNextStage, getStageWorkflow } from './applicants';
 
 export async function upsertStageResult(payload: {
   referenceNo: string;
@@ -152,9 +152,7 @@ export function calculateApplicationStatus(
 ): string {
   if (!stageResults || stageResults.length === 0) return 'Pending';
 
-  const workflow = position === 'Dealer' 
-    ? ['Initial Screening', 'Math Exam', 'Table Test', 'Sweaty Palm', 'Final Interview'] 
-    : ['Initial Screening', 'Math Exam', 'Table Test', 'Final Interview'];
+  const workflow = getStageWorkflow(position, experienceLevel || undefined);
 
   const lastResult = stageResults[stageResults.length - 1];
   const lastStageName = lastResult?.stage_name;

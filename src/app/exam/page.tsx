@@ -14,6 +14,9 @@ function getExamErrorMessage(error: string): string {
   if (error === 'initialScreeningRequired') {
     return 'You must complete Initial Screening before taking the math exam.';
   }
+  if (error === 'examNotAuthorized') {
+    return 'You are not authorized to take the exam. Please contact HR.';
+  }
   if (error === 'alreadyTaken') {
     return 'You have already taken this exam.';
   }
