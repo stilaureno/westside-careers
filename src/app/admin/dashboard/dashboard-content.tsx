@@ -236,12 +236,59 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
   );
 }
 
-function HeightGenderMatrix({ data }: { data: HeightGenderByPosition }) {
+function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPosition; useFeet?: boolean }) {
   const positions = Object.keys(data).sort();
   
   if (positions.length === 0) {
     return <p style={{ color: '#6b7280', fontSize: '13px' }}>No data available</p>;
   }
+  
+  const cmToFeetRange = (cm: number): { feet: number; inches: number } => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+  };
+  
+  const formatHeight = (cm: number): string => {
+    const { feet, inches } = cmToFeetRange(cm);
+    return `${feet}'${inches}`;
+  };
+  
+  const getFeetDisplay = (data: HeightGenderByPosition) => {
+    const result: { [pos: string]: { range52to54: { male: number; female: number }; range55to57: { male: number; female: number }; range58to60: { male: number; female: number }; range61Plus: { male: number; female: number } } } = {};
+    
+    for (const pos of Object.keys(data)) {
+      result[pos] = {
+        range52to54: { male: 0, female: 0 },
+        range55to57: { male: 0, female: 0 },
+        range58to60: { male: 0, female: 0 },
+        range61Plus: { male: 0, female: 0 },
+      };
+      
+      const p = data[pos];
+      
+      // below160 (157-163 cm = 5'2 - 5'4)
+      result[pos].range52to54.male += p.below160.male;
+      result[pos].range52to54.female += p.below160.female;
+      
+      // height160170 (165-170 cm = 5'5 - 5'7)
+      result[pos].range55to57.male += p.height160170.male;
+      result[pos].range55to57.female += p.height160170.female;
+      
+      // height170180 (173-183 cm = 5'8 - 6'0)
+      result[pos].range58to60.male += p.height170180.male;
+      result[pos].range58to60.female += p.height170180.female;
+      
+      // height180Plus (185+ cm = 6'1+)
+      result[pos].range61Plus.male += p.height180Plus.male;
+      result[pos].range61Plus.female += p.height180Plus.female;
+    }
+    
+    return result;
+  };
+  
+  const feetData = useFeet ? getFeetDisplay(data) : null;
   
   const cellStyle: React.CSSProperties = {
     padding: '8px 6px',
@@ -263,10 +310,21 @@ function HeightGenderMatrix({ data }: { data: HeightGenderByPosition }) {
         <thead>
           <tr>
             <th style={{ ...headerCellStyle, textAlign: 'left', width: '100px' }}>Position</th>
-            <th style={headerCellStyle} colSpan={3}>{'<160'}</th>
-            <th style={headerCellStyle} colSpan={3}>160-169</th>
-            <th style={headerCellStyle} colSpan={3}>170-179</th>
-            <th style={headerCellStyle} colSpan={3}>{'180+'}</th>
+            {useFeet ? (
+              <>
+                <th style={headerCellStyle} colSpan={3}>{`5'2 - 5'4`}</th>
+                <th style={headerCellStyle} colSpan={3}>{`5'5 - 5'7`}</th>
+                <th style={headerCellStyle} colSpan={3}>{`5'8 - 6'0`}</th>
+                <th style={headerCellStyle} colSpan={3}>6&apos;1+</th>
+              </>
+            ) : (
+              <>
+                <th style={headerCellStyle} colSpan={3}>{'<160'}</th>
+                <th style={headerCellStyle} colSpan={3}>160-169</th>
+                <th style={headerCellStyle} colSpan={3}>170-179</th>
+                <th style={headerCellStyle} colSpan={3}>{'180+'}</th>
+              </>
+            )}
           </tr>
           <tr>
             <th style={{ ...headerCellStyle, textAlign: 'left' }}></th>
@@ -290,21 +348,42 @@ function HeightGenderMatrix({ data }: { data: HeightGenderByPosition }) {
             const rowTotal = p.below160.male + p.below160.female + p.height160170.male + p.height160170.female + p.height170180.male + p.height170180.female + p.height180Plus.male + p.height180Plus.female;
             if (rowTotal === 0) return null;
             
+            const fd = feetData?.[pos];
+            
             return (
               <tr key={pos}>
                 <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080' }}>{pos}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.below160.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.below160.female}</td>
-                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.below160.male + p.below160.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height160170.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height160170.female}</td>
-                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height160170.male + p.height160170.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height170180.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height170180.female}</td>
-                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height170180.male + p.height170180.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height180Plus.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height180Plus.female}</td>
-                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height180Plus.male + p.height180Plus.female}</td>
+                {useFeet && fd ? (
+                  <>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range52to54.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range52to54.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range52to54.male + fd.range52to54.female}</td>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range55to57.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range55to57.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range55to57.male + fd.range55to57.female}</td>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range58to60.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range58to60.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range58to60.male + fd.range58to60.female}</td>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range61Plus.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range61Plus.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range61Plus.male + fd.range61Plus.female}</td>
+                  </>
+                ) : (
+                  <>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.below160.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.below160.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.below160.male + p.below160.female}</td>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height160170.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height160170.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height160170.male + p.height160170.female}</td>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height170180.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height170180.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height170180.male + p.height170180.female}</td>
+                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height180Plus.male}</td>
+                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height180Plus.female}</td>
+                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height180Plus.male + p.height180Plus.female}</td>
+                  </>
+                )}
               </tr>
             );
           })}
@@ -323,6 +402,7 @@ export default function DashboardContent() {
   const supabase = createClient();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [allowedDepartments, setAllowedDepartments] = useState<string[]>([]);
+  const [heightInFeet, setHeightInFeet] = useState(false);
 
   useEffect(() => {
     const superAdminCookie = getCookie('super_admin_session');
@@ -694,8 +774,25 @@ export default function DashboardContent() {
               <div style={{
                 background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
               }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Height & Gender by Position</h3>
-                <HeightGenderMatrix data={deptData.heightGenderByPosition} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0 }}>Height & Gender by Position</h3>
+                  <button
+                    onClick={() => setHeightInFeet(!heightInFeet)}
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      border: '1px solid #000080',
+                      borderRadius: '6px',
+                      background: heightInFeet ? '#000080' : '#fff',
+                      color: heightInFeet ? '#FFD700' : '#000080',
+                      cursor: 'pointer',
+                      fontWeight: '500',
+                    }}
+                  >
+                    {heightInFeet ? "Show in cm" : "Show in ft/in"}
+                  </button>
+                </div>
+                <HeightGenderMatrix data={deptData.heightGenderByPosition} useFeet={heightInFeet} />
               </div>
             </div>
           </div>
