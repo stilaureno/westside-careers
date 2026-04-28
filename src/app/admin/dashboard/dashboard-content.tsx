@@ -45,6 +45,15 @@ interface HeightBandSummary {
   height180Plus: number;
 }
 
+interface AgeGenderByPosition {
+  [position: string]: {
+    age20s: { male: number; female: number };
+    age30s: { male: number; female: number };
+    age40s: { male: number; female: number };
+    age50Plus: { male: number; female: number };
+  };
+}
+
 interface DeptData {
   positions: { [posName: string]: PositionSummary };
   genderByPosition: { [posName: string]: GenderByPosition };
@@ -52,6 +61,7 @@ interface DeptData {
   stageTable: StageSummary;
   ageBands: AgeBandSummary;
   heightBands: HeightBandSummary;
+  ageGenderByPosition: AgeGenderByPosition;
   total: number;
   pending: number;
   ongoing: number;
@@ -138,6 +148,84 @@ function HeightBandRow({ label, value, isLast = false }: { label: string; value:
   );
 }
 
+function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
+  const positions = Object.keys(data).sort();
+  
+  if (positions.length === 0) {
+    return <p style={{ color: '#6b7280', fontSize: '13px' }}>No data available</p>;
+  }
+  
+  const cellStyle: React.CSSProperties = {
+    padding: '8px 6px',
+    textAlign: 'center',
+    fontSize: '12px',
+    borderBottom: '1px solid #e5e7eb',
+  };
+  
+  const headerCellStyle: React.CSSProperties = {
+    ...cellStyle,
+    fontWeight: '700',
+    background: '#f8f9fa',
+    color: '#000080',
+  };
+  
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+        <thead>
+          <tr>
+            <th style={{ ...headerCellStyle, textAlign: 'left', width: '100px' }}>Position</th>
+            <th style={headerCellStyle} colSpan={3}>20s</th>
+            <th style={headerCellStyle} colSpan={3}>30s</th>
+            <th style={headerCellStyle} colSpan={3}>40s</th>
+            <th style={headerCellStyle} colSpan={3}>50+</th>
+          </tr>
+          <tr>
+            <th style={{ ...headerCellStyle, textAlign: 'left' }}></th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+          </tr>
+        </thead>
+        <tbody>
+          {positions.map(pos => {
+            const p = data[pos];
+            const rowTotal = p.age20s.male + p.age20s.female + p.age30s.male + p.age30s.female + p.age40s.male + p.age40s.female + p.age50Plus.male + p.age50Plus.female;
+            if (rowTotal === 0) return null;
+            
+            return (
+              <tr key={pos}>
+                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080' }}>{pos}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age20s.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age20s.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age20s.male + p.age20s.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age30s.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age30s.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age30s.male + p.age30s.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age40s.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age40s.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age40s.male + p.age40s.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age50Plus.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age50Plus.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age50Plus.male + p.age50Plus.female}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function DashboardContent() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({});
   const [deptPositions, setDeptPositions] = useState<{ [dept: string]: string[] }>({});
@@ -170,6 +258,13 @@ export default function DashboardContent() {
     const emptyStage = (): StageSummary => ({ taken: 0, pending: 0, passed: 0, failed: 0 });
     const emptyAgeBands = (): AgeBandSummary => ({ age20s: 0, age30s: 0, age40s: 0, age50Plus: 0 });
     const emptyHeightBands = (): HeightBandSummary => ({ below160: 0, height160170: 0, height170180: 0, height180Plus: 0 });
+
+  const emptyAgeGender = () => ({
+    age20s: { male: 0, female: 0 },
+    age30s: { male: 0, female: 0 },
+    age40s: { male: 0, female: 0 },
+    age50Plus: { male: 0, female: 0 },
+  });
     
     const data: DashboardData = {};
     const positionsMap: { [dept: string]: string[] } = {};
@@ -209,6 +304,7 @@ export default function DashboardContent() {
         stageTable: emptyStage(),
         ageBands: emptyAgeBands(),
         heightBands: emptyHeightBands(),
+        ageGenderByPosition: {},
         total: 0,
         pending: 0,
         ongoing: 0,
@@ -222,6 +318,7 @@ export default function DashboardContent() {
       for (const pos of posRows || []) {
         data[dept.name].positions[pos.name] = emptyPos();
         data[dept.name].genderByPosition[pos.name] = { male: 0, female: 0 };
+        data[dept.name].ageGenderByPosition[pos.name] = emptyAgeGender();
       }
     }
     
@@ -301,6 +398,26 @@ export default function DashboardContent() {
       else if (age >= 30 && age <= 39) deptData.ageBands.age30s++;
       else if (age >= 40 && age <= 49) deptData.ageBands.age40s++;
       else if (age >= 50) deptData.ageBands.age50Plus++;
+      
+      // Age + Gender breakdown by position
+      const agePosData = deptData.ageGenderByPosition[pos];
+      if (agePosData) {
+        const isMale = gender === 'Male';
+        const isFemale = gender === 'Female';
+        if (age >= 20 && age <= 29) {
+          if (isMale) agePosData.age20s.male++;
+          else if (isFemale) agePosData.age20s.female++;
+        } else if (age >= 30 && age <= 39) {
+          if (isMale) agePosData.age30s.male++;
+          else if (isFemale) agePosData.age30s.female++;
+        } else if (age >= 40 && age <= 49) {
+          if (isMale) agePosData.age40s.male++;
+          else if (isFemale) agePosData.age40s.female++;
+        } else if (age >= 50) {
+          if (isMale) agePosData.age50Plus.male++;
+          else if (isFemale) agePosData.age50Plus.female++;
+        }
+      }
       
       // Height band breakdown
       const height = r.height_cm;
@@ -476,6 +593,13 @@ export default function DashboardContent() {
                 <AgeBandRow label="30s" value={deptData.ageBands.age30s} />
                 <AgeBandRow label="40s" value={deptData.ageBands.age40s} />
                 <AgeBandRow label="50 and above" value={deptData.ageBands.age50Plus} isLast />
+              </div>
+
+              <div style={{
+                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Age & Gender by Position</h3>
+                <AgeGenderMatrix data={deptData.ageGenderByPosition} />
               </div>
 
               <div style={{
