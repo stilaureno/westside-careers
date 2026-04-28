@@ -228,7 +228,7 @@ function getStageInstruction(stageName: string, resultStatus: string): string {
   }
   if (stageName === 'Final Interview') {
     if (resultStatus === 'Passed') {
-      return 'Congratulations! You have passed all stages. Please create your account at https://westsideresort.darwinbox.com/ms/candidatev2/main/auth/login to proceed with your application.';
+      return 'Congratulations! You have passed all stages. Please follow the next instructions provided by the final interviewer.';
     }
     if (resultStatus === 'Reprofile') {
       return 'You have been Reprofiled. Please check for other available positions.';

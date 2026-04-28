@@ -318,15 +318,13 @@ const [autoFetched, setAutoFetched] = useState(false);
               ))}
             </div>
 
-            {result.nextStep && result.nextStep.includes('\n') ? (
+{result.nextStep && result.applicant?.application_status === 'Completed' ? (
               <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                {result.nextStep.split('\n').map((line, idx) => (
-                  <p key={idx} style={{ fontSize: '13px', color: '#1e40af', margin: idx === 0 ? '0 0 8px' : '0 0 8px' }}>
-                    {idx === 0 ? <span style={{ fontWeight: '600' }}>Next Step: </span> : null}
-                    {line}
-                  </p>
-                ))}
-                <a href="https://westsideresort.darwinbox.com/ms/candidatev2/main/auth/login" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '8px', padding: '10px 16px', background: '#163a70', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
+                <p style={{ fontSize: '13px', color: '#1e40af', margin: '0 0 8px' }}>
+                  <span style={{ fontWeight: '600' }}>Next Step: </span>
+                  {result.nextStep}
+                </p>
+                <a href="https://westsideresort.darwinbox.com/ms/candidatev2/main/auth_login" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '8px', padding: '10px 16px', background: '#163a70', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
                   Open Darwinbox →
                 </a>
               </div>

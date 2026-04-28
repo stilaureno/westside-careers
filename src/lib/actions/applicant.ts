@@ -242,7 +242,7 @@ const workflow = await getStageWorkflowFromDB(applicant.position_applied, applic
   if (allStagesCompleted) {
     const stagesList = workflow.join(', ');
     const pos = applicant.position_applied;
-    nextStep = `You have completed the Hiring Portal process for the ${pos} position, including the ${stagesList}. Please follow the next instructions provided by the final interviewer.\n\nFor application monitoring purposes, please create your Darwinbox account, complete all required information, and select the position you applied for today.\n\nDarwinbox link = https://westsideresort.darwinbox.com/ms/candidatev2/main/auth/login`;
+    nextStep = `You have completed the Hiring Portal process for the ${pos} position, including the ${stagesList}. Please follow the next instructions provided by the final interviewer.`;
   } else if (lastCompletedIdx < workflow.length) {
     nextStep = workflow[lastCompletedIdx];
   }
