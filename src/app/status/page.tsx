@@ -70,6 +70,13 @@ const [autoFetched, setAutoFetched] = useState(false);
   }, [autoFetched, rememberMe, form.referenceNo, form.birthdate]);
 
   function clearSavedInfo() {
+    const confirmed = window.confirm(
+      'This will delete your saved Reference Number from this device.\n\n' +
+      'Please make sure to save your personal Reference Number so you can check your application status again later.\n\n' +
+      'Click OK to continue, or Cancel to stay on this page.'
+    );
+    if (!confirmed) return;
+    
     localStorage.removeItem('savedReferenceNo');
     localStorage.removeItem('savedBirthdate');
     setForm({ referenceNo: '', birthdate: '' });
