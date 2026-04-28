@@ -370,16 +370,16 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
                   </>
                 ) : (
                   <>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.below160.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.below160.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.below160.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{p.below160.male + p.below160.female}</td>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height160170.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.height160170.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height160170.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height160170.male + p.height160170.female}</td>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height170180.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.height170180.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height170180.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height170180.male + p.height170180.female}</td>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height180Plus.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.height180Plus.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height180Plus.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height180Plus.male + p.height180Plus.female}</td>
                   </>
