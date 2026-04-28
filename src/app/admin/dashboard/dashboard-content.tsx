@@ -164,6 +164,25 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
   if (positions.length === 0) {
     return <p style={{ color: '#6b7280', fontSize: '13px' }}>No data available</p>;
   }
+
+  const totals = {
+    age20s: { male: 0, female: 0 },
+    age30s: { male: 0, female: 0 },
+    age40s: { male: 0, female: 0 },
+    age50Plus: { male: 0, female: 0 },
+  };
+
+  positions.forEach(pos => {
+    const p = data[pos];
+    totals.age20s.male += p.age20s.male;
+    totals.age20s.female += p.age20s.female;
+    totals.age30s.male += p.age30s.male;
+    totals.age30s.female += p.age30s.female;
+    totals.age40s.male += p.age40s.male;
+    totals.age40s.female += p.age40s.female;
+    totals.age50Plus.male += p.age50Plus.male;
+    totals.age50Plus.female += p.age50Plus.female;
+  });
   
   const cellStyle: React.CSSProperties = {
     padding: '8px 6px',
@@ -176,6 +195,14 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
     ...cellStyle,
     fontWeight: '700',
     background: '#f8f9fa',
+    color: '#000080',
+  };
+
+  const footerCellStyle: React.CSSProperties = {
+    ...cellStyle,
+    fontWeight: '700',
+    background: '#fff9e6',
+    borderTop: '2px solid #FFD700',
     color: '#000080',
   };
   
@@ -230,6 +257,21 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
               </tr>
             );
           })}
+          <tr>
+            <td style={{ ...footerCellStyle, textAlign: 'left' }}>GRAND TOTAL</td>
+            <td style={footerCellStyle}>{totals.age20s.male}</td>
+            <td style={footerCellStyle}>{totals.age20s.female}</td>
+            <td style={footerCellStyle}>{totals.age20s.male + totals.age20s.female}</td>
+            <td style={footerCellStyle}>{totals.age30s.male}</td>
+            <td style={footerCellStyle}>{totals.age30s.female}</td>
+            <td style={footerCellStyle}>{totals.age30s.male + totals.age30s.female}</td>
+            <td style={footerCellStyle}>{totals.age40s.male}</td>
+            <td style={footerCellStyle}>{totals.age40s.female}</td>
+            <td style={footerCellStyle}>{totals.age40s.male + totals.age40s.female}</td>
+            <td style={footerCellStyle}>{totals.age50Plus.male}</td>
+            <td style={footerCellStyle}>{totals.age50Plus.female}</td>
+            <td style={footerCellStyle}>{totals.age50Plus.male + totals.age50Plus.female}</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -242,6 +284,25 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
   if (positions.length === 0) {
     return <p style={{ color: '#6b7280', fontSize: '13px' }}>No data available</p>;
   }
+
+  const totals = {
+    below160: { male: 0, female: 0 },
+    height160170: { male: 0, female: 0 },
+    height170180: { male: 0, female: 0 },
+    height180Plus: { male: 0, female: 0 },
+  };
+
+  positions.forEach(pos => {
+    const p = data[pos];
+    totals.below160.male += p.below160.male;
+    totals.below160.female += p.below160.female;
+    totals.height160170.male += p.height160170.male;
+    totals.height160170.female += p.height160170.female;
+    totals.height170180.male += p.height170180.male;
+    totals.height170180.female += p.height170180.female;
+    totals.height180Plus.male += p.height180Plus.male;
+    totals.height180Plus.female += p.height180Plus.female;
+  });
   
   const cmToFeetRange = (cm: number): { feet: number; inches: number } => {
     const totalInches = cm / 2.54;
@@ -289,6 +350,7 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
   };
   
   const feetData = useFeet ? getFeetDisplay(data) : null;
+  const grandTotalFeet = useFeet ? getFeetDisplay({ "GRAND TOTAL": totals })["GRAND TOTAL"] : null;
   
   const cellStyle: React.CSSProperties = {
     padding: '8px 6px',
@@ -301,6 +363,14 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
     ...cellStyle,
     fontWeight: '700',
     background: '#f8f9fa',
+    color: '#000080',
+  };
+
+  const footerCellStyle: React.CSSProperties = {
+    ...cellStyle,
+    fontWeight: '700',
+    background: '#f0f9ff',
+    borderTop: '2px solid #0066CC',
     color: '#000080',
   };
   
@@ -387,6 +457,40 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
               </tr>
             );
           })}
+          <tr>
+            <td style={{ ...footerCellStyle, textAlign: 'left' }}>GRAND TOTAL</td>
+            {useFeet && grandTotalFeet ? (
+              <>
+                <td style={footerCellStyle}>{grandTotalFeet.range52to54.male}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range52to54.female}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range52to54.male + grandTotalFeet.range52to54.female}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range55to57.male}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range55to57.female}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range55to57.male + grandTotalFeet.range55to57.female}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range58to60.male}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range58to60.female}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range58to60.male + grandTotalFeet.range58to60.female}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range61Plus.male}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range61Plus.female}</td>
+                <td style={footerCellStyle}>{grandTotalFeet.range61Plus.male + grandTotalFeet.range61Plus.female}</td>
+              </>
+            ) : (
+              <>
+                <td style={footerCellStyle}>{totals.below160.male}</td>
+                <td style={footerCellStyle}>{totals.below160.female}</td>
+                <td style={footerCellStyle}>{totals.below160.male + totals.below160.female}</td>
+                <td style={footerCellStyle}>{totals.height160170.male}</td>
+                <td style={footerCellStyle}>{totals.height160170.female}</td>
+                <td style={footerCellStyle}>{totals.height160170.male + totals.height160170.female}</td>
+                <td style={footerCellStyle}>{totals.height170180.male}</td>
+                <td style={footerCellStyle}>{totals.height170180.female}</td>
+                <td style={footerCellStyle}>{totals.height170180.male + totals.height170180.female}</td>
+                <td style={footerCellStyle}>{totals.height180Plus.male}</td>
+                <td style={footerCellStyle}>{totals.height180Plus.female}</td>
+                <td style={footerCellStyle}>{totals.height180Plus.male + totals.height180Plus.female}</td>
+              </>
+            )}
+          </tr>
         </tbody>
       </table>
     </div>
