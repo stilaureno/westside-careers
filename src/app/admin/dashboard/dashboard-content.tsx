@@ -402,7 +402,7 @@ export default function DashboardContent() {
   const supabase = createClient();
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [allowedDepartments, setAllowedDepartments] = useState<string[]>([]);
-  const [heightInFeet, setHeightInFeet] = useState(false);
+  const [heightInFeet, setHeightInFeet] = useState(true);
 
   useEffect(() => {
     const superAdminCookie = getCookie('super_admin_session');
