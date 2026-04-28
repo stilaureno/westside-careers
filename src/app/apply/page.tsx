@@ -322,10 +322,10 @@ export default function ApplyPage() {
                     max="250"
                     value={form.heightCm}
                     onChange={(e) => {
-                      e.target.setCustomValidity('');
+                      (e.target as HTMLInputElement).setCustomValidity('');
                       setForm({ ...form, heightCm: e.target.value });
                     }}
-                    onInvalid={(e) => e.target.setCustomValidity('Your height must be in centimeters')}
+                    onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('Your height must be in centimeters')}
                     placeholder="cm"
                   />
                 </Field>

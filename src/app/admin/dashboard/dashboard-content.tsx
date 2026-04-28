@@ -38,12 +38,20 @@ interface AgeBandSummary {
   age50Plus: number;
 }
 
+interface HeightBandSummary {
+  below160: number;
+  height160170: number;
+  height170180: number;
+  height180Plus: number;
+}
+
 interface DeptData {
   positions: { [posName: string]: PositionSummary };
   genderByPosition: { [posName: string]: GenderByPosition };
   stageMath: StageSummary;
   stageTable: StageSummary;
   ageBands: AgeBandSummary;
+  heightBands: HeightBandSummary;
   total: number;
   pending: number;
   ongoing: number;
@@ -121,6 +129,15 @@ function AgeBandRow({ label, value, isLast = false }: { label: string; value: nu
   );
 }
 
+function HeightBandRow({ label, value, isLast = false }: { label: string; value: number; isLast?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: isLast ? 'none' : '1px solid #e5e7eb' }}>
+      <span style={{ fontSize: '13px', color: '#000080' }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '600', color: '#000080' }}>{value}</span>
+    </div>
+  );
+}
+
 export default function DashboardContent() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({});
   const [deptPositions, setDeptPositions] = useState<{ [dept: string]: string[] }>({});
@@ -152,6 +169,7 @@ export default function DashboardContent() {
     const emptyPos = (): PositionSummary => ({ total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0 });
     const emptyStage = (): StageSummary => ({ taken: 0, pending: 0, passed: 0, failed: 0 });
     const emptyAgeBands = (): AgeBandSummary => ({ age20s: 0, age30s: 0, age40s: 0, age50Plus: 0 });
+    const emptyHeightBands = (): HeightBandSummary => ({ below160: 0, height160170: 0, height170180: 0, height180Plus: 0 });
     
     const data: DashboardData = {};
     const positionsMap: { [dept: string]: string[] } = {};
@@ -190,6 +208,7 @@ export default function DashboardContent() {
         stageMath: emptyStage(),
         stageTable: emptyStage(),
         ageBands: emptyAgeBands(),
+        heightBands: emptyHeightBands(),
         total: 0,
         pending: 0,
         ongoing: 0,
@@ -209,7 +228,7 @@ export default function DashboardContent() {
     // Query applicants
     let appQuery = supabase
       .from('applicants')
-      .select('reference_no, application_status, current_stage, position_applied, gender, birthdate, experience_level, department')
+      .select('reference_no, application_status, current_stage, position_applied, gender, birthdate, experience_level, department, height_cm')
       .in('department', deptsToShow.map(d => d.name));
     
     if (startDate) appQuery = appQuery.gte('created_at', startDate);
@@ -282,6 +301,15 @@ export default function DashboardContent() {
       else if (age >= 30 && age <= 39) deptData.ageBands.age30s++;
       else if (age >= 40 && age <= 49) deptData.ageBands.age40s++;
       else if (age >= 50) deptData.ageBands.age50Plus++;
+      
+      // Height band breakdown
+      const height = r.height_cm;
+      if (height !== null && height !== undefined && !isNaN(height)) {
+        if (height < 160) deptData.heightBands.below160++;
+        else if (height >= 160 && height < 170) deptData.heightBands.height160170++;
+        else if (height >= 170 && height < 180) deptData.heightBands.height170180++;
+        else if (height >= 180) deptData.heightBands.height180Plus++;
+      }
       
       // Stage stats (only for Dealer position in Table Games)
       if (pos === 'Dealer' && dept === 'Table Games') {
@@ -448,6 +476,16 @@ export default function DashboardContent() {
                 <AgeBandRow label="30s" value={deptData.ageBands.age30s} />
                 <AgeBandRow label="40s" value={deptData.ageBands.age40s} />
                 <AgeBandRow label="50 and above" value={deptData.ageBands.age50Plus} isLast />
+              </div>
+
+              <div style={{
+                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Height Breakdown (cm)</h3>
+                <HeightBandRow label="Below 160" value={deptData.heightBands.below160} />
+                <HeightBandRow label="160 - 169" value={deptData.heightBands.height160170} />
+                <HeightBandRow label="170 - 179" value={deptData.heightBands.height170180} />
+                <HeightBandRow label="180 and above" value={deptData.heightBands.height180Plus} isLast />
               </div>
             </div>
           </div>
