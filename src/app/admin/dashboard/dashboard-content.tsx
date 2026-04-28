@@ -54,6 +54,15 @@ interface AgeGenderByPosition {
   };
 }
 
+interface HeightGenderByPosition {
+  [position: string]: {
+    below160: { male: number; female: number };
+    height160170: { male: number; female: number };
+    height170180: { male: number; female: number };
+    height180Plus: { male: number; female: number };
+  };
+}
+
 interface DeptData {
   positions: { [posName: string]: PositionSummary };
   genderByPosition: { [posName: string]: GenderByPosition };
@@ -62,6 +71,7 @@ interface DeptData {
   ageBands: AgeBandSummary;
   heightBands: HeightBandSummary;
   ageGenderByPosition: AgeGenderByPosition;
+  heightGenderByPosition: HeightGenderByPosition;
   total: number;
   pending: number;
   ongoing: number;
@@ -184,16 +194,16 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
             <th style={{ ...headerCellStyle, textAlign: 'left' }}></th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
             <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Tot</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
           </tr>
         </thead>
         <tbody>
@@ -217,6 +227,84 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
                 <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age50Plus.male}</td>
                 <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age50Plus.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age50Plus.male + p.age50Plus.female}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function HeightGenderMatrix({ data }: { data: HeightGenderByPosition }) {
+  const positions = Object.keys(data).sort();
+  
+  if (positions.length === 0) {
+    return <p style={{ color: '#6b7280', fontSize: '13px' }}>No data available</p>;
+  }
+  
+  const cellStyle: React.CSSProperties = {
+    padding: '8px 6px',
+    textAlign: 'center',
+    fontSize: '12px',
+    borderBottom: '1px solid #e5e7eb',
+  };
+  
+  const headerCellStyle: React.CSSProperties = {
+    ...cellStyle,
+    fontWeight: '700',
+    background: '#f8f9fa',
+    color: '#000080',
+  };
+  
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+        <thead>
+          <tr>
+            <th style={{ ...headerCellStyle, textAlign: 'left', width: '100px' }}>Position</th>
+            <th style={headerCellStyle} colSpan={3}>{'<160'}</th>
+            <th style={headerCellStyle} colSpan={3}>160-169</th>
+            <th style={headerCellStyle} colSpan={3}>170-179</th>
+            <th style={headerCellStyle} colSpan={3}>{'180+'}</th>
+          </tr>
+          <tr>
+            <th style={{ ...headerCellStyle, textAlign: 'left' }}></th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {positions.map(pos => {
+            const p = data[pos];
+            const rowTotal = p.below160.male + p.below160.female + p.height160170.male + p.height160170.female + p.height170180.male + p.height170180.female + p.height180Plus.male + p.height180Plus.female;
+            if (rowTotal === 0) return null;
+            
+            return (
+              <tr key={pos}>
+                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080' }}>{pos}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.below160.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.below160.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.below160.male + p.below160.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height160170.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height160170.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height160170.male + p.height160170.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height170180.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height170180.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height170180.male + p.height170180.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height180Plus.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height180Plus.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height180Plus.male + p.height180Plus.female}</td>
               </tr>
             );
           })}
@@ -265,6 +353,13 @@ export default function DashboardContent() {
     age40s: { male: 0, female: 0 },
     age50Plus: { male: 0, female: 0 },
   });
+
+  const emptyHeightGender = () => ({
+    below160: { male: 0, female: 0 },
+    height160170: { male: 0, female: 0 },
+    height170180: { male: 0, female: 0 },
+    height180Plus: { male: 0, female: 0 },
+  });
     
     const data: DashboardData = {};
     const positionsMap: { [dept: string]: string[] } = {};
@@ -305,6 +400,7 @@ export default function DashboardContent() {
         ageBands: emptyAgeBands(),
         heightBands: emptyHeightBands(),
         ageGenderByPosition: {},
+        heightGenderByPosition: {},
         total: 0,
         pending: 0,
         ongoing: 0,
@@ -319,6 +415,7 @@ export default function DashboardContent() {
         data[dept.name].positions[pos.name] = emptyPos();
         data[dept.name].genderByPosition[pos.name] = { male: 0, female: 0 };
         data[dept.name].ageGenderByPosition[pos.name] = emptyAgeGender();
+        data[dept.name].heightGenderByPosition[pos.name] = emptyHeightGender();
       }
     }
     
@@ -421,11 +518,32 @@ export default function DashboardContent() {
       
       // Height band breakdown
       const height = r.height_cm;
+      const isMale = gender === 'Male';
+      const isFemale = gender === 'Female';
+      
       if (height !== null && height !== undefined && !isNaN(height)) {
         if (height < 160) deptData.heightBands.below160++;
         else if (height >= 160 && height < 170) deptData.heightBands.height160170++;
         else if (height >= 170 && height < 180) deptData.heightBands.height170180++;
         else if (height >= 180) deptData.heightBands.height180Plus++;
+        
+        // Height + Gender breakdown by position
+        const heightPosData = deptData.heightGenderByPosition[pos];
+        if (heightPosData) {
+          if (height < 160) {
+            if (isMale) heightPosData.below160.male++;
+            else if (isFemale) heightPosData.below160.female++;
+          } else if (height >= 160 && height < 170) {
+            if (isMale) heightPosData.height160170.male++;
+            else if (isFemale) heightPosData.height160170.female++;
+          } else if (height >= 170 && height < 180) {
+            if (isMale) heightPosData.height170180.male++;
+            else if (isFemale) heightPosData.height170180.female++;
+          } else if (height >= 180) {
+            if (isMale) heightPosData.height180Plus.male++;
+            else if (isFemale) heightPosData.height180Plus.female++;
+          }
+        }
       }
       
       // Stage stats (only for Dealer position in Table Games)
@@ -576,11 +694,8 @@ export default function DashboardContent() {
               <div style={{
                 background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
               }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Height Breakdown (cm)</h3>
-                <HeightBandRow label="Below 160" value={deptData.heightBands.below160} />
-                <HeightBandRow label="160 - 169" value={deptData.heightBands.height160170} />
-                <HeightBandRow label="170 - 179" value={deptData.heightBands.height170180} />
-                <HeightBandRow label="180 and above" value={deptData.heightBands.height180Plus} isLast />
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Height & Gender by Position</h3>
+                <HeightGenderMatrix data={deptData.heightGenderByPosition} />
               </div>
             </div>
           </div>
