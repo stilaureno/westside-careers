@@ -363,7 +363,7 @@ export default function DashboardContent() {
 {deptNames.map(deptName => {
         const deptData = dashboardData[deptName];
         const positions = deptPositions[deptName] || [];
-        const deptHeaderColor = deptName === 'Table Games' ? '#800000' : deptName === 'Slots' ? '#FF8C00' : '#000080';
+        const deptHeaderColor = deptName === 'Table Games' ? '#800000' : deptName === 'Business Development' ? '#006400' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#FF8C00' : '#000080';
         
         return (
           <div key={deptName} style={{
@@ -374,7 +374,7 @@ export default function DashboardContent() {
               background: deptHeaderColor, color: '#FFD700', borderRadius: '12px', padding: '16px',
               marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: deptName === 'Table Games' ? '#fff' : deptName === 'Slots' ? '#000' : '#FFD700' }}>{deptName}</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: deptName === 'Table Games' ? '#fff' : deptName === 'Business Development' ? '#fff' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#000' : '#FFD700' }}>{deptName}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
                 <SummaryCard label="Total" value={deptData.total} />
                 <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" />
