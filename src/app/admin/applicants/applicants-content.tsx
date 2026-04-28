@@ -6,6 +6,19 @@ import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
 import type { ApplicantListItem } from '@/lib/db/applicants';
 
+function useWindowSize() {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    function handleResize() {
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return size;
+}
+
 type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
 
@@ -47,6 +60,10 @@ export default function ApplicantsContent({
   const [applicants, setApplicants] = useState<ApplicantListItem[]>(initialApplicants);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width < 768;
+  const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
+  const [showFilters, setShowFilters] = useState(!isMobile);
   
   // Use custom column visibility from props, or load from DB
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
@@ -363,8 +380,21 @@ export default function ApplicantsContent({
 
   return (
     <div className="container-fluid py-3" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif' }}>
+      {/* Mobile Filter Toggle */}
+      {isMobile && (
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <span className="text-muted small">{filteredApplicants.length} results</span>
+          <button 
+            className="btn btn-sm btn-outline-secondary" 
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            {showFilters ? 'Hide Filters ▲' : 'Show Filters ▼'}
+          </button>
+        </div>
+      )}
+
       {/* Filters Row */}
-      <div className="card mb-3 shadow-sm" style={{ minHeight: '118px' }}>
+      <div className={`card mb-3 shadow-sm ${isMobile && !showFilters ? 'd-none' : ''}`} style={{ minHeight: '118px' }}>
         <div className="card-body">
           <div className="row g-3 align-items-end">
             <div className="col-md-2">
@@ -548,20 +578,20 @@ export default function ApplicantsContent({
         </div>
       </div>
 
-      <div className="mt-3 d-flex justify-content-between align-items-center">
-        <div className="text-muted small">
+      <div className={`mt-3 d-flex ${isMobile ? 'flex-column' : 'justify-content-between'} align-items-center`}>
+        <div className="text-muted small mb-2 mb-md-0">
           Showing {paginatedApplicants.length} of {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}
           {hasFilters && <span> (filtered)</span>}
         </div>
         
         {/* Pagination Controls */}
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 flex-wrap justify-content-center">
           {/* Page Size Dropdown */}
           <div className="d-flex align-items-center gap-1">
-            <span className="text-muted small">Show:</span>
+            {!isMobile && <span className="text-muted small">Show:</span>}
             <select
               className="form-select form-select-sm"
-              style={{ width: '80px' }}
+              style={{ width: isMobile ? '70px' : '80px' }}
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
@@ -584,7 +614,7 @@ export default function ApplicantsContent({
                 onClick={() => handlePageChange(1)}
                 style={{ padding: '4px 8px', fontSize: '12px' }}
               >
-                ««
+                {isMobile ? '1' : '««'}
               </button>
               <button
                 className="btn btn-sm btn-outline-secondary"
@@ -595,7 +625,7 @@ export default function ApplicantsContent({
                 «
               </button>
               <span className="text-muted small mx-1">
-                Page {currentPage} of {totalPages}
+                {isMobile ? `${currentPage}/${totalPages}` : `Page ${currentPage} of ${totalPages}`}
               </span>
               <button
                 className="btn btn-sm btn-outline-secondary"
@@ -611,7 +641,7 @@ export default function ApplicantsContent({
                 onClick={() => handlePageChange(totalPages)}
                 style={{ padding: '4px 8px', fontSize: '12px' }}
               >
-                »»
+                {isMobile ? totalPages.toString() : '»»'}
               </button>
             </div>
           )}
