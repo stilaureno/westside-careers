@@ -268,19 +268,19 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
       
       const p = data[pos];
       
-      // below160 (157-163 cm = 5'2 - 5'4)
+      // below160 (<158 cm = below 5'2)
       result[pos].range52to54.male += p.below160.male;
       result[pos].range52to54.female += p.below160.female;
       
-      // height160170 (165-170 cm = 5'5 - 5'7)
+      // height160170 (158-169 cm = 5'2 - 5'7)
       result[pos].range55to57.male += p.height160170.male;
       result[pos].range55to57.female += p.height160170.female;
       
-      // height170180 (173-183 cm = 5'8 - 6'0)
+      // height170180 (170-183 cm = 5'7 - 6'0)
       result[pos].range58to60.male += p.height170180.male;
       result[pos].range58to60.female += p.height170180.female;
       
-      // height180Plus (185+ cm = 6'1+)
+      // height180Plus (183+ cm = 6'0+)
       result[pos].range61Plus.male += p.height180Plus.male;
       result[pos].range61Plus.female += p.height180Plus.female;
     }
@@ -319,10 +319,10 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
               </>
             ) : (
               <>
-                <th style={headerCellStyle} colSpan={3}>{'<160'}</th>
-                <th style={headerCellStyle} colSpan={3}>160-169</th>
-                <th style={headerCellStyle} colSpan={3}>170-179</th>
-                <th style={headerCellStyle} colSpan={3}>{'180+'}</th>
+                <th style={headerCellStyle} colSpan={3}>{'<158'}</th>
+                <th style={headerCellStyle} colSpan={3}>158-169</th>
+                <th style={headerCellStyle} colSpan={3}>170-183</th>
+                <th style={headerCellStyle} colSpan={3}>{'183+'}</th>
               </>
             )}
           </tr>
@@ -602,24 +602,24 @@ export default function DashboardContent() {
       const isFemale = gender === 'Female';
       
       if (height !== null && height !== undefined && !isNaN(height)) {
-        if (height < 160) deptData.heightBands.below160++;
-        else if (height >= 160 && height < 170) deptData.heightBands.height160170++;
-        else if (height >= 170 && height < 180) deptData.heightBands.height170180++;
-        else if (height >= 180) deptData.heightBands.height180Plus++;
+        if (height < 158) deptData.heightBands.below160++;
+        else if (height >= 158 && height < 170) deptData.heightBands.height160170++;
+        else if (height >= 170 && height < 183) deptData.heightBands.height170180++;
+        else if (height >= 183) deptData.heightBands.height180Plus++;
         
         // Height + Gender breakdown by position
         const heightPosData = deptData.heightGenderByPosition[pos];
         if (heightPosData) {
-          if (height < 160) {
+          if (height < 158) {
             if (isMale) heightPosData.below160.male++;
             else if (isFemale) heightPosData.below160.female++;
-          } else if (height >= 160 && height < 170) {
+          } else if (height >= 158 && height < 170) {
             if (isMale) heightPosData.height160170.male++;
             else if (isFemale) heightPosData.height160170.female++;
-          } else if (height >= 170 && height < 180) {
+          } else if (height >= 170 && height < 183) {
             if (isMale) heightPosData.height170180.male++;
             else if (isFemale) heightPosData.height170180.female++;
-          } else if (height >= 180) {
+          } else if (height >= 183) {
             if (isMale) heightPosData.height180Plus.male++;
             else if (isFemale) heightPosData.height180Plus.female++;
           }
