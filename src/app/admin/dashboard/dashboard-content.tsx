@@ -566,35 +566,6 @@ export default function DashboardContent() {
               gap: '20px',
               marginTop: '20px',
             }}>
-              {/* Gender Breakdown by Position */}
-              <div style={{
-                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
-              }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Gender Breakdown by Position</h3>
-                {positions.map(posName => {
-                  const genderData = deptData.genderByPosition[posName];
-                  if (!genderData || (genderData.male === 0 && genderData.female === 0)) return null;
-                  return (
-                    <GenderRow 
-                      key={posName} 
-                      label={posName} 
-                      male={genderData.male} 
-                      female={genderData.female} 
-                    />
-                  );
-                })}
-              </div>
-
-              <div style={{
-                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
-              }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Age Band Breakdown</h3>
-                <AgeBandRow label="20s" value={deptData.ageBands.age20s} />
-                <AgeBandRow label="30s" value={deptData.ageBands.age30s} />
-                <AgeBandRow label="40s" value={deptData.ageBands.age40s} />
-                <AgeBandRow label="50 and above" value={deptData.ageBands.age50Plus} isLast />
-              </div>
-
               <div style={{
                 background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
               }}>
