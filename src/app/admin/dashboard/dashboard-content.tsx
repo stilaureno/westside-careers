@@ -172,6 +172,9 @@ function HeightBandRow({ label, value, isLast = false }: { label: string; value:
 }
 
 function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width < 768;
+  
   const positions = Object.keys(data).sort();
   
   if (positions.length === 0) {
@@ -197,10 +200,15 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
     totals.age50Plus.female += p.age50Plus.female;
   });
   
+  const cellPadding = isMobile ? '4px 2px' : '8px 6px';
+  const fontSize = isMobile ? '9px' : '12px';
+  const colWidth = isMobile ? '28px' : '45px';
+  const posWidth = isMobile ? '60px' : '100px';
+  
   const cellStyle: React.CSSProperties = {
-    padding: '8px 6px',
+    padding: cellPadding,
     textAlign: 'center',
-    fontSize: '12px',
+    fontSize,
     borderBottom: '1px solid #e5e7eb',
   };
   
@@ -220,11 +228,11 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
   };
   
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+    <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize, minWidth: isMobile ? '280px' : 'auto' }}>
         <thead>
           <tr>
-            <th style={{ ...headerCellStyle, textAlign: 'left', width: '100px' }}>Position</th>
+            <th style={{ ...headerCellStyle, textAlign: 'left', width: posWidth }}>Position</th>
             <th style={headerCellStyle} colSpan={3}>20s</th>
             <th style={headerCellStyle} colSpan={3}>30s</th>
             <th style={headerCellStyle} colSpan={3}>40s</th>
@@ -232,18 +240,18 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
           </tr>
           <tr>
             <th style={{ ...headerCellStyle, textAlign: 'left' }}></th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
           </tr>
         </thead>
         <tbody>
@@ -254,7 +262,7 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
             
             return (
               <tr key={pos}>
-                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080' }}>{pos}</td>
+                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080', fontSize: isMobile ? '10px' : '12px' }}>{pos}</td>
                 <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age20s.male}</td>
                 <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age20s.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age20s.male + p.age20s.female}</td>
@@ -271,7 +279,7 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
             );
           })}
           <tr>
-            <td style={{ ...footerCellStyle, textAlign: 'left' }}>GRAND TOTAL</td>
+            <td style={{ ...footerCellStyle, textAlign: 'left' }}>TOTAL</td>
             <td style={footerCellStyle}>{totals.age20s.male}</td>
             <td style={footerCellStyle}>{totals.age20s.female}</td>
             <td style={footerCellStyle}>{totals.age20s.male + totals.age20s.female}</td>
@@ -292,6 +300,9 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
 }
 
 function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPosition; useFeet?: boolean }) {
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width < 768;
+  
   const positions = Object.keys(data).sort();
   
   if (positions.length === 0) {
@@ -317,58 +328,15 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
     totals.height180Plus.female += p.height180Plus.female;
   });
   
-  const cmToFeetRange = (cm: number): { feet: number; inches: number } => {
-    const totalInches = cm / 2.54;
-    const feet = Math.floor(totalInches / 12);
-    const inches = Math.round(totalInches % 12);
-    return { feet, inches };
-  };
-  
-  const formatHeight = (cm: number): string => {
-    const { feet, inches } = cmToFeetRange(cm);
-    return `${feet}'${inches}`;
-  };
-  
-  const getFeetDisplay = (data: HeightGenderByPosition) => {
-    const result: { [pos: string]: { range52to54: { male: number; female: number }; range55to57: { male: number; female: number }; range58to60: { male: number; female: number }; range61Plus: { male: number; female: number } } } = {};
-    
-    for (const pos of Object.keys(data)) {
-      result[pos] = {
-        range52to54: { male: 0, female: 0 },
-        range55to57: { male: 0, female: 0 },
-        range58to60: { male: 0, female: 0 },
-        range61Plus: { male: 0, female: 0 },
-      };
-      
-      const p = data[pos];
-      
-      // below160 (<158 cm = below 5'2)
-      result[pos].range52to54.male += p.below160.male;
-      result[pos].range52to54.female += p.below160.female;
-      
-      // height160170 (158-169 cm = 5'2 - 5'7)
-      result[pos].range55to57.male += p.height160170.male;
-      result[pos].range55to57.female += p.height160170.female;
-      
-      // height170180 (170-183 cm = 5'7 - 6'0)
-      result[pos].range58to60.male += p.height170180.male;
-      result[pos].range58to60.female += p.height170180.female;
-      
-      // height180Plus (183+ cm = 6'0+)
-      result[pos].range61Plus.male += p.height180Plus.male;
-      result[pos].range61Plus.female += p.height180Plus.female;
-    }
-    
-    return result;
-  };
-  
-  const feetData = useFeet ? getFeetDisplay(data) : null;
-  const grandTotalFeet = useFeet ? getFeetDisplay({ "GRAND TOTAL": totals })["GRAND TOTAL"] : null;
+  const cellPadding = isMobile ? '4px 2px' : '8px 6px';
+  const fontSize = isMobile ? '9px' : '12px';
+  const colWidth = isMobile ? '28px' : '45px';
+  const posWidth = isMobile ? '60px' : '100px';
   
   const cellStyle: React.CSSProperties = {
-    padding: '8px 6px',
+    padding: cellPadding,
     textAlign: 'center',
-    fontSize: '12px',
+    fontSize,
     borderBottom: '1px solid #e5e7eb',
   };
   
@@ -382,47 +350,40 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
   const footerCellStyle: React.CSSProperties = {
     ...cellStyle,
     fontWeight: '700',
-    background: '#f0f9ff',
-    borderTop: '2px solid #0066CC',
+    background: '#fff9e6',
+    borderTop: '2px solid #FFD700',
     color: '#000080',
   };
   
+  const heightLabels = useFeet
+    ? { below160: `<'5'2`, height160170: `5'2-5'4`, height170180: `5'5-6'0`, height180Plus: `6'1+` }
+    : { below160: '<158', height160170: '158-169', height170170: '170-183', height180Plus: '183+' };
+
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+    <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize, minWidth: isMobile ? '280px' : 'auto' }}>
         <thead>
           <tr>
-            <th style={{ ...headerCellStyle, textAlign: 'left', width: '100px' }}>Position</th>
-            {useFeet ? (
-              <>
-                <th style={headerCellStyle} colSpan={3}>{`5'2 - 5'4`}</th>
-                <th style={headerCellStyle} colSpan={3}>{`5'5 - 5'7`}</th>
-                <th style={headerCellStyle} colSpan={3}>{`5'8 - 6'0`}</th>
-                <th style={headerCellStyle} colSpan={3}>6&apos;1+</th>
-              </>
-            ) : (
-              <>
-                <th style={headerCellStyle} colSpan={3}>{'<158'}</th>
-                <th style={headerCellStyle} colSpan={3}>158-169</th>
-                <th style={headerCellStyle} colSpan={3}>170-183</th>
-                <th style={headerCellStyle} colSpan={3}>{'183+'}</th>
-              </>
-            )}
+            <th style={{ ...headerCellStyle, textAlign: 'left', width: posWidth }}>Position</th>
+            <th style={headerCellStyle} colSpan={3}>{useFeet ? `<'5'2` : '<158'}</th>
+            <th style={headerCellStyle} colSpan={3}>{useFeet ? `5'2-5'4` : '158-169'}</th>
+            <th style={headerCellStyle} colSpan={3}>{useFeet ? `5'5-6'0` : '170-183'}</th>
+            <th style={headerCellStyle} colSpan={3}>{useFeet ? `6'1+` : '183+'}</th>
           </tr>
           <tr>
             <th style={{ ...headerCellStyle, textAlign: 'left' }}></th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>M</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>F</th>
-            <th style={{ ...headerCellStyle, fontSize: '10px', width: '45px' }}>Total</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>M</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>F</th>
+            <th style={{ ...headerCellStyle, fontSize: isMobile ? '8px' : '10px', width: colWidth }}>T</th>
           </tr>
         </thead>
         <tbody>
@@ -431,78 +392,38 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
             const rowTotal = p.below160.male + p.below160.female + p.height160170.male + p.height160170.female + p.height170180.male + p.height170180.female + p.height180Plus.male + p.height180Plus.female;
             if (rowTotal === 0) return null;
             
-            const fd = feetData?.[pos];
-            
             return (
               <tr key={pos}>
-                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080' }}>{pos}</td>
-                {useFeet && fd ? (
-                  <>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range52to54.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range52to54.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range52to54.male + fd.range52to54.female}</td>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range55to57.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range55to57.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range55to57.male + fd.range55to57.female}</td>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range58to60.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range58to60.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range58to60.male + fd.range58to60.female}</td>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range61Plus.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range61Plus.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range61Plus.male + fd.range61Plus.female}</td>
-                  </>
-                ) : (
-                  <>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.below160.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.below160.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.below160.male + p.below160.female}</td>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.height160170.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height160170.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height160170.male + p.height160170.female}</td>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.height170180.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height170180.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height170180.male + p.height170180.female}</td>
-                    <td style={{ ...cellStyle, color: '#0066CC' }}>{p.height180Plus.male}</td>
-                    <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height180Plus.female}</td>
-                    <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height180Plus.male + p.height180Plus.female}</td>
-                  </>
-                )}
+                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080', fontSize: isMobile ? '10px' : '12px' }}>{pos}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.below160.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.below160.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.below160.male + p.below160.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height160170.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height160170.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height160170.male + p.height160170.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height170180.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height170180.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height170180.male + p.height170180.female}</td>
+                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height180Plus.male}</td>
+                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height180Plus.female}</td>
+                <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height180Plus.male + p.height180Plus.female}</td>
               </tr>
             );
           })}
           <tr>
-            <td style={{ ...footerCellStyle, textAlign: 'left' }}>GRAND TOTAL</td>
-            {useFeet && grandTotalFeet ? (
-              <>
-                <td style={footerCellStyle}>{grandTotalFeet.range52to54.male}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range52to54.female}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range52to54.male + grandTotalFeet.range52to54.female}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range55to57.male}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range55to57.female}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range55to57.male + grandTotalFeet.range55to57.female}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range58to60.male}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range58to60.female}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range58to60.male + grandTotalFeet.range58to60.female}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range61Plus.male}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range61Plus.female}</td>
-                <td style={footerCellStyle}>{grandTotalFeet.range61Plus.male + grandTotalFeet.range61Plus.female}</td>
-              </>
-            ) : (
-              <>
-                <td style={footerCellStyle}>{totals.below160.male}</td>
-                <td style={footerCellStyle}>{totals.below160.female}</td>
-                <td style={footerCellStyle}>{totals.below160.male + totals.below160.female}</td>
-                <td style={footerCellStyle}>{totals.height160170.male}</td>
-                <td style={footerCellStyle}>{totals.height160170.female}</td>
-                <td style={footerCellStyle}>{totals.height160170.male + totals.height160170.female}</td>
-                <td style={footerCellStyle}>{totals.height170180.male}</td>
-                <td style={footerCellStyle}>{totals.height170180.female}</td>
-                <td style={footerCellStyle}>{totals.height170180.male + totals.height170180.female}</td>
-                <td style={footerCellStyle}>{totals.height180Plus.male}</td>
-                <td style={footerCellStyle}>{totals.height180Plus.female}</td>
-                <td style={footerCellStyle}>{totals.height180Plus.male + totals.height180Plus.female}</td>
-              </>
-            )}
+            <td style={{ ...footerCellStyle, textAlign: 'left' }}>TOTAL</td>
+            <td style={footerCellStyle}>{totals.below160.male}</td>
+            <td style={footerCellStyle}>{totals.below160.female}</td>
+            <td style={footerCellStyle}>{totals.below160.male + totals.below160.female}</td>
+            <td style={footerCellStyle}>{totals.height160170.male}</td>
+            <td style={footerCellStyle}>{totals.height160170.female}</td>
+            <td style={footerCellStyle}>{totals.height160170.male + totals.height160170.female}</td>
+            <td style={footerCellStyle}>{totals.height170180.male}</td>
+            <td style={footerCellStyle}>{totals.height170180.female}</td>
+            <td style={footerCellStyle}>{totals.height170180.male + totals.height170180.female}</td>
+            <td style={footerCellStyle}>{totals.height180Plus.male}</td>
+            <td style={footerCellStyle}>{totals.height180Plus.female}</td>
+            <td style={footerCellStyle}>{totals.height180Plus.male + totals.height180Plus.female}</td>
           </tr>
         </tbody>
       </table>
