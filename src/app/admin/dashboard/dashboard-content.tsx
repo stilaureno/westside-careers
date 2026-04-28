@@ -355,16 +355,16 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
                 <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080' }}>{pos}</td>
                 {useFeet && fd ? (
                   <>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range52to54.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range52to54.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range52to54.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range52to54.male + fd.range52to54.female}</td>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range55to57.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range55to57.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range55to57.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range55to57.male + fd.range55to57.female}</td>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range58to60.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range58to60.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range58to60.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range58to60.male + fd.range58to60.female}</td>
-                    <td style={{ ...cellStyle, color: '#FFD700' }}>{fd.range61Plus.male}</td>
+                    <td style={{ ...cellStyle, color: '#0066CC' }}>{fd.range61Plus.male}</td>
                     <td style={{ ...cellStyle, color: '#FFA07A' }}>{fd.range61Plus.female}</td>
                     <td style={{ ...cellStyle, fontWeight: '600' }}>{fd.range61Plus.male + fd.range61Plus.female}</td>
                   </>
