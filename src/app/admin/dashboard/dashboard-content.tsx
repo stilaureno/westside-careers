@@ -3,6 +3,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
+function useWindowSize() {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    function handleResize() {
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return size;
+}
+
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -85,14 +98,14 @@ interface DashboardData {
   [deptName: string]: DeptData;
 }
 
-function SummaryCard({ label, value, color = '#000080' }: { label: string; value: number; color?: string }) {
+function SummaryCard({ label, value, color = '#000080', padding = '12px', valueSize = '20px', labelSize = '11px' }: { label: string; value: number; color?: string; padding?: string; valueSize?: string; labelSize?: string }) {
   return (
     <div style={{
       background: '#f8f9fa', border: '1px solid #FFD700', borderRadius: '14px',
-      padding: '12px', textAlign: 'center', minHeight: '88px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      padding, textAlign: 'center', minHeight: '88px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
     }}>
-      <p style={{ fontSize: '11px', color: '#6b7280', margin: '0 0 6px', lineHeight: 1.3 }}>{label}</p>
-      <strong style={{ fontSize: '20px', color }}>{value}</strong>
+      <p style={{ fontSize: labelSize, color: '#6b7280', margin: '0 0 6px', lineHeight: 1.3 }}>{label}</p>
+      <strong style={{ fontSize: valueSize, color }}>{value}</strong>
     </div>
   );
 }
@@ -507,6 +520,11 @@ export default function DashboardContent() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [allowedDepartments, setAllowedDepartments] = useState<string[]>([]);
   const [heightInFeet, setHeightInFeet] = useState(true);
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width < 768;
+  const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
+  const [showDateFilters, setShowDateFilters] = useState(!isMobile);
+  const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const superAdminCookie = getCookie('super_admin_session');
@@ -760,6 +778,19 @@ export default function DashboardContent() {
 
   const clearFilters = () => { setStartDate(''); setEndDate(''); };
 
+  const toggleDept = (dept: string) => {
+    setExpandedDepts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dept)) newSet.delete(dept);
+      else newSet.add(dept);
+      return newSet;
+    });
+  };
+
+  const cardPadding = isMobile ? '8px' : (isTablet ? '10px' : '12px');
+  const cardValueSize = isMobile ? '16px' : '20px';
+  const cardLabelSize = isMobile ? '9px' : '11px';
+
   if (loading) {
     return <div style={{ padding: '24px', textAlign: 'center' }}>Loading...</div>;
   }
@@ -767,32 +798,76 @@ export default function DashboardContent() {
   const deptNames = Object.keys(dashboardData);
 
   return (
-    <div style={{ padding: '0' }}>
+    <div style={{ padding: isMobile ? '8px' : '0', width: '100%', maxWidth: '100vw', overflow: 'hidden' }}>
       {/* Header with inline filters */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#000080', margin: 0 }}>Dashboard</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row',
+        justifyContent: 'space-between', 
+        alignItems: isMobile ? 'stretch' : 'center', 
+        marginBottom: isMobile ? '12px' : '20px',
+        gap: isMobile ? '10px' : '0'
+      }}>
+        <h1 style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '700', color: '#000080', margin: 0 }}>Dashboard</h1>
+        
+        {isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span className="text-muted small">{deptNames.length} dept{deptNames.length !== 1 ? 's' : ''}</span>
+            <button 
+              className="btn btn-sm btn-outline-secondary" 
+              onClick={() => setShowDateFilters(!showDateFilters)}
+            >
+              {showDateFilters ? 'Hide Dates ▲' : 'Show Dates ▼'}
+            </button>
+          </div>
+        )}
+        
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: isMobile ? '4px' : '8px',
+          flexWrap: isMobile ? 'wrap' : 'nowrap'
+        }}>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             placeholder="Start date"
-            style={{ padding: '8px 12px', border: '1px solid #FFD700', borderRadius: '8px', fontSize: '13px', background: '#fff' }}
+            className={!showDateFilters && isMobile ? 'd-none' : ''}
+            style={{ 
+              padding: isMobile ? '6px 8px' : '8px 12px', 
+              border: '1px solid #FFD700', 
+              borderRadius: '8px', 
+              fontSize: isMobile ? '11px' : '13px', 
+              background: '#fff',
+              width: isMobile ? '100%' : 'auto'
+            }}
           />
-          <span style={{ color: '#FFD700', fontSize: '13px' }}>to</span>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            placeholder="End date"
-            style={{ padding: '8px 12px', border: '1px solid #FFD700', borderRadius: '8px', fontSize: '13px', background: '#fff' }}
-          />
+          {!showDateFilters && isMobile && <span style={{ color: '#FFD700', fontSize: '11px' }}>to</span>}
+          {(!showDateFilters || !isMobile) && (
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              placeholder="End date"
+              className={!showDateFilters && isMobile ? 'd-none' : ''}
+              style={{ 
+                padding: isMobile ? '6px 8px' : '8px 12px', 
+                border: '1px solid #FFD700', 
+                borderRadius: '8px', 
+                fontSize: isMobile ? '11px' : '13px', 
+                background: '#fff',
+                width: isMobile ? '100%' : 'auto'
+              }}
+            />
+          )}
           {(startDate || endDate) && (
             <button
               onClick={clearFilters}
               style={{
-                padding: '8px 14px', background: '#fff', color: '#8b1e2d', border: '1px solid #8b1e2d',
-                borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '500',
+                padding: isMobile ? '6px 10px' : '8px 14px', 
+                background: '#fff', color: '#8b1e2d', border: '1px solid #8b1e2d',
+                borderRadius: '8px', fontSize: isMobile ? '11px' : '13px', cursor: 'pointer', fontWeight: '500',
               }}
             >
               Clear
@@ -811,94 +886,142 @@ export default function DashboardContent() {
         const deptData = dashboardData[deptName];
         const positions = deptPositions[deptName] || [];
         const deptHeaderColor = deptName === 'Table Games' ? '#800000' : deptName === 'Business Development' ? '#006400' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#FF8C00' : '#000080';
+        const isExpanded = expandedDepts.has(deptName) || !isMobile;
+        const toggleCard = () => { if (isMobile) toggleDept(deptName); };
         
         return (
           <div key={deptName} style={{
-            background: '#f0f4f8', border: '1px solid #FFD700', borderRadius: '18px', padding: '20px', marginBottom: '20px',
+            background: '#f0f4f8', border: '1px solid #FFD700', 
+            borderRadius: isMobile ? '12px' : '18px', 
+            padding: isMobile ? '12px' : '20px', 
+            marginBottom: isMobile ? '12px' : '20px',
           }}>
-            {/* Department Header */}
-            <div style={{
-              background: deptHeaderColor, color: '#FFD700', borderRadius: '12px', padding: '16px',
-              marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: deptName === 'Table Games' ? '#fff' : deptName === 'Business Development' ? '#fff' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#000' : '#FFD700' }}>{deptName}</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-                <SummaryCard label="Total" value={deptData.total} />
-                <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" />
-                <SummaryCard label="Ongoing" value={deptData.ongoing} color="#d97706" />
-                <SummaryCard label="Qualified" value={deptData.qualified} color="#FFD700" />
-                <SummaryCard label="Reprofile" value={deptData.reprofile} color="#d8b4fe" />
-                <SummaryCard label="Pooling" value={deptData.pooling} color="#67e8f9" />
-                <SummaryCard label="Failed" value={deptData.failed} color="#fca5a5" />
+            {/* Department Header - clickable on mobile */}
+            <div 
+              style={{
+                background: deptHeaderColor, color: '#FFD700', borderRadius: '12px', 
+                padding: isMobile ? '10px' : '16px',
+                marginBottom: isMobile ? '10px' : '20px', 
+                display: 'flex', 
+                flexDirection: isMobile ? 'column' : 'row',
+                justifyContent: 'space-between', 
+                alignItems: isMobile ? 'stretch' : 'center',
+                cursor: isMobile ? 'pointer' : 'default',
+              }}
+              onClick={toggleCard}
+            >
+              <h2 style={{ 
+                fontSize: isMobile ? '14px' : '18px', 
+                fontWeight: '700', 
+                margin: 0, 
+                color: deptName === 'Table Games' ? '#fff' : deptName === 'Business Development' ? '#fff' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#000' : '#FFD700',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                {deptName}
+                {isMobile && <span style={{ fontSize: '10px', color: '#FFD700' }}>{isExpanded ? '▲' : '▼'}</span>}
+              </h2>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(7, 1fr)', 
+                gap: isMobile ? '4px' : '8px',
+                marginTop: isMobile ? '8px' : '0',
+                width: isMobile ? '100%' : 'auto'
+              }}>
+                <SummaryCard label="Total" value={deptData.total} padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                <SummaryCard label="Ongoing" value={deptData.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                <SummaryCard label="Qual" value={deptData.qualified} color="#FFD700" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                {!isMobile && <SummaryCard label="Reprofile" value={deptData.reprofile} color="#d8b4fe" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
+                {!isMobile && <SummaryCard label="Pool" value={deptData.pooling} color="#67e8f9" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
+                {!isMobile && <SummaryCard label="Fail" value={deptData.failed} color="#fca5a5" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
               </div>
             </div>
             
-            {/* Position Sections */}
-            {positions.map(posName => {
-              const posSummary = deptData.positions[posName] || emptyPos();
-              if (posSummary.total === 0) return null;
-              
-              return (
-                <div key={posName} style={{ marginBottom: '20px' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#000080' }}>{posName}</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-                    <SummaryCard label="Total" value={posSummary.total} />
-                    <SummaryCard label="Pending" value={posSummary.pending} color="#6b7280" />
-                    <SummaryCard label="Ongoing" value={posSummary.ongoing} color="#d97706" />
-                    <SummaryCard label="Qualified" value={posSummary.qualified} color="#DAA520" />
-                    <SummaryCard label="Reprofile" value={posSummary.reprofile} color="#7c3aed" />
-                    <SummaryCard label="Pooling" value={posSummary.pooling} color="#0891b2" />
-                    <SummaryCard label="Failed" value={posSummary.failed} color="#991b1b" />
-                  </div>
+            {/* Position Sections - collapsible on mobile */}
+            {(!isMobile || isExpanded) && (
+              <>
+                {/* Position Sections */}
+                {positions.map(posName => {
+                  const posSummary = deptData.positions[posName] || emptyPos();
+                  if (posSummary.total === 0) return null;
                   
-                  {/* Stage sections only for Dealer in Table Games */}
-                  {posName === 'Dealer' && deptName === 'Table Games' && (
-                    <>
-                      <StageSection title="Math Exam" summary={deptData.stageMath} />
-                      <StageSection title="Table Test" summary={deptData.stageTable} />
-                    </>
-                  )}
-                </div>
-              );
-            })}
-            
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '20px',
-              marginTop: '20px',
-            }}>
-              <div style={{
-                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
-              }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px' }}>Age & Gender by Position</h3>
-                <AgeGenderMatrix data={deptData.ageGenderByPosition} />
-              </div>
+                  return (
+                    <div key={posName} style={{ marginBottom: isMobile ? '12px' : '20px', marginTop: isMobile ? '12px' : '0' }}>
+                      <h3 style={{ 
+                        fontSize: isMobile ? '12px' : '14px', 
+                        fontWeight: '700', 
+                        marginBottom: isMobile ? '6px' : '10px', 
+                        color: '#000080' 
+                      }}>{posName}</h3>
+                      <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(7, 1fr)', 
+                        gap: isMobile ? '4px' : '8px' 
+                      }}>
+                        <SummaryCard label="Total" value={posSummary.total} padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                        <SummaryCard label="Pend" value={posSummary.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                        <SummaryCard label="Ongoing" value={posSummary.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                        <SummaryCard label="Qual" value={posSummary.qualified} color="#DAA520" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
+                        {!isMobile && <SummaryCard label="Repro" value={posSummary.reprofile} color="#7c3aed" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
+                        {!isMobile && <SummaryCard label="Pool" value={posSummary.pooling} color="#0891b2" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
+                        {!isMobile && <SummaryCard label="Fail" value={posSummary.failed} color="#991b1b" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
+                      </div>
+                      
+                      {/* Stage sections only for Dealer in Table Games */}
+                      {posName === 'Dealer' && deptName === 'Table Games' && (
+                        <>
+                          <StageSection title="Math Exam" summary={deptData.stageMath} />
+                          <StageSection title="Table Test" summary={deptData.stageTable} />
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+                
+                {/* Age & Gender / Height & Gender grids */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: isMobile ? '10px' : '20px',
+                  marginTop: isMobile ? '12px' : '20px',
+                }}>
+                  <div style={{
+                    background: '#fff', border: '1px solid #e5e7eb', borderRadius: isMobile ? '12px' : '18px', 
+                    padding: isMobile ? '12px' : '20px',
+                  }}>
+                    <h3 style={{ fontSize: isMobile ? '13px' : '16px', fontWeight: '700', marginBottom: '14px' }}>Age & Gender by Position</h3>
+                    <AgeGenderMatrix data={deptData.ageGenderByPosition} />
+                  </div>
 
-              <div style={{
-                background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0 }}>Height & Gender by Position</h3>
-                  <button
-                    onClick={() => setHeightInFeet(!heightInFeet)}
-                    style={{
-                      padding: '6px 12px',
-                      fontSize: '12px',
-                      border: '1px solid #000080',
-                      borderRadius: '6px',
-                      background: heightInFeet ? '#000080' : '#fff',
-                      color: heightInFeet ? '#FFD700' : '#000080',
-                      cursor: 'pointer',
-                      fontWeight: '500',
-                    }}
-                  >
-                    {heightInFeet ? "Show in cm" : "Show in ft/in"}
-                  </button>
+                  <div style={{
+                    background: '#fff', border: '1px solid #e5e7eb', borderRadius: isMobile ? '12px' : '18px', 
+                    padding: isMobile ? '12px' : '20px',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                      <h3 style={{ fontSize: isMobile ? '13px' : '16px', fontWeight: '700', margin: 0 }}>Height & Gender</h3>
+                      <button
+                        onClick={() => setHeightInFeet(!heightInFeet)}
+                        style={{
+                          padding: isMobile ? '4px 8px' : '6px 12px',
+                          fontSize: isMobile ? '10px' : '12px',
+                          border: '1px solid #000080',
+                          borderRadius: '6px',
+                          background: heightInFeet ? '#000080' : '#fff',
+                          color: heightInFeet ? '#FFD700' : '#000080',
+                          cursor: 'pointer',
+                          fontWeight: '500',
+                        }}
+                      >
+                        {heightInFeet ? "cm" : "ft/in"}
+                      </button>
+                    </div>
+                    <HeightGenderMatrix data={deptData.heightGenderByPosition} useFeet={heightInFeet} />
+                  </div>
                 </div>
-                <HeightGenderMatrix data={deptData.heightGenderByPosition} useFeet={heightInFeet} />
-              </div>
-            </div>
+              </>
+            )}
           </div>
         );
       })}
