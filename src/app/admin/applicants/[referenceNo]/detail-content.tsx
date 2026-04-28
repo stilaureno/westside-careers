@@ -63,7 +63,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       colorBlindResult: 'Passed',
       visibleTattoo: 'No',
       invisibleTattoo: 'No',
-      sweatyPalmResult: 'Passed',
+      sweatyPalmResult: '',
       score: '',
       passingScore: 8,
       maxScore: 10,
@@ -81,6 +81,8 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
     setSaving(true);
     setMessage(null);
 
+    const isDealer = data?.applicant?.position_applied === 'Dealer';
+
     const res = await updateStage({
       referenceNo: data.applicant.reference_no,
       stageName: stage,
@@ -94,7 +96,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       colorBlindResult: form.colorBlindResult,
       visibleTattoo: form.visibleTattoo,
       invisibleTattoo: form.invisibleTattoo,
-      sweatyPalmResult: form.sweatyPalmResult,
+      ...(isDealer && { sweatyPalmResult: form.sweatyPalmResult }),
       score: parseFloat(form.score) || undefined,
       passingScore: parseFloat(form.passingScore) || 8,
       maxScore: parseFloat(form.maxScore) || 10,
@@ -295,6 +297,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Sweaty Palm</label>
                 <select value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                  <option value="">Select...</option>
                   <option>Passed</option><option>Failed</option>
                 </select>
               </div>

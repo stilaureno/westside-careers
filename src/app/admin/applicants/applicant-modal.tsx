@@ -126,7 +126,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       colorBlindResult: 'Passed',
       visibleTattoo: 'No',
       invisibleTattoo: 'No',
-      sweatyPalmResult: 'Passed',
+      sweatyPalmResult: '',
       score: '',
       passingScore: 8,
       maxScore: 10,
@@ -144,6 +144,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     setSaving(true);
     setMessage(null);
 
+    const isDealer = data?.applicant?.position_applied === 'Dealer';
+
     const res = await updateStage({
       referenceNo: data.applicant.reference_no,
       stageName: stage,
@@ -157,7 +159,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       colorBlindResult: form.colorBlindResult,
       visibleTattoo: form.visibleTattoo,
       invisibleTattoo: form.invisibleTattoo,
-      sweatyPalmResult: form.sweatyPalmResult,
+      ...(isDealer && { sweatyPalmResult: form.sweatyPalmResult }),
       score: parseFloat(form.score) || undefined,
       passingScore: parseFloat(form.passingScore) || 8,
       maxScore: parseFloat(form.maxScore) || 10,
@@ -376,6 +378,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                               <div className="col-md-6">
                                 <label className="form-label small">Sweaty Palm</label>
                                 <select className="form-select form-select-sm" value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })}>
+                                  <option value="">Select...</option>
                                   <option>Passed</option><option>Failed</option>
                                 </select>
                               </div>
