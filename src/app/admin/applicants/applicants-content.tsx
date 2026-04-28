@@ -148,7 +148,7 @@ export default function ApplicantsContent({
         initialScreeningResult: getStageResult('Initial Screening'),
         mathExamResult: getStageResult('Math Exam'),
         tableTestResult: getStageResult('Table Test'),
-        sweatyPalmResult: appStages.find((x) => x.stage_name === 'Final Interview')?.result_status || '-',
+        sweatyPalmResult: appStages.find((x) => x.stage_name === 'Final Interview')?.sweaty_palm_result || '-',
         finalInterviewResult: getStageResult('Final Interview'),
         stages: appStages,
       };
