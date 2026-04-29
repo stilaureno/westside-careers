@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { getApplicant, updateStage } from '@/lib/actions/admin';
 import { getStagesForPosition } from '@/lib/db/positions';
+import { createClient } from '@/lib/supabase/client';
 import type { Applicant } from '@/types';
 import { useRouter } from 'next/navigation';
 
@@ -18,6 +19,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const [form, setForm] = useState<any>({});
   const [workflow, setWorkflow] = useState<string[]>(['Initial Screening']);
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     async function loadWorkflow() {
@@ -33,10 +35,54 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const completedStages = data?.stages ? getCompletedStages(data.stages) : [];
   const availableStages = getAvailableStages(workflow, completedStages);
 
-  function handleStageChange(stageName: string) {
+  async function handleStageChange(stageName: string) {
     setStage(stageName);
     setStageSeq(workflow.indexOf(stageName) + 1);
-    updateFormFields(stageName, data?.applicant);
+    await loadStageResults(stageName, data?.applicant);
+  }
+
+  async function loadStageResults(stageName: string, app: Applicant) {
+    const referenceNo = data?.applicant?.reference_no;
+    const { data: stageResult } = await supabase
+      .from('stage_results')
+      .select('*')
+      .eq('reference_no', referenceNo)
+      .eq('stage_name', stageName)
+      .single();
+
+    if (stageResult) {
+      setForm({
+        heightCm: stageResult.height_cm || app?.height_cm || '',
+        weightKg: stageResult.weight_kg || app?.weight_kg || '',
+        bmiValue: stageResult.bmi_value || app?.bmi_value || '',
+        bmiResult: stageResult.bmi_result || 'Passed',
+        colorBlindResult: stageResult.color_blind_result || 'Passed',
+        visibleTattoo: stageResult.visible_tattoo || 'No',
+        invisibleTattoo: stageResult.invisible_tattoo || 'No',
+        sweatyPalmResult: stageResult.sweaty_palm_result || '',
+        score: stageResult.score?.toString() || '',
+        passingScore: stageResult.passing_score || 8,
+        maxScore: stageResult.max_score || 10,
+        remarks: stageResult.remarks || '',
+        evaluatedBy: stageResult.evaluated_by || 'HR',
+      });
+    } else {
+      setForm({
+        heightCm: app?.height_cm || '',
+        weightKg: app?.weight_kg || '',
+        bmiValue: app?.bmi_value || '',
+        bmiResult: 'Passed',
+        colorBlindResult: 'Passed',
+        visibleTattoo: 'No',
+        invisibleTattoo: 'No',
+        sweatyPalmResult: '',
+        score: '',
+        passingScore: 8,
+        maxScore: 10,
+        remarks: '',
+        evaluatedBy: 'HR',
+      });
+    }
   }
 
   function getCompletedStages(stages: any[]): string[] {

@@ -115,7 +115,50 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   function handleStageChange(stageName: string) {
     setStage(stageName);
     setStageSeq(workflow.indexOf(stageName) + 1);
-    updateFormFields(stageName, data?.applicant);
+    loadStageResults(stageName, data?.applicant);
+  }
+
+  async function loadStageResults(stageName: string, app: Applicant) {
+    const { data: stageResult } = await supabase
+      .from('stage_results')
+      .select('*')
+      .eq('reference_no', referenceNo)
+      .eq('stage_name', stageName)
+      .single();
+
+    if (stageResult) {
+      setForm({
+        heightCm: stageResult.height_cm || app?.height_cm || '',
+        weightKg: stageResult.weight_kg || app?.weight_kg || '',
+        bmiValue: stageResult.bmi_value || app?.bmi_value || '',
+        bmiResult: stageResult.bmi_result || 'Passed',
+        colorBlindResult: stageResult.color_blind_result || 'Passed',
+        visibleTattoo: stageResult.visible_tattoo || 'No',
+        invisibleTattoo: stageResult.invisible_tattoo || 'No',
+        sweatyPalmResult: stageResult.sweaty_palm_result || '',
+        score: stageResult.score?.toString() || '',
+        passingScore: stageResult.passing_score || 8,
+        maxScore: stageResult.max_score || 10,
+        remarks: stageResult.remarks || '',
+        evaluatedBy: stageResult.evaluated_by || 'HR',
+      });
+    } else {
+      setForm({
+        heightCm: app?.height_cm || '',
+        weightKg: app?.weight_kg || '',
+        bmiValue: app?.bmi_value || '',
+        bmiResult: 'Passed',
+        colorBlindResult: 'Passed',
+        visibleTattoo: 'No',
+        invisibleTattoo: 'No',
+        sweatyPalmResult: '',
+        score: '',
+        passingScore: 8,
+        maxScore: 10,
+        remarks: '',
+        evaluatedBy: 'HR',
+      });
+    }
   }
 
   function updateFormFields(stageName: string, app: Applicant) {
