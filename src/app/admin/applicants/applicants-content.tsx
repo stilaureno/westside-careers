@@ -546,7 +546,7 @@ export default function ApplicantsContent({
                       </td>
                     )}
                     {visibleColumns.has('applicants_table_sweatyPalmResult') && (
-                      <td className="text-muted" style={{ fontSize: '12px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
+                      <td className={app.sweatyPalmResult === 'Passed' ? 'text-success' : app.sweatyPalmResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
                     )}
                     {visibleColumns.has('applicants_table_finalInterviewResult') && (
                       <td className={
