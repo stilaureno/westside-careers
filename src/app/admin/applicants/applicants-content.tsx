@@ -227,8 +227,7 @@ export default function ApplicantsContent({
 
   const positionCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
-    // Initialize with available positions if loaded, otherwise use applicants data
-    const positions = availablePositions.length > 0 ? availablePositions : [...new Set(applicantsForCounts.map(a => a.position_applied).filter(Boolean)];
+    const positions = (availablePositions.length > 0 ? availablePositions : [...new Set(applicantsForCounts.map(a => a.position_applied).filter(Boolean))]);
     positions.forEach(p => { counts[p] = 0; });
     applicantsForCounts.forEach((app) => {
       const p = app.position_applied;
