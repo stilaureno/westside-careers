@@ -383,7 +383,7 @@ export async function getApplicantsPageData(options?: {
   isSuperAdmin?: boolean;
 }): Promise<ApplicantListItem[]> {
   const supabase = await createClient();
-  const limit = options?.limit ?? 300;
+  const limit = options?.limit ?? 5000;
   const allowedDepartments = options?.allowedDepartments ?? [];
   const isSuperAdmin = options?.isSuperAdmin ?? false;
 
