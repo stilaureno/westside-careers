@@ -22,9 +22,6 @@ function useWindowSize() {
 type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
 
-// Dynamic positions loaded from database
-const [availablePositions, setAvailablePositions] = useState<string[]>([]);
-
 // Map config field_key to data key
 const COLUMN_KEY_MAP: Record<string, keyof ApplicantListItem | 'displayName'> = {
   'applicants_table_created_at': 'created_at',
@@ -65,6 +62,7 @@ export default function ApplicantsContent({
   const isMobile = windowSize.width < 768;
   const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
   const [showFilters, setShowFilters] = useState(!isMobile);
+  const [availablePositions, setAvailablePositions] = useState<string[]>([]);
   
   // Use custom column visibility from props, or load from DB
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
@@ -139,7 +137,7 @@ export default function ApplicantsContent({
       }
     }
     loadPositions();
-  }, [columnVisibility]);
+  }, [columnVisibility, supabase]);
 
   const loadApplicants = useCallback(async () => {
     setLoading(true);
@@ -235,7 +233,7 @@ export default function ApplicantsContent({
       if (p && counts[p] !== undefined) counts[p]++;
     });
     return counts;
-  }, [applicantsForCounts, availablePositions]);
+  }, [applicantsForCounts]);
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
