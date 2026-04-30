@@ -669,8 +669,9 @@ export default function DashboardContent() {
         }
       }
       
-      // Stage stats (only for Dealer position in Table Games)
-      if (pos === 'Dealer' && dept === 'Table Games') {
+      // Stage stats (only for Experienced Dealer in Table Games)
+      const isExperiencedDealer = pos === 'Dealer' && (r.experience_level === 'Experienced Dealer' || r.experience_level === 'Experienced-Dealer');
+      if (isExperiencedDealer && dept === 'Table Games') {
         const stages = stageMap[r.reference_no];
         if (stages) {
           const math = stages['Math Exam'];
@@ -681,13 +682,16 @@ export default function DashboardContent() {
       }
     });
     
-    // Calculate pending stages for Table Games Dealer
+    // Calculate pending stages for Table Games - only Experienced Dealer
     if (data['Table Games']) {
-      const dealerPos = data['Table Games'].positions['Dealer'];
-      if (dealerPos) {
-        data['Table Games'].stageMath.pending = Math.max(0, dealerPos.total - data['Table Games'].stageMath.taken);
-        data['Table Games'].stageTable.pending = Math.max(0, dealerPos.total - data['Table Games'].stageTable.taken);
-      }
+      // Count only Experienced Dealer for stage pending calculation
+      const expDealer = (appRows || []).filter((r: any) => 
+        r.position_applied === 'Dealer' && 
+        r.department === 'Table Games' &&
+        (r.experience_level === 'Experienced Dealer' || r.experience_level === 'Experienced-Dealer')
+      ).length;
+      data['Table Games'].stageMath.pending = Math.max(0, expDealer - data['Table Games'].stageMath.taken);
+      data['Table Games'].stageTable.pending = Math.max(0, expDealer - data['Table Games'].stageTable.taken);
     }
     
     setDeptPositions(positionsMap);
