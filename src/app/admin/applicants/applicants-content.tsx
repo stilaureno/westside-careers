@@ -22,7 +22,8 @@ function useWindowSize() {
 type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
 
-const POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager'];
+// Dynamic positions loaded from database
+const [availablePositions, setAvailablePositions] = useState<string[]>([]);
 
 // Map config field_key to data key
 const COLUMN_KEY_MAP: Record<string, keyof ApplicantListItem | 'displayName'> = {
@@ -125,6 +126,19 @@ export default function ApplicantsContent({
       }
     }
     loadColumnVisibility();
+    // Load available positions from database
+    async function loadPositions() {
+      const { data } = await supabase
+        .from('applicants')
+        .select('position_applied')
+        .not('position_applied', 'is', null);
+      
+      if (data) {
+        const positions = [...new Set(data.map((r: any) => r.position_applied))].filter(Boolean).sort();
+        setAvailablePositions(positions);
+      }
+    }
+    loadPositions();
   }, [columnVisibility]);
 
   const loadApplicants = useCallback(async () => {
@@ -215,13 +229,13 @@ export default function ApplicantsContent({
 
   const positionCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
-    POSITIONS.forEach(p => { counts[p] = 0; });
+    availablePositions.forEach(p => { counts[p] = 0; });
     applicantsForCounts.forEach((app) => {
       const p = app.position_applied;
       if (p && counts[p] !== undefined) counts[p]++;
     });
     return counts;
-  }, [applicantsForCounts]);
+  }, [applicantsForCounts, availablePositions]);
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
@@ -423,7 +437,7 @@ export default function ApplicantsContent({
                 onChange={(e) => setFilterPosition(e.target.value)}
               >
                 <option value="">{getPositionLabel('')}</option>
-                {POSITIONS.map(p => (
+                {availablePositions.map(p => (
                   <option key={p} value={p}>{getPositionLabel(p)}</option>
                 ))}
               </select>
