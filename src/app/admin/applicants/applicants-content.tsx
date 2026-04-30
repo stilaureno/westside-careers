@@ -75,11 +75,19 @@ export default function ApplicantsContent({
 
   const today = new Date().toISOString().split('T')[0];
 
+  // Default date range: last 7 days to show recent applicants
+  const getDefaultStartDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().split('T')[0];
+  };
+  const defaultStartDate = getDefaultStartDate();
+
   const [globalSearch, setGlobalSearch] = useState('');
   const [filterPosition, setFilterPosition] = useState('');
   const [filterStage, setFilterStage] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [filterStartDate, setFilterStartDate] = useState(today);
+  const [filterStartDate, setFilterStartDate] = useState(defaultStartDate);
   const [filterEndDate, setFilterEndDate] = useState(today);
 
   const [sortField, setSortField] = useState<SortField>('created_at');
@@ -126,7 +134,7 @@ export default function ApplicantsContent({
       .from('applicants')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(300);
+      .limit(5000);
 
     if (!isSuperAdmin) {
       if (allowedDepartments.length === 0) {
@@ -319,7 +327,7 @@ export default function ApplicantsContent({
     setFilterPosition('');
     setFilterStage('');
     setFilterStatus('');
-    setFilterStartDate(today);
+    setFilterStartDate(defaultStartDate);
     setFilterEndDate(today);
   }
 
@@ -368,7 +376,7 @@ export default function ApplicantsContent({
     { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
   ];
 
-  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== today || filterEndDate !== today;
+  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== defaultStartDate || filterEndDate !== today;
 
   if (loading) {
     return (
