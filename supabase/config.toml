@@ -5,6 +5,7 @@ config = "!{pnpm}/node_modules/@supabase/supabase-js"
 [api]
 endpoint = "http://127.0.0.1:54321"
 api_url = "http://127.0.0.1:54321"
+max_rows = 5000
 
 [db]
 host = "127.0.0.1"
@@ -12,6 +13,7 @@ port = 54321
 user = "postgres"
 password = "postgres"
 database = "postgres"
+
 
 [auth]
 site_url = "http://localhost:3000"
