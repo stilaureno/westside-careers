@@ -36,6 +36,9 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [resultStatus, setResultStatus] = useState('Passed');
   const [stageLabel, setStageLabel] = useState('');
   const [form, setForm] = useState<any>({ evaluatedBy: '' });
+  const [reprofileDepartment, setReprofileDepartment] = useState('');
+  const [reprofilePosition, setReprofilePosition] = useState('');
+  const [positionsList, setPositionsList] = useState<{ id: string; name: string }[]>([]);
 
   const finalResultOptions = [
     { value: 'Passed', label: 'Passed', icon: '✓' },
@@ -69,14 +72,16 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
 
   async function loadData() {
     setLoading(true);
-    const [applicantRes, fieldsRes] = await Promise.all([
+    const [applicantRes, fieldsRes, positionsRes] = await Promise.all([
       getApplicant(referenceNo, ''),
       supabase.from('visible_fields').select('*').eq('is_visible', true).order('display_order'),
+      supabase.from('positions').select('*').order('display_order'),
     ]);
     if (applicantRes.data) {
       setData(applicantRes.data);
     }
     setVisibleFields(fieldsRes.data || []);
+    setPositionsList(positionsRes.data || []);
     setLoading(false);
   }
 
@@ -142,6 +147,11 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         remarks: stageResult.remarks || '',
         evaluatedBy: stageResult.evaluated_by || 'HR',
       });
+      setReprofileDepartment(stageResult.reprofile_department || '');
+      setReprofilePosition(stageResult.reprofile_position || '');
+      if (stageName === 'Final Interview') {
+        setResultStatus(stageResult.result_status || 'Passed');
+      }
     } else {
       setForm({
         heightCm: app?.height_cm || '',
@@ -158,6 +168,11 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         remarks: '',
         evaluatedBy: 'HR',
       });
+      setReprofileDepartment('');
+      setReprofilePosition('');
+      if (stageName === 'Final Interview') {
+        setResultStatus('Passed');
+      }
     }
   }
 
@@ -218,6 +233,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       visibleTattoo: form.visibleTattoo,
       invisibleTattoo: form.invisibleTattoo,
       ...(isDealer && { sweatyPalmResult: form.sweatyPalmResult }),
+      ...(resultStatus === 'Reprofile' && { reprofileDepartment, reprofilePosition }),
       score: parseFloat(form.score) || undefined,
       passingScore: parseFloat(form.passingScore) || 8,
       maxScore: parseFloat(form.maxScore) || 10,
@@ -474,6 +490,31 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                                   </label>
                                 ))}
                               </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {stage === 'Final Interview' && resultStatus === 'Reprofile' && (
+                          <div className="row g-3 mb-3">
+                            <div className="col-md-6">
+                              <label className="form-label small">Reprofile Department</label>
+                              <select className="form-select form-select-sm" value={reprofileDepartment} onChange={(e) => setReprofileDepartment(e.target.value)}>
+                                <option value="">Select Department...</option>
+                                <option>Casino Operations</option>
+                                <option>Casino Admin</option>
+                                <option>Security</option>
+                                <option>IT</option>
+                                <option>HR</option>
+                              </select>
+                            </div>
+                            <div className="col-md-6">
+                              <label className="form-label small">Reprofile Position</label>
+                              <select className="form-select form-select-sm" value={reprofilePosition} onChange={(e) => setReprofilePosition(e.target.value)}>
+                                <option value="">Select Position...</option>
+                                {positionsList.map((pos) => (
+                                  <option key={pos.id} value={pos.name}>{pos.name}</option>
+                                ))}
+                              </select>
                             </div>
                           </div>
                         )}

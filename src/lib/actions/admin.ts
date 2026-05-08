@@ -73,6 +73,8 @@ export async function updateStage(
     visibleTattoo: payload.visibleTattoo,
     invisibleTattoo: payload.invisibleTattoo,
     sweatyPalmResult: payload.sweatyPalmResult,
+    reprofileDepartment: payload.reprofileDepartment,
+    reprofilePosition: payload.reprofilePosition,
     score: payload.score,
     passingScore: payload.passingScore,
     maxScore: payload.maxScore,

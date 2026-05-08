@@ -17,6 +17,8 @@ export async function upsertStageResult(payload: {
   visibleTattoo?: string;
   invisibleTattoo?: string;
   sweatyPalmResult?: string;
+  reprofileDepartment?: string;
+  reprofilePosition?: string;
   score?: number;
   passingScore?: number;
   maxScore?: number;
@@ -55,6 +57,8 @@ export async function upsertStageResult(payload: {
         visible_tattoo: payload.visibleTattoo,
         invisible_tattoo: payload.invisibleTattoo,
         sweaty_palm_result: payload.sweatyPalmResult,
+        reprofile_department: payload.reprofileDepartment,
+        reprofile_position: payload.reprofilePosition,
         score: payload.score,
         passing_score: payload.passingScore,
         max_score: payload.maxScore,
@@ -85,6 +89,8 @@ export async function upsertStageResult(payload: {
         visible_tattoo: payload.visibleTattoo,
         invisible_tattoo: payload.invisibleTattoo,
         sweaty_palm_result: payload.sweatyPalmResult,
+        reprofile_department: payload.reprofileDepartment,
+        reprofile_position: payload.reprofilePosition,
         score: payload.score,
         passing_score: payload.passingScore,
         max_score: payload.maxScore,
@@ -116,6 +122,8 @@ export async function upsertStageResult(payload: {
       current_stage: isFinalInterview ? 'Completed' : payload.stageName,
       application_status: dynamicStatus,
       overall_result: overallResult,
+      department: payload.resultStatus === 'Reprofile' && payload.reprofileDepartment ? payload.reprofileDepartment : undefined,
+      position_applied: payload.resultStatus === 'Reprofile' && payload.reprofilePosition ? payload.reprofilePosition : undefined,
       updated_at: new Date().toISOString(),
     })
     .eq('reference_no', payload.referenceNo);
@@ -127,7 +135,7 @@ export async function upsertStageResult(payload: {
       reference_no: payload.referenceNo,
       stage_name: payload.stageName,
       result_status: payload.resultStatus,
-      notification_message: getStageInstruction(payload.stageName, payload.resultStatus),
+      notification_message: getStageInstruction(payload.stageName, payload.resultStatus, payload.reprofilePosition, payload.reprofileDepartment),
       visible_to_applicant: 'Yes',
       created_by: payload.evaluatedBy,
     });
@@ -211,7 +219,7 @@ function getApplicationStatus(stageName: string, resultStatus: string): string {
   return resultStatus;
 }
 
-function getStageInstruction(stageName: string, resultStatus: string): string {
+function getStageInstruction(stageName: string, resultStatus: string, reprofilePosition?: string, reprofileDepartment?: string): string {
   if (stageName === 'Initial Screening') {
     if (resultStatus === 'Passed') return 'Please proceed to the Math Exam Area.';
     return 'Unfortunately, you did not pass the Initial Screening.';
@@ -229,6 +237,12 @@ function getStageInstruction(stageName: string, resultStatus: string): string {
       return 'Congratulations! You have passed all stages. Please follow the next instructions provided by the final interviewer.';
     }
     if (resultStatus === 'Reprofile') {
+      if (reprofilePosition && reprofileDepartment) {
+        return `You have been Reprofiled for ${reprofilePosition} in ${reprofileDepartment}. Please check for other available positions.`;
+      }
+      if (reprofilePosition) {
+        return `You have been Reprofiled for ${reprofilePosition}. Please check for other available positions.`;
+      }
       return 'You have been Reprofiled. Please check for other available positions.';
     }
     if (resultStatus === 'For Pooling') {
