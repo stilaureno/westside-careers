@@ -148,7 +148,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         passingScore: stageResult.passing_score || 8,
         maxScore: stageResult.max_score || 10,
         remarks: stageResult.remarks || '',
-        evaluatedBy: stageResult.evaluated_by || 'HR',
+        evaluatedBy: stageResult.evaluated_by || '',
       });
       setReprofileDepartment(stageResult.reprofile_department || '');
       setReprofilePosition(stageResult.reprofile_position || '');
@@ -169,7 +169,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         passingScore: 8,
         maxScore: 10,
         remarks: '',
-        evaluatedBy: 'HR',
+evaluatedBy: '',
       });
       setReprofileDepartment('');
       setReprofilePosition('');
@@ -215,6 +215,10 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     e.preventDefault();
     if (!stage) {
       setMessage({ text: 'Please select a stage.', type: 'error' });
+      return;
+    }
+    if (!form.evaluatedBy?.trim()) {
+      setMessage({ text: 'Please enter evaluator name.', type: 'error' });
       return;
     }
     setSaving(true);
@@ -532,8 +536,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
 
                         <div className="row g-3 mb-3">
                           <div className="col-md-6">
-                            <label className="form-label small">Evaluated By</label>
-                            <input className="form-control form-control-sm" value={form.evaluatedBy} onChange={(e) => setForm({ ...form, evaluatedBy: e.target.value })} />
+                            <label className="form-label small">Evaluated By <span className="text-danger">*</span></label>
+                            <input className="form-control form-control-sm" value={form.evaluatedBy} onChange={(e) => setForm({ ...form, evaluatedBy: e.target.value })} required />
                           </div>
                         </div>
 
