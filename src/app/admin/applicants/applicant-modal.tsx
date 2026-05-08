@@ -38,7 +38,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [form, setForm] = useState<any>({ evaluatedBy: '' });
   const [reprofileDepartment, setReprofileDepartment] = useState('');
   const [reprofilePosition, setReprofilePosition] = useState('');
-  const [positionsList, setPositionsList] = useState<{ id: string; name: string }[]>([]);
+  const [positionsList, setPositionsList] = useState<{ id: string; name: string; department_id: string }[]>([]);
   const [departmentsList, setDepartmentsList] = useState<{ id: string; name: string }[]>([]);
 
   const finalResultOptions = [
@@ -501,7 +501,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                           <div className="row g-3 mb-3">
                             <div className="col-md-6">
                               <label className="form-label small">Reprofile Department</label>
-                              <select className="form-select form-select-sm" value={reprofileDepartment} onChange={(e) => setReprofileDepartment(e.target.value)}>
+                              <select className="form-select form-select-sm" value={reprofileDepartment} onChange={(e) => { setReprofileDepartment(e.target.value); setReprofilePosition(''); }}>
                                 <option value="">Select Department...</option>
                                 {departmentsList.map((dept) => (
                                   <option key={dept.id} value={dept.name}>{dept.name}</option>
@@ -510,11 +510,16 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                             </div>
                             <div className="col-md-6">
                               <label className="form-label small">Reprofile Position</label>
-                              <select className="form-select form-select-sm" value={reprofilePosition} onChange={(e) => setReprofilePosition(e.target.value)}>
+                              <select className="form-select form-select-sm" value={reprofilePosition} onChange={(e) => setReprofilePosition(e.target.value)} disabled={!reprofileDepartment}>
                                 <option value="">Select Position...</option>
-                                {positionsList.map((pos) => (
-                                  <option key={pos.id} value={pos.name}>{pos.name}</option>
-                                ))}
+                                {positionsList
+                                  .filter((pos) => {
+                                    const dept = departmentsList.find((d) => d.name === reprofileDepartment);
+                                    return dept && pos.department_id === dept.id;
+                                  })
+                                  .map((pos) => (
+                                    <option key={pos.id} value={pos.name}>{pos.name}</option>
+                                  ))}
                               </select>
                             </div>
                           </div>
