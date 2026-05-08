@@ -39,6 +39,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [reprofileDepartment, setReprofileDepartment] = useState('');
   const [reprofilePosition, setReprofilePosition] = useState('');
   const [positionsList, setPositionsList] = useState<{ id: string; name: string }[]>([]);
+  const [departmentsList, setDepartmentsList] = useState<{ id: string; name: string }[]>([]);
 
   const finalResultOptions = [
     { value: 'Passed', label: 'Passed', icon: '✓' },
@@ -72,16 +73,18 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
 
   async function loadData() {
     setLoading(true);
-    const [applicantRes, fieldsRes, positionsRes] = await Promise.all([
+    const [applicantRes, fieldsRes, positionsRes, departmentsRes] = await Promise.all([
       getApplicant(referenceNo, ''),
       supabase.from('visible_fields').select('*').eq('is_visible', true).order('display_order'),
-      supabase.from('positions').select('*').order('display_order'),
+      supabase.from('positions').select('*').eq('is_active', true).order('name'),
+      supabase.from('departments').select('*').eq('is_active', true).order('name'),
     ]);
     if (applicantRes.data) {
       setData(applicantRes.data);
     }
     setVisibleFields(fieldsRes.data || []);
     setPositionsList(positionsRes.data || []);
+    setDepartmentsList(departmentsRes.data || []);
     setLoading(false);
   }
 
@@ -500,11 +503,9 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                               <label className="form-label small">Reprofile Department</label>
                               <select className="form-select form-select-sm" value={reprofileDepartment} onChange={(e) => setReprofileDepartment(e.target.value)}>
                                 <option value="">Select Department...</option>
-                                <option>Casino Operations</option>
-                                <option>Casino Admin</option>
-                                <option>Security</option>
-                                <option>IT</option>
-                                <option>HR</option>
+                                {departmentsList.map((dept) => (
+                                  <option key={dept.id} value={dept.name}>{dept.name}</option>
+                                ))}
                               </select>
                             </div>
                             <div className="col-md-6">
