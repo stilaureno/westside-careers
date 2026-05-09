@@ -204,7 +204,9 @@ sweaty_palm_result: payload.sweatyPalmResult,
       department: payload.resultStatus === 'Reprofile' && payload.reprofileDepartment ? payload.reprofileDepartment : undefined,
       position_applied: payload.resultStatus === 'Reprofile' && payload.reprofilePosition ? payload.reprofilePosition : undefined,
       experience_level: payload.resultStatus === 'Reprofile'
-        ? (payload.reprofileExperienceLevel || null)
+        ? (payload.reprofilePosition === 'Dealer'
+          ? (payload.reprofileExperienceLevel || null)
+          : null)
         : undefined,
       updated_at: new Date().toISOString(),
     })
