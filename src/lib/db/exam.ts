@@ -347,7 +347,7 @@ export async function submitExam(
     return { success: false, error: getExamWriteErrorMessage('Failed to submit exam', updateError) };
   }
 
-  await syncMathExamStage(referenceNo, score, passed);
+  await syncMathExamStage(referenceNo, score, passed, reason);
 
   return {
     success: true,
@@ -355,7 +355,7 @@ export async function submitExam(
   };
 }
 
-async function syncMathExamStage(referenceNo: string, score: number, passed: boolean) {
+async function syncMathExamStage(referenceNo: string, score: number, passed: boolean, reason: string = 'SUBMIT') {
   const supabase = await createClient();
 
   const { data: applicant } = await supabase
@@ -374,7 +374,9 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
     .eq('stage_name', 'Math Exam')
     .single();
 
-  const remarks = `Math Exam submitted via Applicant Portal. | Result: ${passed ? 'Passed' : 'Failed'} | Score: ${score}/${MAX_MATH_EXAM_SCORE}`;
+  const isAutoSubmit = reason === 'AUTO_SUBMIT';
+  const submissionType = isAutoSubmit ? 'Auto-submitted (lost focus/tab switch)' : 'Submitted via Applicant Portal';
+  const remarks = `Math Exam ${submissionType} | Result: ${passed ? 'Passed' : 'Failed'} | Score: ${score}/${MAX_MATH_EXAM_SCORE}`;
 
   if (existing) {
     await supabase

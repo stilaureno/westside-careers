@@ -75,6 +75,7 @@ export async function updateStage(
     sweatyPalmResult: payload.sweatyPalmResult,
     reprofileDepartment: payload.reprofileDepartment,
     reprofilePosition: payload.reprofilePosition,
+    reprofileExperienceLevel: payload.reprofileExperienceLevel,
     score: payload.score,
     passingScore: payload.passingScore,
     maxScore: payload.maxScore,

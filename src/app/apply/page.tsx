@@ -252,13 +252,14 @@ export default function ApplyPage() {
             </div>
 
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Middle Name">
+              <Field label="Middle Name" required>
                 <input
                   className={styles.control}
                   value={form.middleName}
                   onChange={(e) => setForm({ ...form, middleName: e.target.value })}
                   autoComplete="additional-name"
                   autoCapitalize="words"
+                  required
                 />
               </Field>
               <Field label="Birthdate" required>
@@ -301,7 +302,7 @@ export default function ApplyPage() {
             </div>
 
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Email Address">
+              <Field label="Email Address" required>
                 <input
                   className={styles.control}
                   type="email"
@@ -309,10 +310,11 @@ export default function ApplyPage() {
                   autoComplete="email"
                   value={form.emailAddress}
                   onChange={(e) => setForm({ ...form, emailAddress: e.target.value })}
+                  required
                 />
               </Field>
               <div className={styles.compactGrid}>
-                <Field label="Height (cm)">
+                <Field label="Height (cm)" required>
                   <input
                     className={styles.control}
                     type="number"
@@ -327,9 +329,10 @@ export default function ApplyPage() {
                     }}
                     onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('Your height must be in centimeters')}
                     placeholder="cm"
+                    required
                   />
                 </Field>
-                <Field label="Weight (kg)">
+                <Field label="Weight (kg)" required>
                   <input
                     className={styles.control}
                     type="number"
@@ -338,6 +341,7 @@ export default function ApplyPage() {
                     value={form.weightKg}
                     onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
                     placeholder="kg"
+                    required
                   />
                 </Field>
               </div>

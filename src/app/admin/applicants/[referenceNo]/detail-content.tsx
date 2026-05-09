@@ -16,7 +16,21 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const [stageSeq, setStageSeq] = useState(1);
   const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
-  const [form, setForm] = useState<any>({});
+  const [form, setForm] = useState<any>({
+    heightCm: '',
+    weightKg: '',
+    bmiValue: '',
+    bmiResult: '',
+    colorBlindResult: '',
+    visibleTattoo: 'No',
+    invisibleTattoo: 'No',
+    sweatyPalmResult: '',
+    score: '',
+    passingScore: 8,
+    maxScore: 10,
+    remarks: '',
+    evaluatedBy: 'HR',
+  });
   const [workflow, setWorkflow] = useState<string[]>(['Initial Screening']);
   const router = useRouter();
   const supabase = createClient();
@@ -55,8 +69,8 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
         heightCm: stageResult.height_cm || app?.height_cm || '',
         weightKg: stageResult.weight_kg || app?.weight_kg || '',
         bmiValue: stageResult.bmi_value || app?.bmi_value || '',
-        bmiResult: stageResult.bmi_result || 'Passed',
-        colorBlindResult: stageResult.color_blind_result || 'Passed',
+        bmiResult: stageResult.bmi_result || '',
+        colorBlindResult: stageResult.color_blind_result || '',
         visibleTattoo: stageResult.visible_tattoo || 'No',
         invisibleTattoo: stageResult.invisible_tattoo || 'No',
         sweatyPalmResult: stageResult.sweaty_palm_result || '',
@@ -221,12 +235,17 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
             {stages && stages.length > 0 ? stages.map((s: any) => (
               <div key={s.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #f3f4f6' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937' }}>{s.stage_name}</span>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#1f2937' }}>{s.stage_name}</span>
                   <span style={{
                     fontSize: '12px', fontWeight: '600',
-                    color: s.result_status === 'Passed' ? '#166534' : '#991b1b',
+                    color: s.result_status === 'Passed' ? '#166534' : s.result_status === 'Reprofile' ? '#d97706' : '#991b1b',
                   }}>{s.result_status}</span>
                 </div>
+                {s.stage_name === 'Final Interview' && s.result_status === 'Reprofile' && (
+                  <p style={{ fontSize: '12px', background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
+                    🔄 <strong>Original:</strong> {data?.applicant?.position_applied} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
+                  </p>
+                )}
                 {s.stage_name === 'Math Exam' && s.termination_reason === 'WINDOWS_LOST_FOCUS' && (
                   <p style={{ fontSize: '12px', color: '#dc3545', fontWeight: '700', margin: '4px 0 0' }}>Auto submitted due to lost window focus</p>
                 )}
@@ -235,7 +254,10 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                     {renderFormattedMessage(s.remarks)}
                   </p>
                 )}
-                <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>{s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}</p>
+                <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>
+                  {s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}
+                  {s.evaluated_by && <> · Evaluated by: <span style={{ color: '#2563eb' }}>{s.evaluated_by}</span></>}
+                </p>
               </div>
             )) : (
               <p style={{ color: '#9ca3af', fontSize: '13px' }}>No stages recorded.</p>

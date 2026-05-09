@@ -359,18 +359,26 @@ evaluatedBy: '',
                           <div className="card-header bg-white py-2">
                             <h6 className="mb-0">Stage History</h6>
                           </div>
-                          <div className="card-body py-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                          <div className="card-body py-2">
                             {stages && stages.length > 0 ? stages.map((s: any) => (
                               <div key={s.id} className="border-bottom py-2">
                                 <div className="d-flex justify-content-between">
-                                  <span className="fw-medium">{s.stage_name}</span>
-                                  <span className={s.result_status === 'Passed' ? 'text-success' : 'text-danger'}>{s.result_status}</span>
+                                  <span className="fw-bold">{s.stage_name}</span>
+                                  <span className={s.result_status === 'Passed' ? 'text-success' : s.result_status === 'Reprofile' ? 'text-warning' : 'text-danger'}>{s.result_status}</span>
                                 </div>
+                                {s.stage_name === 'Final Interview' && s.result_status === 'Reprofile' && (
+                                  <p className="small mb-0" style={{ background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
+                                    🔄 <strong>Original:</strong> {data?.applicant?.position_applied} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
+                                  </p>
+                                )}
                                 {s.stage_name === 'Math Exam' && s.termination_reason === 'WINDOWS_LOST_FOCUS' && (
                                   <p className="text-danger small mb-0 fw-bold">Auto submitted due to lost window focus</p>
                                 )}
                                 {s.remarks && <p className="text-muted small mb-0">{renderFormattedMessage(s.remarks)}</p>}
-                                <p className="text-muted small mb-0">{s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}</p>
+                                <p className="text-muted small mb-0">
+                                  {s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}
+                                  {s.evaluated_by && <> · Evaluated by: <span className="text-primary">{s.evaluated_by}</span></>}
+                                </p>
                               </div>
                             )) : (
                               <p className="text-muted mb-0">No stages recorded.</p>
@@ -403,12 +411,16 @@ evaluatedBy: '',
                             </select>
                           </div>
                           <div className="col-md-4">
-                            <label className="form-label small">Result *</label>
-                            <select className="form-select form-select-sm" value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required>
-                              <option value="">Select...</option>
-                              <option>Passed</option>
-                              <option>Failed</option>
-                            </select>
+                            {stage !== 'Final Interview' && (
+                              <>
+                                <label className="form-label small">Result *</label>
+                                <select className="form-select form-select-sm" value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required>
+                                  <option value="">Select...</option>
+                                  <option>Passed</option>
+                                  <option>Failed</option>
+                                </select>
+                              </>
+                            )}
                           </div>
                           
                         </div>
@@ -517,7 +529,7 @@ evaluatedBy: '',
 
                         {stage === 'Final Interview' && resultStatus === 'Reprofile' && (
                           <div className="row g-3 mb-3">
-                            <div className="col-md-6">
+                            <div className="col-md-4">
                               <label className="form-label small">Reprofile Department</label>
                               <select className="form-select form-select-sm" value={reprofileDepartment} onChange={(e) => { setReprofileDepartment(e.target.value); setReprofilePosition(''); }}>
                                 <option value="">Select Department...</option>
@@ -526,7 +538,7 @@ evaluatedBy: '',
                                 ))}
                               </select>
                             </div>
-                            <div className="col-md-6">
+                            <div className="col-md-4">
                               <label className="form-label small">Reprofile Position</label>
                               <select className="form-select form-select-sm" value={reprofilePosition} onChange={(e) => setReprofilePosition(e.target.value)} disabled={!reprofileDepartment}>
                                 <option value="">Select Position...</option>
@@ -538,6 +550,18 @@ evaluatedBy: '',
                                   .map((pos) => (
                                     <option key={pos.id} value={pos.name}>{pos.name}</option>
                                   ))}
+                              </select>
+                            </div>
+                            <div className="col-md-4">
+                              <label className="form-label small">Experience Level</label>
+                              <select
+                                className="form-select form-select-sm"
+                                value={form.reprofileExperienceLevel !== undefined ? form.reprofileExperienceLevel : data?.applicant?.experience_level || ''}
+                                onChange={(e) => setForm({ ...form, reprofileExperienceLevel: e.target.value })}
+                              >
+                                <option value="">Select Experience...</option>
+                                <option>Non-Experienced Dealer</option>
+                                <option>Experienced Dealer</option>
                               </select>
                             </div>
                           </div>

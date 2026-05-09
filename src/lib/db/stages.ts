@@ -27,6 +27,7 @@ export async function upsertStageResult(payload: {
   sweatyPalmResult?: string;
   reprofileDepartment?: string;
   reprofilePosition?: string;
+  reprofileExperienceLevel?: string;
   score?: number;
   passingScore?: number;
   maxScore?: number;
@@ -159,6 +160,7 @@ export async function upsertStageResult(payload: {
       overall_result: overallResult,
       department: payload.resultStatus === 'Reprofile' && payload.reprofileDepartment ? payload.reprofileDepartment : undefined,
       position_applied: payload.resultStatus === 'Reprofile' && payload.reprofilePosition ? payload.reprofilePosition : undefined,
+      experience_level: payload.resultStatus === 'Reprofile' && payload.reprofileExperienceLevel ? payload.reprofileExperienceLevel : undefined,
       updated_at: new Date().toISOString(),
     })
     .eq('reference_no', payload.referenceNo);
