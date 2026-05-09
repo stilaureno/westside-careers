@@ -2,6 +2,14 @@ import { createClient } from '@/lib/supabase/server';
 import type { StageResult } from '@/types';
 import { getNextStage, getStageWorkflow } from './applicants';
 
+const COMPLETED_STAGE_STATUSES = new Set([
+  'Passed',
+  'Failed',
+  'Reprofile',
+  'For Pooling',
+  'Not Recommended',
+]);
+
 export async function upsertStageResult(payload: {
   referenceNo: string;
   stageName: string;
@@ -29,6 +37,33 @@ export async function upsertStageResult(payload: {
   const meta = await getApplicantMeta(payload.referenceNo);
   const { applicant_id, position_applied, experience_level } = meta;
   if (!applicant_id) return { success: false, error: 'Applicant not found' };
+
+  const workflow = await getStageWorkflowForApplicant(position_applied || '', experience_level);
+  const requestedStageIndex = workflow.indexOf(payload.stageName);
+  if (requestedStageIndex === -1) {
+    return { success: false, error: `Invalid stage "${payload.stageName}" for this applicant.` };
+  }
+
+  const { data: recordedStages, error: recordedStagesError } = await supabase
+    .from('stage_results')
+    .select('stage_name, result_status')
+    .eq('reference_no', payload.referenceNo);
+
+  if (recordedStagesError) {
+    return { success: false, error: recordedStagesError.message };
+  }
+
+  const firstIncompleteStageIndex = getFirstIncompleteStageIndex(
+    workflow,
+    recordedStages || []
+  );
+
+  if (firstIncompleteStageIndex !== -1 && requestedStageIndex > firstIncompleteStageIndex) {
+    return {
+      success: false,
+      error: `Cannot skip stages. Complete "${workflow[firstIncompleteStageIndex]}" first.`,
+    };
+  }
 
   const nextStage = getNextStage(payload.stageName, position_applied || '', experience_level);
   const isFinalInterview = payload.stageName === 'Final Interview';
@@ -151,6 +186,68 @@ async function getApplicantMeta(referenceNo: string): Promise<{ applicant_id?: s
     .eq('reference_no', referenceNo)
     .single();
   return data as { applicant_id?: string; position_applied?: string; experience_level?: string } || {};
+}
+
+function getFirstIncompleteStageIndex(
+  workflow: string[],
+  stageResults: Array<{ stage_name: string; result_status: string | null }>
+): number {
+  const stageResultMap = new Map(
+    stageResults.map((stageResult) => [stageResult.stage_name, stageResult.result_status])
+  );
+
+  for (let index = 0; index < workflow.length; index++) {
+    const status = stageResultMap.get(workflow[index]);
+    if (!status || !COMPLETED_STAGE_STATUSES.has(status)) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+async function getStageWorkflowForApplicant(position: string, experienceLevel?: string): Promise<string[]> {
+  const supabase = await createClient();
+  const normalizedExperienceLevel = experienceLevel === 'Experienced Dealer' ? 'Experienced' : 'Non-Experienced';
+
+  const { data: positionData, error: positionError } = await supabase
+    .from('positions')
+    .select('id')
+    .eq('name', position)
+    .single();
+
+  if (positionError || !positionData) {
+    return getStageWorkflow(position, experienceLevel);
+  }
+
+  const { data: positionStages, error: positionStagesError } = await supabase
+    .from('position_stages')
+    .select('stage_id, stage_order')
+    .eq('position_id', positionData.id)
+    .eq('experience_level', normalizedExperienceLevel)
+    .eq('is_enabled', true)
+    .order('stage_order', { ascending: true });
+
+  if (positionStagesError || !positionStages || positionStages.length === 0) {
+    return getStageWorkflow(position, experienceLevel);
+  }
+
+  const stageIds = positionStages.map((positionStage) => positionStage.stage_id);
+  const { data: stages, error: stagesError } = await supabase
+    .from('stages')
+    .select('id, name')
+    .in('id', stageIds);
+
+  if (stagesError || !stages) {
+    return getStageWorkflow(position, experienceLevel);
+  }
+
+  const stageNameById = new Map(stages.map((stage) => [stage.id, stage.name]));
+  const workflow = positionStages
+    .map((positionStage) => stageNameById.get(positionStage.stage_id))
+    .filter((stageName): stageName is string => Boolean(stageName));
+
+  return workflow.length > 0 ? workflow : getStageWorkflow(position, experienceLevel);
 }
 
 export function calculateApplicationStatus(

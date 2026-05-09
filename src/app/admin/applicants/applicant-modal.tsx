@@ -265,7 +265,7 @@ evaluatedBy: '',
   function computeAvailableStages(wf: string[], completed: string[]): string[] {
     for (const stage of wf) {
       if (!completed.includes(stage)) {
-        return wf.slice(wf.indexOf(stage));
+        return [stage];
       }
     }
     return [];

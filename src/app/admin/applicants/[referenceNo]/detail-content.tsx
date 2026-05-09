@@ -94,7 +94,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   function getAvailableStages(workflow: string[], completed: string[]): string[] {
     for (const stage of workflow) {
       if (!completed.includes(stage)) {
-        return workflow.slice(workflow.indexOf(stage));
+        return [stage];
       }
     }
     return [];
