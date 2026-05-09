@@ -12,12 +12,20 @@ const STATUS_CHECK_LOCK_MINUTES = 5;
 
 function sanitizeName(name: string | undefined): string {
   if (!name) return '';
-  return name.trim().replace(/[^a-zA-Z\s\-']/g, '').toUpperCase();
+  const cleaned = name.trim().replace(/[^a-zA-Z\s\-']/g, '');
+  return cleaned
+    .split(/[\s\-]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 function sanitizeBasic(name: string | undefined): string {
   if (!name) return '';
-  return name.trim();
+  return name
+    .trim()
+    .split(/[\s\-]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 function getStatusCheckCookieOptions() {
