@@ -49,11 +49,36 @@ type ApplicantsContentProps = {
 };
 
 function getDerivedApplicationStatus(app: ApplicantListItem, appStages: any[]): string {
+  const stageNames = appStages.map((s) => s.stage_name);
+  
   const finalInterviewResult = appStages.find((stage) => stage.stage_name === 'Final Interview')?.result_status;
   if (finalInterviewResult) {
     return finalInterviewResult === 'Passed' ? 'Completed' : finalInterviewResult;
   }
+
+  const requiredStages = getRequiredStages(app.position_applied, app.department, app.experience_level);
+  const hasAllRequired = requiredStages.every((stage) => stageNames.includes(stage));
+
+  if (!hasAllRequired) {
+    return 'Ongoing';
+  }
+
   return app.application_status || 'Pending';
+}
+
+function getRequiredStages(position: string | null | undefined, department: string | null | undefined, experienceLevel: string | null | undefined): string[] {
+  const isTableGames = department === 'Table Games';
+  const isDealer = position === 'Dealer';
+  const isExperienced = experienceLevel === 'Experienced Dealer' || experienceLevel === 'Experienced-Dealer';
+
+  if (isDealer && isTableGames) {
+    if (isExperienced) {
+      return ['Initial Screening', 'Math Exam', 'Table Test', 'Final Interview'];
+    }
+    return ['Initial Screening', 'Final Interview'];
+  }
+
+  return ['Initial Screening', 'Final Interview'];
 }
 
 export default function ApplicantsContent({
