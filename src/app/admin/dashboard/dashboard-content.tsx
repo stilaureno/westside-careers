@@ -1,8 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+
+interface ApplicantListItem {
+  reference_no: string;
+  first_name: string;
+  last_name: string;
+  middle_name?: string;
+  position_applied: string;
+  application_status: string;
+  department: string;
+  current_stage: string;
+  created_at: string;
+  stages?: any[];
+}
 
 function useWindowSize() {
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -468,7 +480,6 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
 }
 
 export default function DashboardContent() {
-  const router = useRouter();
   const [dashboardData, setDashboardData] = useState<DashboardData>({});
   const [deptPositions, setDeptPositions] = useState<{ [dept: string]: string[] }>({});
   const [loading, setLoading] = useState(true);
@@ -484,27 +495,77 @@ export default function DashboardContent() {
   const [showDateFilters, setShowDateFilters] = useState(!isMobile);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
 
-  const handleKpiClick = useCallback((filterType: string, filterValue: string, department?: string, position?: string) => {
-    const params = new URLSearchParams();
-    if (filterType === 'status') {
-      params.set('status', filterValue);
-    } else if (filterType === 'stage') {
-      const [stageName, result] = filterValue.split('|');
-      params.set('stage', stageName);
-      params.set('stage_result', result);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalApplicants, setModalApplicants] = useState<ApplicantListItem[]>([]);
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const handleStatusClick = useCallback(async (status: string, department: string, position?: string) => {
+    setModalTitle(position 
+      ? `${status} - ${position} in ${department}` 
+      : `${status} in ${department}`);
+    setModalOpen(true);
+    setModalLoading(true);
+
+    let query = supabase
+      .from('applicants')
+      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, created_at')
+      .eq('department', department)
+      .order('created_at', { ascending: false });
+
+    if (position) {
+      query = query.eq('position_applied', position);
     }
-    if (department) params.set('department', department);
-    if (position) params.set('position', position);
-    router.push(`/admin/applicants?${params.toString()}`);
-  }, [router]);
 
-  const handleStatusClick = useCallback((status: string, department: string, position?: string) => {
-    handleKpiClick('status', status, department, position);
-  }, [handleKpiClick]);
+    if (status === 'Passed') {
+      query = query.in('application_status', ['Passed', 'Completed']);
+    } else {
+      query = query.eq('application_status', status);
+    }
 
-  const handleStageClick = useCallback((stage: string, result: string, department: string) => {
-    handleKpiClick('stage', `${stage}|${result}`, department);
-  }, [handleKpiClick]);
+    const { data } = await query.limit(200);
+    setModalApplicants(data || []);
+    setModalLoading(false);
+  }, [supabase]);
+
+  const handleStageClick = useCallback(async (stage: string, result: string, department: string) => {
+    setModalTitle(`${stage} ${result} in ${department}`);
+    setModalOpen(true);
+    setModalLoading(true);
+
+    const stageName = stage === 'Math Exam' ? 'Math Exam' : stage === 'Table Test' ? 'Table Test' : stage;
+
+    const { data: apps } = await supabase
+      .from('applicants')
+      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, created_at')
+      .eq('department', department)
+      .limit(500);
+
+    const refNos = (apps || []).map(a => a.reference_no).filter(Boolean);
+    const { data: stages } = refNos.length > 0
+      ? await supabase
+          .from('stage_results')
+          .select('reference_no, stage_name, result_status')
+          .in('reference_no', refNos)
+          .eq('stage_name', stageName)
+          .eq('result_status', result)
+      : { data: [] };
+
+    const matchingRefs = new Set(stages?.map(s => s.reference_no) || []);
+    const filtered = (apps || []).filter(a => matchingRefs.has(a.reference_no));
+
+    setModalApplicants(filtered.map(a => ({
+      ...a,
+      application_status: result === 'Passed' ? 'Passed' : 'Failed'
+    })));
+    setModalLoading(false);
+  }, [supabase]);
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalApplicants([]);
+    setModalTitle('');
+  };
 
   useEffect(() => {
     const superAdminCookie = getCookie('super_admin_session');
@@ -1009,6 +1070,104 @@ export default function DashboardContent() {
           </div>
         );
       })}
+
+      {/* Modal for showing applicants list */}
+      {modalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: isMobile ? '10px' : '20px',
+        }} onClick={closeModal}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: isMobile ? '12px' : '18px',
+            padding: isMobile ? '16px' : '24px',
+            width: '100%',
+            maxWidth: '800px',
+            maxHeight: '80vh',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: isMobile ? '16px' : '20px', fontWeight: '700', color: '#000080', margin: 0 }}>
+                {modalTitle}
+              </h3>
+              <button
+                onClick={closeModal}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  padding: '0',
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            {modalLoading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>Loading...</div>
+            ) : modalApplicants.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>No applicants found</div>
+            ) : (
+              <div style={{ overflow: 'auto', flex: 1 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead style={{ position: 'sticky', top: 0, background: '#f8f9fa' }}>
+                    <tr>
+                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Reference No</th>
+                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Name</th>
+                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Position</th>
+                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Status</th>
+                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {modalApplicants.map((app) => (
+                      <tr key={app.reference_no} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                        <td style={{ padding: '10px 8px', color: '#8b1e2d', fontWeight: '600' }}>{app.reference_no}</td>
+                        <td style={{ padding: '10px 8px' }}>{app.last_name?.toUpperCase()}, {app.first_name}{app.middle_name ? ' ' + app.middle_name : ''}</td>
+                        <td style={{ padding: '10px 8px', color: '#6b7280' }}>{app.position_applied}</td>
+                        <td style={{ padding: '10px 8px' }}>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '11px',
+                            backgroundColor: app.application_status === 'Passed' || app.application_status === 'Completed' ? '#d1fae5' : 
+                              app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? '#fee2e2' :
+                              app.application_status === 'Reprofile' ? '#fef3c7' : '#dbeafe',
+                            color: app.application_status === 'Passed' || app.application_status === 'Completed' ? '#065f46' : 
+                              app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? '#991b1b' :
+                              app.application_status === 'Reprofile' ? '#92400e' : '#1e40af',
+                          }}>
+                            {app.application_status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px 8px', color: '#6b7280' }}>{app.created_at?.slice(0, 10) || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            <div style={{ marginTop: '16px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
+              {modalApplicants.length} applicant{modalApplicants.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
