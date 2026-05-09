@@ -10,6 +10,16 @@ const STATUS_CHECK_LOCK_COOKIE = 'status_check_lock_until';
 const STATUS_CHECK_LIMIT = 5;
 const STATUS_CHECK_LOCK_MINUTES = 5;
 
+function sanitizeName(name: string | undefined): string {
+  if (!name) return '';
+  return name.trim().replace(/[^a-zA-Z\s\-']/g, '').toUpperCase();
+}
+
+function sanitizeBasic(name: string | undefined): string {
+  if (!name) return '';
+  return name.trim();
+}
+
 function getStatusCheckCookieOptions() {
   return {
     path: '/',
@@ -83,7 +93,13 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
   }
 
   const bmi = formData.heightCm && formData.weightKg ? computeBMI(formData.heightCm, formData.weightKg) : null;
-  const duplicateKey = buildDuplicateKey(formData.lastName, formData.firstName, formData.middleName || '', formData.birthdate, formData.contactNumber);
+  const duplicateKey = buildDuplicateKey(
+    sanitizeName(formData.lastName),
+    sanitizeBasic(formData.firstName),
+    sanitizeBasic(formData.middleName) || '',
+    formData.birthdate,
+    formData.contactNumber
+  );
   const referenceNo = generateReferenceNo();
   const applicantId = generateApplicantId();
   const workflow = getStageWorkflow(formData.positionApplied, formData.experienceLevel);
@@ -93,9 +109,9 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
     .insert({
       applicant_id: applicantId,
       reference_no: referenceNo,
-      last_name: formData.lastName,
-      first_name: formData.firstName,
-      middle_name: formData.middleName || null,
+      last_name: sanitizeName(formData.lastName),
+      first_name: sanitizeBasic(formData.firstName),
+      middle_name: sanitizeBasic(formData.middleName) || null,
       birthdate: formData.birthdate,
       age,
       gender: formData.gender,
