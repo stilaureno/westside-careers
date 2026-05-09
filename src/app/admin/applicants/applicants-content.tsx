@@ -163,7 +163,7 @@ export default function ApplicantsContent({
     const { data: stages } = referenceNumbers.length > 0
       ? await supabase
           .from('stage_results')
-          .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks')
+          .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks, sweaty_palm_result')
           .in('reference_no', referenceNumbers)
       : { data: [] };
 
@@ -185,7 +185,10 @@ export default function ApplicantsContent({
         initialScreeningResult: getStageResult('Initial Screening'),
         mathExamResult: getStageResult('Math Exam'),
         tableTestResult: getStageResult('Table Test'),
-        sweatyPalmResult: appStages.find((x) => x.stage_name === 'Final Interview')?.sweaty_palm_result || '-',
+        sweatyPalmResult:
+          appStages.find((x) => x.stage_name === 'Initial Screening')?.sweaty_palm_result ||
+          appStages.find((x) => x.stage_name === 'Final Interview')?.sweaty_palm_result ||
+          '-',
         finalInterviewResult: getStageResult('Final Interview'),
         stages: appStages,
       };

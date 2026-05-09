@@ -99,6 +99,10 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       .single();
 
     if (stageResult) {
+      const legacySweatyPalm =
+        stageName === 'Initial Screening'
+          ? data?.stages?.find((s: any) => s.stage_name === 'Final Interview')?.sweaty_palm_result || ''
+          : '';
       setForm({
         heightCm: stageResult.height_cm || app?.height_cm || '',
         weightKg: stageResult.weight_kg || app?.weight_kg || '',
@@ -107,7 +111,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
         colorBlindResult: stageResult.color_blind_result || '',
         visibleTattoo: stageResult.visible_tattoo || 'No',
         invisibleTattoo: stageResult.invisible_tattoo || 'No',
-        sweatyPalmResult: stageResult.sweaty_palm_result || '',
+        sweatyPalmResult: stageResult.sweaty_palm_result || legacySweatyPalm,
         score: stageResult.score?.toString() || '',
         passingScore: stageResult.passing_score || 8,
         maxScore: stageResult.max_score || 10,
@@ -190,7 +194,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       colorBlindResult: form.colorBlindResult,
       visibleTattoo: form.visibleTattoo,
       invisibleTattoo: form.invisibleTattoo,
-      ...(isDealer && { sweatyPalmResult: form.sweatyPalmResult }),
+      ...(isDealer && stage === 'Initial Screening' && { sweatyPalmResult: form.sweatyPalmResult }),
       score: parseFloat(form.score) || undefined,
       passingScore: parseFloat(form.passingScore) || 8,
       maxScore: parseFloat(form.maxScore) || 10,
@@ -375,7 +379,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
           </div>
 
           {stage === 'Initial Screening' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${data?.applicant?.position_applied === 'Dealer' ? 7 : 6}, 1fr)`, gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Height (cm)</label>
                 <input type="number" value={form.heightCm} onChange={(e) => setForm({ ...form, heightCm: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }} />
@@ -408,6 +412,15 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                   <option>No</option><option>Yes</option>
                 </select>
               </div>
+              {data?.applicant?.position_applied === 'Dealer' && (
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Sweaty Palm</label>
+                  <select value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                    <option value="">Select...</option>
+                    <option>Passed</option><option>Failed</option>
+                  </select>
+                </div>
+              )}
             </div>
           )}
 
@@ -429,14 +442,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
           )}
 
           {stage === 'Final Interview' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-              <div>
-                <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Sweaty Palm</label>
-                <select value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
-                  <option value="">Select...</option>
-                  <option>Passed</option><option>Failed</option>
-                </select>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Final Result</label>
                 <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>

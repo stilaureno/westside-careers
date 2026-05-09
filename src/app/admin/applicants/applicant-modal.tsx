@@ -221,6 +221,10 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       .single();
 
     if (stageResult) {
+      const legacySweatyPalm =
+        stageName === 'Initial Screening'
+          ? data?.stages?.find((s: any) => s.stage_name === 'Final Interview')?.sweaty_palm_result || ''
+          : '';
       setForm({
         heightCm: stageResult.height_cm || app?.height_cm || '',
         weightKg: stageResult.weight_kg || app?.weight_kg || '',
@@ -229,7 +233,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         colorBlindResult: stageResult.color_blind_result || '',
         visibleTattoo: stageResult.visible_tattoo || 'No',
         invisibleTattoo: stageResult.invisible_tattoo || 'No',
-        sweatyPalmResult: stageResult.sweaty_palm_result || '',
+        sweatyPalmResult: stageResult.sweaty_palm_result || legacySweatyPalm,
         score: stageResult.score?.toString() || '',
         passingScore: stageResult.passing_score || 8,
         maxScore: stageResult.max_score || 10,
@@ -328,7 +332,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       colorBlindResult: form.colorBlindResult,
       visibleTattoo: form.visibleTattoo,
       invisibleTattoo: form.invisibleTattoo,
-      ...(isDealer && { sweatyPalmResult: form.sweatyPalmResult }),
+      ...(isDealer && stage === 'Initial Screening' && { sweatyPalmResult: form.sweatyPalmResult }),
       ...(resultStatus === 'Reprofile' && { 
         reprofileDepartment, 
         reprofilePosition,
@@ -575,6 +579,15 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                                 <option>No</option><option>Yes</option>
                               </select>
                             </div>
+                            {data?.applicant?.position_applied === 'Dealer' && (
+                              <div className="col-md-2">
+                                <label className="form-label small">Sweaty Palm</label>
+                                <select className="form-select form-select-sm" value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} required>
+                                  <option value="">Select...</option>
+                                  <option>Passed</option><option>Failed</option>
+                                </select>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -610,16 +623,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
 
                         {stage === 'Final Interview' && (
                           <div className="row g-3 mb-3">
-                            {data?.applicant?.position_applied === 'Dealer' && (
-                              <div className="col-md-6">
-                                <label className="form-label small">Sweaty Palm</label>
-                                <select className="form-select form-select-sm" value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} required>
-                                  <option value="">Select...</option>
-                                  <option>Passed</option><option>Failed</option>
-                                </select>
-                              </div>
-                            )}
-                            <div className={`col-md-${data?.applicant?.position_applied === 'Dealer' ? 6 : 12}`}>
+                            <div className="col-md-12">
                               <label className="form-label small fw-bold text-dark">FINAL RESULT</label>
                               <div className={styles.finalResultContainer}>
                                 {finalResultOptions.map((option) => (

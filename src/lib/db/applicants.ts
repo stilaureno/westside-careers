@@ -436,7 +436,10 @@ export async function getApplicantsPageData(options?: {
       initialScreeningResult: getStageResult('Initial Screening'),
       mathExamResult: getStageResult('Math Exam'),
       tableTestResult: getStageResult('Table Test'),
-      sweatyPalmResult: applicantStages.find((item) => item.stage_name === 'Final Interview')?.sweaty_palm_result || '-',
+      sweatyPalmResult:
+        applicantStages.find((item) => item.stage_name === 'Initial Screening')?.sweaty_palm_result ||
+        applicantStages.find((item) => item.stage_name === 'Final Interview')?.sweaty_palm_result ||
+        '-',
       finalInterviewResult: getStageResult('Final Interview'),
       remarks: applicant.remarks,
       stages: applicantStages,
