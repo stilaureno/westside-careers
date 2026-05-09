@@ -336,6 +336,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       ...(resultStatus === 'Reprofile' && { 
         reprofileDepartment, 
         reprofilePosition,
+        reprofileExperienceLevel: reprofilePosition === 'Dealer' ? (form.reprofileExperienceLevel || null) : null,
         originalPosition: data?.applicant?.position_applied,
         originalDepartment: data?.applicant?.department,
         originalExperienceLevel: data?.applicant?.experience_level,
