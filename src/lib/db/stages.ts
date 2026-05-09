@@ -28,6 +28,9 @@ export async function upsertStageResult(payload: {
   reprofileDepartment?: string;
   reprofilePosition?: string;
   reprofileExperienceLevel?: string;
+  originalPosition?: string;
+  originalDepartment?: string;
+  originalExperienceLevel?: string;
   score?: number;
   passingScore?: number;
   maxScore?: number;
@@ -95,6 +98,9 @@ export async function upsertStageResult(payload: {
         sweaty_palm_result: payload.sweatyPalmResult,
         reprofile_department: payload.reprofileDepartment,
         reprofile_position: payload.reprofilePosition,
+        original_position: payload.resultStatus === 'Reprofile' ? payload.originalPosition : null,
+        original_department: payload.resultStatus === 'Reprofile' ? payload.originalDepartment : null,
+        original_experience_level: payload.resultStatus === 'Reprofile' ? payload.originalExperienceLevel : null,
         score: payload.score,
         passing_score: payload.passingScore,
         max_score: payload.maxScore,
@@ -124,9 +130,12 @@ export async function upsertStageResult(payload: {
         color_blind_result: payload.colorBlindResult,
         visible_tattoo: payload.visibleTattoo,
         invisible_tattoo: payload.invisibleTattoo,
-        sweaty_palm_result: payload.sweatyPalmResult,
+sweaty_palm_result: payload.sweatyPalmResult,
         reprofile_department: payload.reprofileDepartment,
         reprofile_position: payload.reprofilePosition,
+        original_position: payload.resultStatus === 'Reprofile' ? payload.originalPosition : null,
+        original_department: payload.resultStatus === 'Reprofile' ? payload.originalDepartment : null,
+        original_experience_level: payload.resultStatus === 'Reprofile' ? payload.originalExperienceLevel : null,
         score: payload.score,
         passing_score: payload.passingScore,
         max_score: payload.maxScore,

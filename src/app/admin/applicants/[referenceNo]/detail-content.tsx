@@ -243,7 +243,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                 </div>
                 {s.result_status === 'Reprofile' && (
                   <p style={{ fontSize: '12px', background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
-                    🔄 <strong>Original:</strong> {data?.applicant?.position_applied} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
+                    🔄 <strong>Original:</strong> {s.original_position || data?.applicant?.position_applied || 'N/A'} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
                   </p>
                 )}
                 {s.stage_name === 'Math Exam' && s.termination_reason === 'WINDOWS_LOST_FOCUS' && (

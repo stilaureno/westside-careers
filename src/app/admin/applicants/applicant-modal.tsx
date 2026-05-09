@@ -254,7 +254,13 @@ evaluatedBy: '',
       visibleTattoo: form.visibleTattoo,
       invisibleTattoo: form.invisibleTattoo,
       ...(isDealer && { sweatyPalmResult: form.sweatyPalmResult }),
-      ...(resultStatus === 'Reprofile' && { reprofileDepartment, reprofilePosition }),
+      ...(resultStatus === 'Reprofile' && { 
+        reprofileDepartment, 
+        reprofilePosition,
+        originalPosition: data?.applicant?.position_applied,
+        originalDepartment: data?.applicant?.department,
+        originalExperienceLevel: data?.applicant?.experience_level,
+      }),
       score: parseFloat(form.score) || undefined,
       passingScore: parseFloat(form.passingScore) || 8,
       maxScore: parseFloat(form.maxScore) || 10,
@@ -368,7 +374,7 @@ evaluatedBy: '',
                                 </div>
                                 {s.result_status === 'Reprofile' && (
                                   <p className="small mb-0" style={{ background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
-                                    🔄 <strong>Original:</strong> {data?.applicant?.position_applied} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
+                                    🔄 <strong>Original:</strong> {s.original_position || data?.applicant?.position_applied || 'N/A'} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
                                   </p>
                                 )}
                                 {s.stage_name === 'Math Exam' && s.termination_reason === 'WINDOWS_LOST_FOCUS' && (
@@ -418,6 +424,7 @@ evaluatedBy: '',
                                   <option value="">Select...</option>
                                   <option>Passed</option>
                                   <option>Failed</option>
+                                  <option>Reprofile</option>
                                 </select>
                               </>
                             )}
@@ -540,7 +547,7 @@ evaluatedBy: '',
                             </div>
                             <div className="col-md-4">
                               <label className="form-label small">Reprofile Position</label>
-                              <select className="form-select form-select-sm" value={reprofilePosition} onChange={(e) => setReprofilePosition(e.target.value)} disabled={!reprofileDepartment}>
+                              <select className="form-select form-select-sm" value={reprofilePosition} onChange={(e) => { setReprofilePosition(e.target.value); if (e.target.value !== 'Dealer') { setForm({ ...form, reprofileExperienceLevel: '' }); } }} disabled={!reprofileDepartment}>
                                 <option value="">Select Position...</option>
                                 {positionsList
                                   .filter((pos) => {
@@ -552,18 +559,21 @@ evaluatedBy: '',
                                   ))}
                               </select>
                             </div>
-                            <div className="col-md-4">
-                              <label className="form-label small">Experience Level</label>
-                              <select
-                                className="form-select form-select-sm"
-                                value={form.reprofileExperienceLevel !== undefined ? form.reprofileExperienceLevel : data?.applicant?.experience_level || ''}
-                                onChange={(e) => setForm({ ...form, reprofileExperienceLevel: e.target.value })}
-                              >
-                                <option value="">Select Experience...</option>
-                                <option>Non-Experienced Dealer</option>
-                                <option>Experienced Dealer</option>
-                              </select>
-                            </div>
+                            {reprofilePosition === 'Dealer' && (
+                              <div className="col-md-4">
+                                <label className="form-label small">Experience Level <span className="text-danger">*</span></label>
+                                <select
+                                  className="form-select form-select-sm"
+                                  value={form.reprofileExperienceLevel !== undefined ? form.reprofileExperienceLevel : data?.applicant?.experience_level || ''}
+                                  onChange={(e) => setForm({ ...form, reprofileExperienceLevel: e.target.value })}
+                                  required
+                                >
+                                  <option value="">Select Experience...</option>
+                                  <option>Non-Experienced Dealer</option>
+                                  <option>Experienced Dealer</option>
+                                </select>
+                              </div>
+                            )}
                           </div>
                         )}
 
