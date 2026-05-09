@@ -48,6 +48,14 @@ type ApplicantsContentProps = {
   modalSectionVisibility?: string[] | null;
 };
 
+function getDerivedApplicationStatus(app: ApplicantListItem, appStages: any[]): string {
+  const finalInterviewResult = appStages.find((stage) => stage.stage_name === 'Final Interview')?.result_status;
+  if (finalInterviewResult) {
+    return finalInterviewResult === 'Passed' ? 'Completed' : finalInterviewResult;
+  }
+  return app.application_status || 'Pending';
+}
+
 export default function ApplicantsContent({
   initialApplicants,
   isSuperAdmin,
@@ -182,6 +190,7 @@ export default function ApplicantsContent({
       return {
         ...app,
         displayName: `${app.last_name?.toUpperCase()}, ${app.first_name}${app.middle_name ? ' ' + app.middle_name : ''}`,
+        application_status: getDerivedApplicationStatus(app, appStages),
         initialScreeningResult: getStageResult('Initial Screening'),
         mathExamResult: getStageResult('Math Exam'),
         tableTestResult: getStageResult('Table Test'),
