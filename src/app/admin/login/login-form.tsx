@@ -68,7 +68,7 @@ export default function LoginForm() {
           }}>
             <img
               src="/WESTSIDE LOGO COLORED.png"
-              alt="Logo"
+              alt="NWR Careers Logo"
               style={{ width: '140px', height: 'auto', objectFit: 'contain' }}
             />
           </div>

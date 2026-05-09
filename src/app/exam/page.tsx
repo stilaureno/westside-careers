@@ -468,7 +468,7 @@ export default function ExamPage() {
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <img
             src="/WESTSIDE%20LOGO%20COLORED.png"
-            alt="Westside Resort logo"
+            alt="NWR Careers logo"
             style={{ width: '220px', maxWidth: '100%', margin: '0 auto 16px', display: 'block' }}
           />
           <h1 style={{ fontSize: '22px', color: '#8b1e2d', marginBottom: '6px' }}>Math Proficiency Exam</h1>

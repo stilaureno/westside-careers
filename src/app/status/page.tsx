@@ -123,7 +123,7 @@ const [autoFetched, setAutoFetched] = useState(false);
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #08111f 0%, #0d1a2f 26%, #10213b 58%, #0a1424 100%)',
+      background: 'linear-gradient(180deg, #2b0f17 0%, #4a1521 26%, #6f1d2b 58%, #2b0f17 100%)',
       padding: '20px',
     }}>
       <div style={{ maxWidth: '580px', margin: '0 auto' }}>
@@ -204,7 +204,7 @@ const [autoFetched, setAutoFetched] = useState(false);
               </div>
             )}
             <button type="submit" disabled={loading || isLocked} style={{
-              width: '100%', padding: '14px', background: '#163a70', color: '#fff',
+              width: '100%', padding: '14px', background: '#8b1e2d', color: '#fff',
               border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
               cursor: loading || isLocked ? 'not-allowed' : 'pointer', opacity: loading || isLocked ? 0.65 : 1,
             }}>
@@ -219,7 +219,7 @@ const [autoFetched, setAutoFetched] = useState(false);
             boxShadow: '0 18px 42px rgba(4,12,24,.34)', padding: '40px',
             border: '1px solid rgba(212,175,55,.22)', textAlign: 'center',
           }}>
-            <div style={{ color: '#163a70', fontSize: '16px' }}>Loading your status...</div>
+            <div style={{ color: '#8b1e2d', fontSize: '16px' }}>Loading your status...</div>
           </div>
         )}
 
@@ -230,7 +230,7 @@ const [autoFetched, setAutoFetched] = useState(false);
             border: '1px solid rgba(212,175,55,.22)',
           }}>
             <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ color: '#163a70', fontSize: '20px', marginBottom: '4px' }}>
+              <h2 style={{ color: '#8b1e2d', fontSize: '20px', marginBottom: '4px' }}>
                 {result.applicant.last_name?.toUpperCase()}, {result.applicant.first_name}{result.applicant.middle_name ? ' ' + result.applicant.middle_name : ''}
               </h2>
               <p style={{ color: '#6b7280', fontSize: '14px' }}>
@@ -240,14 +240,14 @@ const [autoFetched, setAutoFetched] = useState(false);
 
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
               <span style={{
-                padding: '6px 14px', background: '#f0f4ff', color: '#163a70',
+                padding: '6px 14px', background: '#fbeaec', color: '#8b1e2d',
                 borderRadius: '20px', fontSize: '13px', fontWeight: '600',
               }}>{result.applicant.position_applied}</span>
             </div>
 
             {result.mathExam && (
               <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '14px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ color: '#163a70', fontSize: '15px', marginBottom: '12px' }}>Math Proficiency Exam</h3>
+                <h3 style={{ color: '#8b1e2d', fontSize: '15px', marginBottom: '12px' }}>Math Proficiency Exam</h3>
                 {result.mathExam.status && result.mathExam.status !== 'IN_PROGRESS' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ flex: 1 }}>
@@ -271,7 +271,7 @@ const [autoFetched, setAutoFetched] = useState(false);
               </div>
             )}
 
-            <h3 style={{ color: '#163a70', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
+            <h3 style={{ color: '#8b1e2d', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {result.roadmap.map((item, idx) => (
                 <div key={item.stageName} style={{
@@ -316,7 +316,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                         top: '50%',
                         transform: 'translateY(-50%)',
                         padding: '8px 14px',
-                        background: '#163a70',
+                        background: '#8b1e2d',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '8px',
@@ -338,7 +338,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                   <span style={{ fontWeight: '600' }}>Next Step: </span>
                   {result.nextStep}
                 </p>
-                <a href="https://westsideresort.darwinbox.com/ms/candidatev2/main/auth_login" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '8px', padding: '10px 16px', background: '#163a70', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
+                <a href="https://westsideresort.darwinbox.com/ms/candidatev2/main/auth_login" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '8px', padding: '10px 16px', background: '#8b1e2d', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
                   Open Darwinbox →
                 </a>
               </div>
@@ -444,7 +444,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                   id="keepScreenOn"
                   checked={keepScreenOn}
                   onChange={(e) => setKeepScreenOn(e.target.checked)}
-                  style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: '#163a70' }}
+                  style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: '#8b1e2d' }}
                 />
                 <span style={{ fontSize: '14px', color: '#1e40af', lineHeight: '1.5' }}>
                   <strong>Keep my screen awake</strong> — Prevent screen from sleeping during the exam (requires permission)
@@ -465,7 +465,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                   type="checkbox"
                   checked={examWarningAcknowledged}
                   onChange={(e) => setExamWarningAcknowledged(e.target.checked)}
-                  style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#163a70' }}
+                  style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#8b1e2d' }}
                 />
                 <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
                   I understand and agree to follow the exam rules. I acknowledge that any violation will result in automatic submission of my exam with only answered items recorded.
@@ -508,7 +508,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                   padding: '12px 24px',
                   borderRadius: '8px',
                   border: 'none',
-                  backgroundColor: examWarningAcknowledged ? '#163a70' : '#9ca3af',
+                  backgroundColor: examWarningAcknowledged ? '#8b1e2d' : '#9ca3af',
                   color: '#fff',
                   fontSize: '14px',
                   fontWeight: '600',

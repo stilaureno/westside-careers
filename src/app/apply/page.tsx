@@ -216,7 +216,7 @@ export default function ApplyPage() {
       <div className={styles.container}>
         <img
           src="/WESTSIDE LOGO WHITE.png"
-          alt="Westside Careers Logo"
+          alt="NWR Careers Logo"
           style={{ width: '160px', margin: '0 auto 24px', display: 'block' }}
         />
         <form onSubmit={handleSubmit} className={`${styles.card} ${styles.formCard}`}>

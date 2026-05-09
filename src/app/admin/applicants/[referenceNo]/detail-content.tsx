@@ -260,7 +260,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {games.map((g: any) => (
                   <span key={g.game_code} style={{
-                    padding: '4px 12px', background: '#f0f4ff', color: '#163a70',
+                    padding: '4px 12px', background: '#fbeaec', color: '#8b1e2d',
                     borderRadius: '20px', fontSize: '13px', fontWeight: '600',
                   }}>{g.game_code}</span>
                 ))}
@@ -314,7 +314,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                 )}
                 <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>
                   {s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}
-                  {s.evaluated_by && <> · Evaluated by: <span style={{ color: '#2563eb' }}>{s.evaluated_by}</span></>}
+                  {s.evaluated_by && <> · Evaluated by: <span style={{ color: '#8b1e2d' }}>{s.evaluated_by}</span></>}
                 </p>
                 {((stageVersionHistory[s.id] || []).filter((v: any) => v.version_number < (stageVersions[s.id] || 1)).length > 0) && (
                   <div style={{ marginTop: '6px' }}>

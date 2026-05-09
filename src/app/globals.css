@@ -1,5 +1,11 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+:root {
+  --color-primary: #8b1e2d;
+  --color-primary-dark: #6f1824;
+  --color-primary-light: #a53a49;
+  --color-surface: #f9f1f3;
+}
 html {
   background-image: url('/bg.png');
   background-size: cover;
@@ -24,23 +30,23 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 80, 0.75);
+  background: rgba(43, 15, 23, 0.78);
   pointer-events: none;
   z-index: -1;
 }
 
-a { color: var(--color-gold); }
-a:hover { color: var(--color-gold-light); }
+a { color: var(--color-primary); }
+a:hover { color: var(--color-primary-light); }
 
 button, .btn {
-  background-color: var(--color-navy);
-  color: var(--color-gold);
-  border: 2px solid var(--color-gold);
+  background-color: var(--color-primary);
+  color: #fff;
+  border: 2px solid var(--color-primary-dark);
   padding: 10px 20px;
   cursor: pointer;
   font-weight: bold;
 }
 button:hover, .btn:hover {
-  background-color: var(--color-navy-dark);
-  border-color: var(--color-gold-light);
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-light);
 }

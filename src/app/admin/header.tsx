@@ -60,14 +60,14 @@ return (
         overflow: 'hidden', width: '100%', maxWidth: '100vw'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
-          <img
-            src="/WESTSIDE LOGO COLORED.png"
-            alt="Logo"
-            style={{ width: isMobile ? '36px' : '56px', height: isMobile ? '36px' : '56px', objectFit: 'contain', flexShrink: 0 }}
-          />
+            <img
+              src="/WESTSIDE LOGO COLORED.png"
+              alt="NWR Careers Logo"
+              style={{ width: isMobile ? '36px' : '56px', height: isMobile ? '36px' : '56px', objectFit: 'contain', flexShrink: 0 }}
+            />
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
             <span style={{ fontSize: isMobile ? '14px' : '18px', fontWeight: '800', color: '#8b1e2d', letterSpacing: '-0.025em', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-              Westside Careers
+              NWR Careers
             </span>
             <span style={{ fontSize: isMobile ? '10px' : '12px', color: '#6b7280', fontWeight: '500', marginTop: '-2px', whiteSpace: 'nowrap' }}>
               {portalLabel}
