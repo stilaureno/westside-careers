@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 function useWindowSize() {
@@ -98,44 +99,79 @@ interface DashboardData {
   [deptName: string]: DeptData;
 }
 
-function SummaryCard({ label, value, color = '#000080', padding = '12px', valueSize = '20px', labelSize = '11px' }: { label: string; value: number; color?: string; padding?: string; valueSize?: string; labelSize?: string }) {
+function SummaryCard({ label, value, color = '#000080', padding = '12px', valueSize = '20px', labelSize = '11px', onClick, filterType, filterValue, department, position }: { label: string; value: number; color?: string; padding?: string; valueSize?: string; labelSize?: string; onClick?: () => void; filterType?: string; filterValue?: string; department?: string; position?: string }) {
+  const isClickable = onClick && value > 0;
   return (
-    <div style={{
-      background: '#f8f9fa', border: '1px solid #FFD700', borderRadius: '14px',
-      padding, textAlign: 'center', minHeight: '88px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
-    }}>
+    <div
+      onClick={isClickable ? onClick : undefined}
+      style={{
+        background: '#f8f9fa',
+        border: '1px solid #FFD700',
+        borderRadius: '14px',
+        padding,
+        textAlign: 'center',
+        minHeight: '88px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        cursor: isClickable ? 'pointer' : 'default',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        ...(isClickable ? {
+          boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+        } : {}),
+      }}
+      onMouseEnter={(e) => {
+        if (isClickable) {
+          e.currentTarget.style.transform = 'scale(1.03)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+          e.currentTarget.style.background = '#fff';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (isClickable) {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.08)';
+          e.currentTarget.style.background = '#f8f9fa';
+        }
+      }}
+      title={isClickable ? `Click to view ${label} applicants` : undefined}
+    >
       <p style={{ fontSize: labelSize, color: '#6b7280', margin: '0 0 6px', lineHeight: 1.3 }}>{label}</p>
-      <strong style={{ fontSize: valueSize, color }}>{value}</strong>
+      <strong style={{ fontSize: valueSize, color, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+        {value}
+        {isClickable && <span style={{ fontSize: '10px', opacity: 0.6 }}>↩</span>}
+      </strong>
     </div>
   );
 }
 
-function PositionSection({ title, summary }: { title: string; summary: PositionSummary }) {
+function PositionSection({ title, summary, onStatusClick }: { title: string; summary: PositionSummary; onStatusClick?: (status: string) => void }) {
   return (
     <div style={{ marginBottom: '20px' }}>
       <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#000080' }}>{title}</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
         <SummaryCard label="Total" value={summary.total} />
-        <SummaryCard label="Pending" value={summary.pending} color="#6b7280" />
-        <SummaryCard label="Ongoing" value={summary.ongoing} color="#d97706" />
-        <SummaryCard label="Qualified" value={summary.qualified} color="#DAA520" />
-        <SummaryCard label="Reprofile" value={summary.reprofile} color="#7c3aed" />
-        <SummaryCard label="Pooling" value={summary.pooling} color="#0891b2" />
-        <SummaryCard label="Failed" value={summary.failed} color="#991b1b" />
+        <SummaryCard label="Pending" value={summary.pending} color="#6b7280" onClick={onStatusClick ? () => onStatusClick('Pending') : undefined} filterType="status" filterValue="Pending" />
+        <SummaryCard label="Ongoing" value={summary.ongoing} color="#d97706" onClick={onStatusClick ? () => onStatusClick('Ongoing') : undefined} filterType="status" filterValue="Ongoing" />
+        <SummaryCard label="Qualified" value={summary.qualified} color="#DAA520" onClick={onStatusClick ? () => onStatusClick('Passed') : undefined} filterType="status" filterValue="Passed" />
+        <SummaryCard label="Reprofile" value={summary.reprofile} color="#7c3aed" onClick={onStatusClick ? () => onStatusClick('Reprofile') : undefined} filterType="status" filterValue="Reprofile" />
+        <SummaryCard label="Pooling" value={summary.pooling} color="#0891b2" onClick={onStatusClick ? () => onStatusClick('For Pooling') : undefined} filterType="status" filterValue="For Pooling" />
+        <SummaryCard label="Failed" value={summary.failed} color="#991b1b" onClick={onStatusClick ? () => onStatusClick('Failed') : undefined} filterType="status" filterValue="Failed" />
       </div>
     </div>
   );
 }
 
-function StageSection({ title, summary }: { title: string; summary: StageSummary }) {
+function StageSection({ title, summary, onStageClick }: { title: string; summary: StageSummary; onStageClick?: (stage: string, result: string) => void }) {
+  const stageName = title.replace(' ', '_').replace('Test', '_Test');
   return (
     <div style={{ marginTop: '14px' }}>
       <h4 style={{ fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: '#6b7280' }}>{title}</h4>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
         <SummaryCard label="Taken" value={summary.taken} />
         <SummaryCard label="Pending" value={summary.pending} color="#6b7280" />
-        <SummaryCard label="Passed" value={summary.passed} color="#166534" />
-        <SummaryCard label="Failed" value={summary.failed} color="#991b1b" />
+        <SummaryCard label="Passed" value={summary.passed} color="#166534" onClick={onStageClick ? () => onStageClick(title, 'Passed') : undefined} filterType="stage" filterValue={`${title}|Passed`} />
+        <SummaryCard label="Failed" value={summary.failed} color="#991b1b" onClick={onStageClick ? () => onStageClick(title, 'Failed') : undefined} filterType="stage" filterValue={`${title}|Failed`} />
       </div>
     </div>
   );
@@ -432,6 +468,7 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
 }
 
 export default function DashboardContent() {
+  const router = useRouter();
   const [dashboardData, setDashboardData] = useState<DashboardData>({});
   const [deptPositions, setDeptPositions] = useState<{ [dept: string]: string[] }>({});
   const [loading, setLoading] = useState(true);
@@ -446,6 +483,28 @@ export default function DashboardContent() {
   const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
   const [showDateFilters, setShowDateFilters] = useState(!isMobile);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
+
+  const handleKpiClick = useCallback((filterType: string, filterValue: string, department?: string, position?: string) => {
+    const params = new URLSearchParams();
+    if (filterType === 'status') {
+      params.set('status', filterValue);
+    } else if (filterType === 'stage') {
+      const [stageName, result] = filterValue.split('|');
+      params.set('stage', stageName);
+      params.set('stage_result', result);
+    }
+    if (department) params.set('department', department);
+    if (position) params.set('position', position);
+    router.push(`/admin/applicants?${params.toString()}`);
+  }, [router]);
+
+  const handleStatusClick = useCallback((status: string, department: string, position?: string) => {
+    handleKpiClick('status', status, department, position);
+  }, [handleKpiClick]);
+
+  const handleStageClick = useCallback((stage: string, result: string, department: string) => {
+    handleKpiClick('stage', `${stage}|${result}`, department);
+  }, [handleKpiClick]);
 
   useEffect(() => {
     const superAdminCookie = getCookie('super_admin_session');
@@ -855,12 +914,12 @@ export default function DashboardContent() {
                 width: isMobile ? '100%' : 'auto'
               }}>
                 <SummaryCard label="Total" value={deptData.total} padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                <SummaryCard label="Ongoing" value={deptData.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                <SummaryCard label="Qual" value={deptData.qualified} color="#FFD700" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                {!isMobile && <SummaryCard label="Reprofile" value={deptData.reprofile} color="#d8b4fe" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
-                {!isMobile && <SummaryCard label="Pool" value={deptData.pooling} color="#67e8f9" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
-                {!isMobile && <SummaryCard label="Fail" value={deptData.failed} color="#fca5a5" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
+                <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.pending > 0 ? () => handleStatusClick('Pending', deptName) : undefined} />
+                <SummaryCard label="Ongoing" value={deptData.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.ongoing > 0 ? () => handleStatusClick('Ongoing', deptName) : undefined} />
+                <SummaryCard label="Qual" value={deptData.qualified} color="#FFD700" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.qualified > 0 ? () => handleStatusClick('Passed', deptName) : undefined} />
+                {!isMobile && <SummaryCard label="Reprofile" value={deptData.reprofile} color="#d8b4fe" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.reprofile > 0 ? () => handleStatusClick('Reprofile', deptName) : undefined} />}
+                {!isMobile && <SummaryCard label="Pool" value={deptData.pooling} color="#67e8f9" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.pooling > 0 ? () => handleStatusClick('For Pooling', deptName) : undefined} />}
+                {!isMobile && <SummaryCard label="Fail" value={deptData.failed} color="#fca5a5" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.failed > 0 ? () => handleStatusClick('Failed', deptName) : undefined} />}
               </div>
             </div>
             
@@ -886,19 +945,19 @@ export default function DashboardContent() {
                         gap: isMobile ? '4px' : '8px' 
                       }}>
                         <SummaryCard label="Total" value={posSummary.total} padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                        <SummaryCard label="Pend" value={posSummary.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                        <SummaryCard label="Ongoing" value={posSummary.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                        <SummaryCard label="Qual" value={posSummary.qualified} color="#DAA520" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                        {!isMobile && <SummaryCard label="Repro" value={posSummary.reprofile} color="#7c3aed" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
-                        {!isMobile && <SummaryCard label="Pool" value={posSummary.pooling} color="#0891b2" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
-                        {!isMobile && <SummaryCard label="Fail" value={posSummary.failed} color="#991b1b" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />}
+                        <SummaryCard label="Pend" value={posSummary.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.pending > 0 ? () => handleStatusClick('Pending', deptName, posName) : undefined} />
+                        <SummaryCard label="Ongoing" value={posSummary.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.ongoing > 0 ? () => handleStatusClick('Ongoing', deptName, posName) : undefined} />
+                        <SummaryCard label="Qual" value={posSummary.qualified} color="#DAA520" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.qualified > 0 ? () => handleStatusClick('Passed', deptName, posName) : undefined} />
+                        {!isMobile && <SummaryCard label="Repro" value={posSummary.reprofile} color="#7c3aed" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.reprofile > 0 ? () => handleStatusClick('Reprofile', deptName, posName) : undefined} />}
+                        {!isMobile && <SummaryCard label="Pool" value={posSummary.pooling} color="#0891b2" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.pooling > 0 ? () => handleStatusClick('For Pooling', deptName, posName) : undefined} />}
+                        {!isMobile && <SummaryCard label="Fail" value={posSummary.failed} color="#991b1b" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.failed > 0 ? () => handleStatusClick('Failed', deptName, posName) : undefined} />}
                       </div>
                       
                       {/* Stage sections only for Dealer in Table Games */}
                       {posName === 'Dealer' && deptName === 'Table Games' && (
                         <>
-                          <StageSection title="Math Exam" summary={deptData.stageMath} />
-                          <StageSection title="Table Test" summary={deptData.stageTable} />
+                          <StageSection title="Math Exam" summary={deptData.stageMath} onStageClick={(stage, result) => handleStageClick(stage, result, deptName)} />
+                          <StageSection title="Table Test" summary={deptData.stageTable} onStageClick={(stage, result) => handleStageClick(stage, result, deptName)} />
                         </>
                       )}
                     </div>

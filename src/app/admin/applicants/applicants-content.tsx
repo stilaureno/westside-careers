@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
@@ -63,6 +64,7 @@ export default function ApplicantsContent({
   columnVisibility,
   modalSectionVisibility,
 }: ApplicantsContentProps) {
+  const searchParams = useSearchParams();
   const [applicants, setApplicants] = useState<ApplicantListItem[]>(initialApplicants);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
@@ -71,6 +73,10 @@ export default function ApplicantsContent({
   const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [availablePositions, setAvailablePositions] = useState<string[]>([]);
+  const [availableDepartments, setAvailableDepartments] = useState<string[]>([]);
+  const [filterDepartment, setFilterDepartment] = useState('');
+  const [filterStageResult, setFilterStageResult] = useState('');
+  const [urlFiltersApplied, setUrlFiltersApplied] = useState(false);
   
   // Use custom column visibility from props, or load from DB
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
@@ -145,7 +151,38 @@ export default function ApplicantsContent({
       }
     }
     loadPositions();
+    // Load available departments from database
+    async function loadDepartments() {
+      const { data } = await supabase
+        .from('applicants')
+        .select('department')
+        .not('department', 'is', null);
+      
+      if (data) {
+        const depts = [...new Set(data.map((r: any) => r.department))].filter(Boolean).sort();
+        setAvailableDepartments(depts);
+      }
+    }
+    loadDepartments();
   }, [columnVisibility, supabase]);
+
+  // Parse URL params and apply filters
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    const deptParam = searchParams.get('department');
+    const posParam = searchParams.get('position');
+    const stageParam = searchParams.get('stage');
+    const stageResultParam = searchParams.get('stage_result');
+    
+    if (statusParam || deptParam || posParam || stageParam || stageResultParam) {
+      setUrlFiltersApplied(true);
+      if (statusParam) setFilterStatus(statusParam);
+      if (deptParam) setFilterDepartment(deptParam);
+      if (posParam) setFilterPosition(posParam);
+      if (stageParam) setFilterStage(stageParam);
+      if (stageResultParam) setFilterStageResult(stageResultParam);
+    }
+  }, [searchParams]);
 
   const loadApplicants = useCallback(async () => {
     setLoading(true);
@@ -274,10 +311,23 @@ export default function ApplicantsContent({
       const pos = filterPosition.toLowerCase();
       const stg = filterStage.toLowerCase();
       const sts = filterStatus.toLowerCase();
+      const dept = filterDepartment.toLowerCase();
+      const stageResult = filterStageResult.toLowerCase();
 
-      return (!pos || (app.position_applied || '').toLowerCase() === pos) &&
-        (!stg || (app.current_stage || '').toLowerCase() === stg) &&
-        (!sts || (app.application_status || '').toLowerCase() === sts);
+      const matchesPosition = !pos || (app.position_applied || '').toLowerCase() === pos;
+      const matchesStage = !stg || (app.current_stage || '').toLowerCase() === stg;
+      const matchesStatus = !sts || (app.application_status || '').toLowerCase() === sts;
+      const matchesDept = !dept || (app.department || '').toLowerCase() === dept;
+
+      let matchesStageResult = true;
+      if (stageResult && app.stages) {
+        const stageToCheck = filterStage;
+        const stageInfo = app.stages.find((s: any) => s.stage_name === stageToCheck);
+        const actualResult = stageInfo?.result_status?.toLowerCase() || '';
+        matchesStageResult = actualResult === stageResult;
+      }
+
+      return matchesPosition && matchesStage && matchesStatus && matchesDept && matchesStageResult;
     });
 
     if (!isSuperAdmin && allowedDepartments.length > 0) {
@@ -300,7 +350,7 @@ export default function ApplicantsContent({
     });
 
     return result;
-  }, [filteredBySearch, filterPosition, filterStage, filterStatus, sortField, sortDir, isSuperAdmin, allowedDepartments]);
+  }, [filteredBySearch, filterPosition, filterStage, filterStatus, filterDepartment, filterStageResult, sortField, sortDir, isSuperAdmin, allowedDepartments]);
 
   // Pagination logic
   const totalPages = pageSize === 0 ? 1 : Math.ceil(filteredApplicants.length / pageSize);
@@ -352,8 +402,11 @@ export default function ApplicantsContent({
     setFilterPosition('');
     setFilterStage('');
     setFilterStatus('');
+    setFilterDepartment('');
+    setFilterStageResult('');
     setFilterStartDate(defaultStartDate);
     setFilterEndDate(today);
+    setUrlFiltersApplied(false);
   }
 
   function openModal(refNo: string) {
@@ -401,7 +454,7 @@ export default function ApplicantsContent({
     { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
   ];
 
-  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== defaultStartDate || filterEndDate !== today;
+  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterDepartment || filterStageResult || filterStartDate !== defaultStartDate || filterEndDate !== today;
 
   if (loading) {
     return (
@@ -440,6 +493,21 @@ export default function ApplicantsContent({
                 onChange={(e) => setGlobalSearch(e.target.value)}
               />
             </div>
+            {isSuperAdmin && (
+              <div className="col-md-2">
+                <label className="form-label small text-muted mb-1">Department</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={filterDepartment}
+                  onChange={(e) => setFilterDepartment(e.target.value)}
+                >
+                  <option value="">All Departments</option>
+                  {availableDepartments.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="col-md-2">
               <label className="form-label small text-muted mb-1">Position</label>
               <select
