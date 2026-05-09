@@ -393,6 +393,8 @@ const [autoFetched, setAutoFetched] = useState(false);
             padding: '28px',
             maxWidth: '520px',
             width: '90%',
+            maxHeight: '85vh',
+            overflowY: 'auto',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
           }}>
             <h2 style={{ margin: '0 0 16px', fontSize: '22px', color: '#dc2626', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -410,6 +412,29 @@ const [autoFetched, setAutoFetched] = useState(false);
                 <li><strong>Do not open other apps</strong> or switch to different windows</li>
                 <li><strong>Activate &quot;Always On Display&quot;</strong> or extend your screen sleep timeout to maximum (30 min+) so your phone doesn&apos;t auto-lock</li>
               </ul>
+            </div>
+
+            <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
+              <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#166534', fontWeight: '600' }}>
+                📝 Math Exam Scope: <strong>10 questions</strong> | <strong>10 minutes</strong> time limit
+              </p>
+              <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#14532d', lineHeight: '1.6' }}>
+                <strong>Passing score: 8 out of 10</strong> (80%)
+              </p>
+              <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#14532d', fontWeight: '600' }}>
+                How to calculate percentages:
+              </p>
+              <ul style={{ margin: '0 0 12px', paddingLeft: '20px', fontSize: '12px', color: '#14532d', lineHeight: '1.8' }}>
+                <li><strong>1.5% of a number:</strong> Multiply the number by 0.015 (or divide by 100, then multiply by 1.5)<br/>
+                  <em>Example: 1.5% of 300 → 300 × 0.015 = <strong>4.5</strong></em><br/>
+                  <em>Quick method: 300 ÷ 100 = 3 → 3 × 1.5 = <strong>4.5</strong></em></li>
+                <li><strong>5% of a number:</strong> Multiply the number by 0.05 (or divide by 20)<br/>
+                  <em>Example: 5% of 100 → 100 × 0.05 = <strong>5</strong></em><br/>
+                  <em>Quick method: 100 ÷ 20 = <strong>5</strong></em></li>
+              </ul>
+              <p style={{ margin: 0, fontSize: '12px', color: '#166534', fontStyle: 'italic' }}>
+                💡 <strong>Best tip:</strong> Move the decimal point two places left, then multiply by the percentage. For 1.5%, move decimal → 3.00 → multiply by 1.5 = 4.5. For 5%, just divide by 20!
+              </p>
             </div>
 
             <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
