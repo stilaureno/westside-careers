@@ -203,7 +203,9 @@ sweaty_palm_result: payload.sweatyPalmResult,
       overall_result: overallResult,
       department: payload.resultStatus === 'Reprofile' && payload.reprofileDepartment ? payload.reprofileDepartment : undefined,
       position_applied: payload.resultStatus === 'Reprofile' && payload.reprofilePosition ? payload.reprofilePosition : undefined,
-      experience_level: payload.resultStatus === 'Reprofile' && payload.reprofileExperienceLevel ? payload.reprofileExperienceLevel : undefined,
+      experience_level: payload.resultStatus === 'Reprofile'
+        ? (payload.reprofileExperienceLevel || null)
+        : undefined,
       updated_at: new Date().toISOString(),
     })
     .eq('reference_no', payload.referenceNo);
