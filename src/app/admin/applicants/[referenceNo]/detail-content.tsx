@@ -14,7 +14,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const [saving, setSaving] = useState(false);
   const [stage, setStage] = useState('');
   const [stageSeq, setStageSeq] = useState(1);
-  const [resultStatus, setResultStatus] = useState('Passed');
+  const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
   const [form, setForm] = useState<any>({});
   const [workflow, setWorkflow] = useState<string[]>(['Initial Screening']);
@@ -71,8 +71,8 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
         heightCm: app?.height_cm || '',
         weightKg: app?.weight_kg || '',
         bmiValue: app?.bmi_value || '',
-        bmiResult: 'Passed',
-        colorBlindResult: 'Passed',
+        bmiResult: '',
+        colorBlindResult: '',
         visibleTattoo: 'No',
         invisibleTattoo: 'No',
         sweatyPalmResult: '',
@@ -271,19 +271,15 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>Result *</label>
-              <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} style={{
+              <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required style={{
                 width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '14px',
               }}>
+                <option value="">Select...</option>
                 <option>Passed</option>
                 <option>Failed</option>
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>Next Stage Label</label>
-              <input value={stageLabel} onChange={(e) => setStageLabel(e.target.value)} style={{
-                width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '14px',
-              }} placeholder={stage || 'Next Stage'} />
-            </div>
+            
           </div>
 
           {stage === 'Initial Screening' && (
@@ -302,13 +298,15 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
               </div>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>BMI Result</label>
-                <select value={form.bmiResult} onChange={(e) => setForm({ ...form, bmiResult: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                <select value={form.bmiResult} onChange={(e) => setForm({ ...form, bmiResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                  <option value="">Select...</option>
                   <option>Passed</option><option>Failed</option>
                 </select>
               </div>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Color Blind</label>
-                <select value={form.colorBlindResult} onChange={(e) => setForm({ ...form, colorBlindResult: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                <select value={form.colorBlindResult} onChange={(e) => setForm({ ...form, colorBlindResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                  <option value="">Select...</option>
                   <option>Passed</option><option>Failed</option>
                 </select>
               </div>
@@ -342,14 +340,15 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Sweaty Palm</label>
-                <select value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                <select value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
                   <option value="">Select...</option>
                   <option>Passed</option><option>Failed</option>
                 </select>
               </div>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Final Result</label>
-                <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                  <option value="">Select...</option>
                   <option>Passed</option><option>Reprofile</option><option>For Pooling</option><option>Not Recommended</option>
                 </select>
               </div>

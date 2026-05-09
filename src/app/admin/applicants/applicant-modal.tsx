@@ -33,9 +33,23 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [authorizing, setAuthorizing] = useState(false);
   const [stage, setStage] = useState('');
   const [stageSeq, setStageSeq] = useState(1);
-  const [resultStatus, setResultStatus] = useState('Passed');
+  const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
-  const [form, setForm] = useState<any>({ evaluatedBy: '' });
+  const [form, setForm] = useState<any>({
+    heightCm: '',
+    weightKg: '',
+    bmiValue: '',
+    bmiResult: '',
+    colorBlindResult: '',
+    visibleTattoo: 'No',
+    invisibleTattoo: 'No',
+    sweatyPalmResult: '',
+    score: '',
+    passingScore: 8,
+    maxScore: 10,
+    remarks: '',
+    evaluatedBy: '',
+  });
   const [reprofileDepartment, setReprofileDepartment] = useState('');
   const [reprofilePosition, setReprofilePosition] = useState('');
   const [positionsList, setPositionsList] = useState<{ id: string; name: string; department_id: string }[]>([]);
@@ -139,8 +153,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         heightCm: stageResult.height_cm || app?.height_cm || '',
         weightKg: stageResult.weight_kg || app?.weight_kg || '',
         bmiValue: stageResult.bmi_value || app?.bmi_value || '',
-        bmiResult: stageResult.bmi_result || 'Passed',
-        colorBlindResult: stageResult.color_blind_result || 'Passed',
+        bmiResult: stageResult.bmi_result || '',
+        colorBlindResult: stageResult.color_blind_result || '',
         visibleTattoo: stageResult.visible_tattoo || 'No',
         invisibleTattoo: stageResult.invisible_tattoo || 'No',
         sweatyPalmResult: stageResult.sweaty_palm_result || '',
@@ -153,15 +167,15 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       setReprofileDepartment(stageResult.reprofile_department || '');
       setReprofilePosition(stageResult.reprofile_position || '');
       if (stageName === 'Final Interview') {
-        setResultStatus(stageResult.result_status || 'Passed');
+        setResultStatus(stageResult.result_status || '');
       }
     } else {
       setForm({
         heightCm: app?.height_cm || '',
         weightKg: app?.weight_kg || '',
         bmiValue: app?.bmi_value || '',
-        bmiResult: 'Passed',
-        colorBlindResult: 'Passed',
+        bmiResult: '',
+        colorBlindResult: '',
         visibleTattoo: 'No',
         invisibleTattoo: 'No',
         sweatyPalmResult: '',
@@ -174,7 +188,7 @@ evaluatedBy: '',
       setReprofileDepartment('');
       setReprofilePosition('');
       if (stageName === 'Final Interview') {
-        setResultStatus('Passed');
+        setResultStatus('');
       }
     }
   }
@@ -390,46 +404,46 @@ evaluatedBy: '',
                           </div>
                           <div className="col-md-4">
                             <label className="form-label small">Result *</label>
-                            <select className="form-select form-select-sm" value={resultStatus} onChange={(e) => setResultStatus(e.target.value)}>
+                            <select className="form-select form-select-sm" value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required>
+                              <option value="">Select...</option>
                               <option>Passed</option>
                               <option>Failed</option>
                             </select>
                           </div>
-                          <div className="col-md-4">
-                            <label className="form-label small">Next Stage Label</label>
-                            <input className="form-control form-control-sm" value={stageLabel} onChange={(e) => setStageLabel(e.target.value)} placeholder={stage || 'Next Stage'} />
-                          </div>
+                          
                         </div>
 
                         {stage === 'Initial Screening' && (
                           <div className="row g-3 mb-3">
                             <div className="col-md-2">
-                              <label className="form-label small">Height (cm)</label>
-                              <input type="number" className="form-control form-control-sm" value={form.heightCm} onChange={(e) => setForm({ ...form, heightCm: e.target.value })} />
+                              <label htmlFor="heightCm" className="form-label small">Height (cm)</label>
+                              <input id="heightCm" type="number" className="form-control form-control-sm" value={form.heightCm} onChange={(e) => setForm({ ...form, heightCm: e.target.value })} />
                             </div>
                             <div className="col-md-2">
-                              <label className="form-label small">Weight (kg)</label>
-                              <input type="number" className="form-control form-control-sm" value={form.weightKg} onChange={(e) => setForm({ ...form, weightKg: e.target.value })} />
+                              <label htmlFor="weightKg" className="form-label small">Weight (kg)</label>
+                              <input id="weightKg" type="number" className="form-control form-control-sm" value={form.weightKg} onChange={(e) => setForm({ ...form, weightKg: e.target.value })} />
                             </div>
                             <div className="col-md-2">
-                              <label className="form-label small">BMI</label>
-                              <input type="number" step="0.01" className="form-control form-control-sm" value={form.bmiValue} onChange={(e) => setForm({ ...form, bmiValue: e.target.value })} />
+                              <label htmlFor="bmiValue" className="form-label small">BMI</label>
+                              <input id="bmiValue" type="number" step="0.01" className="form-control form-control-sm" value={form.bmiValue} onChange={(e) => setForm({ ...form, bmiValue: e.target.value })} />
                             </div>
                             <div className="col-md-2">
-                              <label className="form-label small">BMI Result</label>
-                              <select className="form-select form-select-sm" value={form.bmiResult} onChange={(e) => setForm({ ...form, bmiResult: e.target.value })}>
+                              <label htmlFor="bmiResult" className="form-label small">BMI Result</label>
+                              <select id="bmiResult" className="form-select form-select-sm" value={form.bmiResult} onChange={(e) => setForm({ ...form, bmiResult: e.target.value })} required>
+                                <option value="">Select...</option>
                                 <option>Passed</option><option>Failed</option>
                               </select>
                             </div>
                             <div className="col-md-2">
-                              <label className="form-label small">Color Blind</label>
-                              <select className="form-select form-select-sm" value={form.colorBlindResult} onChange={(e) => setForm({ ...form, colorBlindResult: e.target.value })}>
+                              <label htmlFor="colorBlindResult" className="form-label small">Color Blind</label>
+                              <select id="colorBlindResult" className="form-select form-select-sm" value={form.colorBlindResult} onChange={(e) => setForm({ ...form, colorBlindResult: e.target.value })} required>
+                                <option value="">Select...</option>
                                 <option>Passed</option><option>Failed</option>
                               </select>
                             </div>
                             <div className="col-md-2">
-                              <label className="form-label small">Visible Tattoo</label>
-                              <select className="form-select form-select-sm" value={form.visibleTattoo} onChange={(e) => setForm({ ...form, visibleTattoo: e.target.value })}>
+                              <label htmlFor="visibleTattoo" className="form-label small">Visible Tattoo</label>
+                              <select id="visibleTattoo" className="form-select form-select-sm" value={form.visibleTattoo} onChange={(e) => setForm({ ...form, visibleTattoo: e.target.value })}>
                                 <option>No</option><option>Yes</option>
                               </select>
                             </div>
@@ -471,7 +485,7 @@ evaluatedBy: '',
                             {data?.applicant?.position_applied === 'Dealer' && (
                               <div className="col-md-6">
                                 <label className="form-label small">Sweaty Palm</label>
-                                <select className="form-select form-select-sm" value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })}>
+                                <select className="form-select form-select-sm" value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} required>
                                   <option value="">Select...</option>
                                   <option>Passed</option><option>Failed</option>
                                 </select>
