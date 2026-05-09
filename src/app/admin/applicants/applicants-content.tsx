@@ -669,7 +669,7 @@ export default function ApplicantsContent({
         </div>
       </div>
 
-      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
+      <ApplicantModal key={selectedRefNo || 'applicant-modal-closed'} referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
     </div>
   );
 }

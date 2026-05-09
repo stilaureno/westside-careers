@@ -17,6 +17,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
   const [stageVersions, setStageVersions] = useState<Record<string, number>>({});
+  const [stageVersionHistory, setStageVersionHistory] = useState<Record<string, any[]>>({});
   const [form, setForm] = useState<any>({
     heightCm: '',
     weightKg: '',
@@ -55,18 +56,25 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       
       const { data: versions } = await supabase
         .from('stage_result_versions')
-        .select('stage_result_id, version_number')
+        .select('stage_result_id, version_number, result_status, remarks, evaluated_by, evaluated_at, edit_reason')
         .in('stage_result_id', stageIds);
       
       if (versions) {
         const counts: Record<string, number> = {};
+        const history: Record<string, any[]> = {};
         versions.forEach((v: any) => {
           const current = counts[v.stage_result_id] || 0;
           if (v.version_number > current) {
             counts[v.stage_result_id] = v.version_number;
           }
+          if (!history[v.stage_result_id]) history[v.stage_result_id] = [];
+          history[v.stage_result_id].push(v);
+        });
+        Object.keys(history).forEach((stageResultId) => {
+          history[stageResultId].sort((a, b) => b.version_number - a.version_number);
         });
         setStageVersions(counts);
+        setStageVersionHistory(history);
       }
     }
     loadVersionCounts();
@@ -304,6 +312,22 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                   {s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}
                   {s.evaluated_by && <> · Evaluated by: <span style={{ color: '#2563eb' }}>{s.evaluated_by}</span></>}
                 </p>
+                {((stageVersionHistory[s.id] || []).filter((v: any) => v.version_number < (stageVersions[s.id] || 1)).length > 0) && (
+                  <div style={{ marginTop: '6px' }}>
+                    <p style={{ fontSize: '11px', color: '#6b7280', margin: 0, fontWeight: 600 }}>Previous Entries</p>
+                    {(stageVersionHistory[s.id] || [])
+                      .filter((v: any) => v.version_number < (stageVersions[s.id] || 1))
+                      .map((v: any) => (
+                        <div key={`${s.id}-v${v.version_number}`} style={{ borderLeft: '2px solid #e5e7eb', paddingLeft: '8px', marginTop: '4px', fontSize: '11px', color: '#6b7280' }}>
+                          <span style={{ fontWeight: 600 }}>v{v.version_number}</span> · {v.result_status}
+                          {v.edit_reason && <> · {v.edit_reason}</>}
+                          {v.evaluated_at && <> · {new Date(v.evaluated_at).toLocaleString()}</>}
+                          {v.evaluated_by && <> · by {v.evaluated_by}</>}
+                          {v.remarks && <div>{renderFormattedMessage(v.remarks)}</div>}
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             )) : (
               <p style={{ color: '#9ca3af', fontSize: '13px' }}>No stages recorded.</p>

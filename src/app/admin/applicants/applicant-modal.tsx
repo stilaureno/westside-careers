@@ -36,6 +36,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
   const [stageVersions, setStageVersions] = useState<Record<string, number>>({});
+  const [stageVersionHistory, setStageVersionHistory] = useState<Record<string, any[]>>({});
   const [form, setForm] = useState<any>({
     heightCm: '',
     weightKg: '',
@@ -80,9 +81,45 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
 
   const supabase = createClient();
 
+  function resetModalState() {
+    setData(null);
+    setVisibleFields([]);
+    setMessage(null);
+    setSaving(false);
+    setAuthorizing(false);
+    setStage('');
+    setStageSeq(1);
+    setResultStatus('');
+    setStageLabel('');
+    setStageVersions({});
+    setStageVersionHistory({});
+    setForm({
+      heightCm: '',
+      weightKg: '',
+      bmiValue: '',
+      bmiResult: '',
+      colorBlindResult: '',
+      visibleTattoo: 'No',
+      invisibleTattoo: 'No',
+      sweatyPalmResult: '',
+      score: '',
+      passingScore: 8,
+      maxScore: 10,
+      remarks: '',
+      evaluatedBy: '',
+      editReason: '',
+    });
+    setReprofileDepartment('');
+    setReprofilePosition('');
+  }
+
   useEffect(() => {
     if (isOpen && referenceNo) {
+      resetModalState();
       loadData();
+    } else if (!isOpen) {
+      resetModalState();
+      setLoading(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, referenceNo]);
@@ -130,18 +167,25 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       
       const { data: versions } = await supabase
         .from('stage_result_versions')
-        .select('stage_result_id, version_number')
+        .select('stage_result_id, version_number, result_status, remarks, evaluated_by, evaluated_at, edit_reason')
         .in('stage_result_id', stageIds);
       
       if (versions) {
         const counts: Record<string, number> = {};
+        const history: Record<string, any[]> = {};
         versions.forEach((v: any) => {
           const current = counts[v.stage_result_id] || 0;
           if (v.version_number > current) {
             counts[v.stage_result_id] = v.version_number;
           }
+          if (!history[v.stage_result_id]) history[v.stage_result_id] = [];
+          history[v.stage_result_id].push(v);
+        });
+        Object.keys(history).forEach((stageResultId) => {
+          history[stageResultId].sort((a, b) => b.version_number - a.version_number);
         });
         setStageVersions(counts);
+        setStageVersionHistory(history);
       }
     }
     loadVersionCounts();
@@ -191,6 +235,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         maxScore: stageResult.max_score || 10,
         remarks: stageResult.remarks || '',
         evaluatedBy: stageResult.evaluated_by || '',
+        editReason: '',
       });
       setReprofileDepartment(stageResult.reprofile_department || '');
       setReprofilePosition(stageResult.reprofile_position || '');
@@ -211,7 +256,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         passingScore: 8,
         maxScore: 10,
         remarks: '',
-evaluatedBy: '',
+        evaluatedBy: '',
+        editReason: '',
       });
       setReprofileDepartment('');
       setReprofilePosition('');
@@ -236,6 +282,7 @@ evaluatedBy: '',
       maxScore: 10,
       remarks: '',
       evaluatedBy: 'HR',
+      editReason: '',
     });
   }
 
@@ -431,6 +478,22 @@ evaluatedBy: '',
                                   {s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}
                                   {s.evaluated_by && <> · Evaluated by: <span className="text-primary">{s.evaluated_by}</span></>}
                                 </p>
+                                {((stageVersionHistory[s.id] || []).filter((v: any) => v.version_number < (stageVersions[s.id] || 1)).length > 0) && (
+                                  <div className="mt-2">
+                                    <p className="small mb-1 fw-semibold" style={{ color: '#6b7280' }}>Previous Entries</p>
+                                    {(stageVersionHistory[s.id] || [])
+                                      .filter((v: any) => v.version_number < (stageVersions[s.id] || 1))
+                                      .map((v: any) => (
+                                        <div key={`${s.id}-v${v.version_number}`} className="small py-1 ps-2 border-start" style={{ color: '#6b7280' }}>
+                                          <span className="fw-semibold">v{v.version_number}</span> · {v.result_status}
+                                          {v.edit_reason && <> · {v.edit_reason}</>}
+                                          {v.evaluated_at && <> · {new Date(v.evaluated_at).toLocaleString()}</>}
+                                          {v.evaluated_by && <> · by {v.evaluated_by}</>}
+                                          {v.remarks && <div>{renderFormattedMessage(v.remarks)}</div>}
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
                               </div>
                             )) : (
                               <p className="text-muted mb-0">No stages recorded.</p>
@@ -630,7 +693,7 @@ evaluatedBy: '',
 
                         <div className="mb-3">
                           <label className="form-label small" style={{ color: '#6b7280' }}>Edit Reason <span style={{ fontWeight: 'normal', color: '#9ca3af' }}>(optional, for history tracking)</span></label>
-                          <input className="form-control form-control-sm" value={form.editReason} onChange={(e) => setForm({ ...form, editReason: e.target.value })} placeholder="e.g., Retake after failed exam, Updated score..." />
+                          <input className="form-control form-control-sm" value={form.editReason ?? ''} onChange={(e) => setForm({ ...form, editReason: e.target.value })} placeholder="e.g., Retake after failed exam, Updated score..." />
                         </div>
 
                         <div className="row g-3 mb-3">

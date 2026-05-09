@@ -78,13 +78,45 @@ export async function upsertStageResult(payload: {
 
   const { data: existing } = await supabase
     .from('stage_results')
-    .select('id')
+    .select('id, result_status, score, passing_score, max_score, remarks, evaluated_by, evaluated_at')
     .eq('reference_no', payload.referenceNo)
     .eq('stage_name', payload.stageName)
     .single();
 
   let stageResult;
+  let latestVersionNumber = 0;
   if (existing) {
+    const { data: existingVersions } = await supabase
+      .from('stage_result_versions')
+      .select('version_number')
+      .eq('stage_result_id', existing.id)
+      .order('version_number', { ascending: false })
+      .limit(1);
+
+    latestVersionNumber = existingVersions?.[0]?.version_number || 0;
+
+    // Backfill legacy rows that predate version tracking so pre-edit values are retained.
+    if (latestVersionNumber === 0) {
+      const { error: backfillError } = await supabase
+        .from('stage_result_versions')
+        .insert({
+          stage_result_id: existing.id,
+          version_number: 1,
+          result_status: existing.result_status,
+          score: existing.score,
+          passing_score: existing.passing_score,
+          max_score: existing.max_score,
+          remarks: existing.remarks,
+          evaluated_by: existing.evaluated_by,
+          evaluated_at: existing.evaluated_at || new Date().toISOString(),
+          created_by: existing.evaluated_by || payload.evaluatedBy,
+          edit_reason: 'Initial entry',
+        });
+
+      if (backfillError) return { success: false, error: backfillError.message };
+      latestVersionNumber = 1;
+    }
+
     const { data, error } = await supabase
       .from('stage_results')
       .update({
@@ -190,16 +222,7 @@ sweaty_palm_result: payload.sweatyPalmResult,
 
   // Create version record for history tracking
   if (stageResult?.id) {
-    const { data: existingVersions } = await supabase
-      .from('stage_result_versions')
-      .select('version_number')
-      .eq('stage_result_id', stageResult.id)
-      .order('version_number', { ascending: false })
-      .limit(1);
-
-    const nextVersion = existingVersions && existingVersions.length > 0 
-      ? (existingVersions[0]?.version_number || 0) + 1 
-      : 1;
+    const nextVersion = existing ? latestVersionNumber + 1 : 1;
 
     await supabase
       .from('stage_result_versions')
