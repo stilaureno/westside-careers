@@ -366,7 +366,7 @@ evaluatedBy: '',
                                   <span className="fw-bold">{s.stage_name}</span>
                                   <span className={s.result_status === 'Passed' ? 'text-success' : s.result_status === 'Reprofile' ? 'text-warning' : 'text-danger'}>{s.result_status}</span>
                                 </div>
-                                {s.stage_name === 'Final Interview' && s.result_status === 'Reprofile' && (
+                                {s.result_status === 'Reprofile' && (
                                   <p className="small mb-0" style={{ background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
                                     🔄 <strong>Original:</strong> {data?.applicant?.position_applied} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
                                   </p>
@@ -527,7 +527,7 @@ evaluatedBy: '',
                           </div>
                         )}
 
-                        {stage === 'Final Interview' && resultStatus === 'Reprofile' && (
+                        {resultStatus === 'Reprofile' && (
                           <div className="row g-3 mb-3">
                             <div className="col-md-4">
                               <label className="form-label small">Reprofile Department</label>

@@ -241,7 +241,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                     color: s.result_status === 'Passed' ? '#166534' : s.result_status === 'Reprofile' ? '#d97706' : '#991b1b',
                   }}>{s.result_status}</span>
                 </div>
-                {s.stage_name === 'Final Interview' && s.result_status === 'Reprofile' && (
+                {s.result_status === 'Reprofile' && (
                   <p style={{ fontSize: '12px', background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
                     🔄 <strong>Original:</strong> {data?.applicant?.position_applied} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
                   </p>
