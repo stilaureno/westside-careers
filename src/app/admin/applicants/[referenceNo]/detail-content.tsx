@@ -261,16 +261,31 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
             {stages && stages.length > 0 ? stages.map((s: any) => (
               <div key={s.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #f3f4f6' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
                     <span style={{ fontSize: '13px', fontWeight: '700', color: '#1f2937' }}>{s.stage_name}</span>
                     {stageVersions[s.id] > 1 && (
                       <span style={{ marginLeft: '8px', background: '#6b7280', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '600' }}>v{stageVersions[s.id]}</span>
                     )}
                   </div>
-                  <span style={{
-                    fontSize: '12px', fontWeight: '600',
-                    color: s.result_status === 'Passed' ? '#166534' : s.result_status === 'Reprofile' ? '#d97706' : '#991b1b',
-                  }}>{s.result_status}</span>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{
+                      fontSize: '12px', fontWeight: '600',
+                      color: s.result_status === 'Passed' ? '#166534' : s.result_status === 'Reprofile' ? '#d97706' : '#991b1b',
+                      marginRight: '8px',
+                    }}>{s.result_status}</span>
+                    <button 
+                      type="button" 
+                      onClick={() => { setStage(s.stage_name); setStageSeq(s.stage_sequence); loadStageResults(s.stage_name, data?.applicant); setResultStatus(s.result_status || ''); }}
+                      style={{ 
+                        background: 'none', border: '1px solid #d1d5db', 
+                        borderRadius: '4px', padding: '2px 6px', cursor: 'pointer',
+                        fontSize: '12px', lineHeight: 1
+                      }}
+                      title="Edit this stage"
+                    >
+                      ✏️
+                    </button>
+</div>
                 </div>
                 {s.result_status === 'Reprofile' && (
                   <p style={{ fontSize: '12px', background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>

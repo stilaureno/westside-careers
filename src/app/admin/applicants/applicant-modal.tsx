@@ -398,14 +398,25 @@ evaluatedBy: '',
                           <div className="card-body py-2">
                             {stages && stages.length > 0 ? stages.map((s: any) => (
                               <div key={s.id} className="border-bottom py-2">
-                                <div className="d-flex justify-content-between">
-                                  <div>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div className="d-flex align-items-center">
                                     <span className="fw-bold">{s.stage_name}</span>
                                     {stageVersions[s.id] > 1 && (
                                       <span className="badge bg-secondary ms-2" style={{ fontSize: '10px' }}>v{stageVersions[s.id]}</span>
                                     )}
                                   </div>
-                                  <span className={s.result_status === 'Passed' ? 'text-success' : s.result_status === 'Reprofile' ? 'text-warning' : 'text-danger'}>{s.result_status}</span>
+                                  <div className="d-flex align-items-center">
+                                    <span className={s.result_status === 'Passed' ? 'text-success' : s.result_status === 'Reprofile' ? 'text-warning' : 'text-danger'} style={{ marginRight: '8px' }}>{s.result_status}</span>
+                                    <button 
+                                      type="button" 
+                                      className="btn btn-sm btn-outline-secondary p-0 px-1" 
+                                      style={{ lineHeight: 1 }}
+                                      onClick={() => { setStage(s.stage_name); setStageSeq(s.stage_sequence); loadStageResults(s.stage_name, data?.applicant); setResultStatus(s.result_status || ''); }}
+                                      title="Edit this stage"
+                                    >
+                                      ✏️
+                                    </button>
+                                  </div>
                                 </div>
                                 {s.result_status === 'Reprofile' && (
                                   <p className="small mb-0" style={{ background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
