@@ -83,6 +83,8 @@ export async function updateStage(
     passingScore: payload.passingScore,
     maxScore: payload.maxScore,
     remarks: payload.remarks,
+    evaluatedAt: payload.evaluatedAt,
+    editReason: payload.editReason,
   });
 }
 

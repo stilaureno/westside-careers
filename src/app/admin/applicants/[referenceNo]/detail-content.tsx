@@ -16,6 +16,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const [stageSeq, setStageSeq] = useState(1);
   const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
+  const [stageVersions, setStageVersions] = useState<Record<string, number>>({});
   const [form, setForm] = useState<any>({
     heightCm: '',
     weightKg: '',
@@ -45,6 +46,31 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       loadWorkflow();
     }
   }, [data?.applicant?.position_applied, data?.applicant?.experience_level]);
+
+  useEffect(() => {
+    async function loadVersionCounts() {
+      if (!data?.stages || data.stages.length === 0) return;
+      const stageIds = data.stages.map((s: any) => s.id).filter(Boolean);
+      if (stageIds.length === 0) return;
+      
+      const { data: versions } = await supabase
+        .from('stage_result_versions')
+        .select('stage_result_id, version_number')
+        .in('stage_result_id', stageIds);
+      
+      if (versions) {
+        const counts: Record<string, number> = {};
+        versions.forEach((v: any) => {
+          const current = counts[v.stage_result_id] || 0;
+          if (v.version_number > current) {
+            counts[v.stage_result_id] = v.version_number;
+          }
+        });
+        setStageVersions(counts);
+      }
+    }
+    loadVersionCounts();
+  }, [data?.stages]);
 
   const completedStages = data?.stages ? getCompletedStages(data.stages) : [];
   const availableStages = getAvailableStages(workflow, completedStages);
@@ -234,8 +260,13 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
             <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px', color: '#1f2937' }}>Stage History</h3>
             {stages && stages.length > 0 ? stages.map((s: any) => (
               <div key={s.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #f3f4f6' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#1f2937' }}>{s.stage_name}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#1f2937' }}>{s.stage_name}</span>
+                    {stageVersions[s.id] > 1 && (
+                      <span style={{ marginLeft: '8px', background: '#6b7280', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '600' }}>v{stageVersions[s.id]}</span>
+                    )}
+                  </div>
                   <span style={{
                     fontSize: '12px', fontWeight: '600',
                     color: s.result_status === 'Passed' ? '#166534' : s.result_status === 'Reprofile' ? '#d97706' : '#991b1b',

@@ -17,6 +17,7 @@ export async function upsertStageResult(payload: {
   resultStatus: string;
   currentStageLabel: string;
   evaluatedBy?: string;
+  evaluatedAt?: string;
   heightCm?: number;
   weightKg?: number;
   bmiValue?: number;
@@ -31,6 +32,7 @@ export async function upsertStageResult(payload: {
   originalPosition?: string;
   originalDepartment?: string;
   originalExperienceLevel?: string;
+  editReason?: string;
   score?: number;
   passingScore?: number;
   maxScore?: number;
@@ -185,6 +187,36 @@ sweaty_palm_result: payload.sweatyPalmResult,
       visible_to_applicant: 'Yes',
       created_by: payload.evaluatedBy,
     });
+
+  // Create version record for history tracking
+  if (stageResult?.id) {
+    const { data: existingVersions } = await supabase
+      .from('stage_result_versions')
+      .select('version_number')
+      .eq('stage_result_id', stageResult.id)
+      .order('version_number', { ascending: false })
+      .limit(1);
+
+    const nextVersion = existingVersions && existingVersions.length > 0 
+      ? (existingVersions[0]?.version_number || 0) + 1 
+      : 1;
+
+    await supabase
+      .from('stage_result_versions')
+      .insert({
+        stage_result_id: stageResult.id,
+        version_number: nextVersion,
+        result_status: payload.resultStatus,
+        score: payload.score,
+        passing_score: payload.passingScore,
+        max_score: payload.maxScore,
+        remarks: payload.remarks,
+        evaluated_by: payload.evaluatedBy,
+        evaluated_at: payload.evaluatedAt || new Date().toISOString(),
+        created_by: payload.evaluatedBy,
+        edit_reason: payload.editReason || (nextVersion === 1 ? 'Initial entry' : 'Updated result'),
+      });
+  }
 
   return { success: true };
 }

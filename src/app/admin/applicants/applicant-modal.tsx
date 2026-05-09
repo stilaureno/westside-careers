@@ -35,6 +35,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [stageSeq, setStageSeq] = useState(1);
   const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
+  const [stageVersions, setStageVersions] = useState<Record<string, number>>({});
   const [form, setForm] = useState<any>({
     heightCm: '',
     weightKg: '',
@@ -49,6 +50,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     maxScore: 10,
     remarks: '',
     evaluatedBy: '',
+    editReason: '',
   });
   const [reprofileDepartment, setReprofileDepartment] = useState('');
   const [reprofilePosition, setReprofilePosition] = useState('');
@@ -118,6 +120,32 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       loadWorkflow();
     }
   }, [data?.applicant?.position_applied, data?.applicant?.experience_level]);
+
+  useEffect(() => {
+    async function loadVersionCounts() {
+      if (!data?.stages || data.stages.length === 0) return;
+      const supabase = createClient();
+      const stageIds = data.stages.map((s: any) => s.id).filter(Boolean);
+      if (stageIds.length === 0) return;
+      
+      const { data: versions } = await supabase
+        .from('stage_result_versions')
+        .select('stage_result_id, version_number')
+        .in('stage_result_id', stageIds);
+      
+      if (versions) {
+        const counts: Record<string, number> = {};
+        versions.forEach((v: any) => {
+          const current = counts[v.stage_result_id] || 0;
+          if (v.version_number > current) {
+            counts[v.stage_result_id] = v.version_number;
+          }
+        });
+        setStageVersions(counts);
+      }
+    }
+    loadVersionCounts();
+  }, [data?.stages]);
 
   function getCompletedStages(stages: any[]): string[] {
     return stages
@@ -266,6 +294,8 @@ evaluatedBy: '',
       maxScore: parseFloat(form.maxScore) || 10,
       remarks: form.remarks,
       evaluatedBy: form.evaluatedBy,
+      evaluatedAt: new Date().toISOString(),
+      editReason: form.editReason,
     }, '');
 
     if (res.success) {
@@ -369,7 +399,12 @@ evaluatedBy: '',
                             {stages && stages.length > 0 ? stages.map((s: any) => (
                               <div key={s.id} className="border-bottom py-2">
                                 <div className="d-flex justify-content-between">
-                                  <span className="fw-bold">{s.stage_name}</span>
+                                  <div>
+                                    <span className="fw-bold">{s.stage_name}</span>
+                                    {stageVersions[s.id] > 1 && (
+                                      <span className="badge bg-secondary ms-2" style={{ fontSize: '10px' }}>v{stageVersions[s.id]}</span>
+                                    )}
+                                  </div>
                                   <span className={s.result_status === 'Passed' ? 'text-success' : s.result_status === 'Reprofile' ? 'text-warning' : 'text-danger'}>{s.result_status}</span>
                                 </div>
                                 {s.result_status === 'Reprofile' && (
@@ -580,6 +615,11 @@ evaluatedBy: '',
                         <div className="mb-3">
                           <label className="form-label small">Remarks</label>
                           <textarea className="form-control form-control-sm" rows={2} value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} placeholder="Add remarks..." />
+                        </div>
+
+                        <div className="mb-3">
+                          <label className="form-label small" style={{ color: '#6b7280' }}>Edit Reason <span style={{ fontWeight: 'normal', color: '#9ca3af' }}>(optional, for history tracking)</span></label>
+                          <input className="form-control form-control-sm" value={form.editReason} onChange={(e) => setForm({ ...form, editReason: e.target.value })} placeholder="e.g., Retake after failed exam, Updated score..." />
                         </div>
 
                         <div className="row g-3 mb-3">
