@@ -173,7 +173,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       }}>← Back</button>
 
       <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>
-        {applicant.first_name} {applicant.last_name}
+        {applicant.last_name?.toUpperCase()}, {applicant.first_name}{applicant.middle_name ? ' ' + applicant.middle_name : ''}
       </h1>
       <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '24px' }}>
         {applicant.reference_no} &middot; {applicant.position_applied} &middot; {applicant.experience_level || '-'}

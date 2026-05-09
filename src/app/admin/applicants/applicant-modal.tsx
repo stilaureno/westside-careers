@@ -281,7 +281,7 @@ evaluatedBy: '',
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">
-                {applicant?.first_name} {applicant?.last_name}
+                {applicant?.last_name?.toUpperCase()}, {applicant?.first_name}{applicant?.middle_name ? ' ' + applicant?.middle_name : ''}
                 <span className="ms-2 text-muted fw-normal" style={{ fontSize: '14px' }}>
                   {applicant?.reference_no} · {applicant?.position_applied} · {applicant?.experience_level || '-'}
                 </span>

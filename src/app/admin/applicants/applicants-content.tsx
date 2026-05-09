@@ -181,7 +181,7 @@ export default function ApplicantsContent({
       };
       return {
         ...app,
-        displayName: `${app.first_name} ${app.last_name}`,
+        displayName: `${app.last_name?.toUpperCase()}, ${app.first_name}${app.middle_name ? ' ' + app.middle_name : ''}`,
         initialScreeningResult: getStageResult('Initial Screening'),
         mathExamResult: getStageResult('Math Exam'),
         tableTestResult: getStageResult('Table Test'),

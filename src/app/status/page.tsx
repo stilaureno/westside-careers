@@ -228,7 +228,7 @@ const [autoFetched, setAutoFetched] = useState(false);
           }}>
             <div style={{ marginBottom: '20px' }}>
               <h2 style={{ color: '#163a70', fontSize: '20px', marginBottom: '4px' }}>
-                {result.applicant.first_name} {result.applicant.last_name}
+                {result.applicant.last_name?.toUpperCase()}, {result.applicant.first_name}{result.applicant.middle_name ? ' ' + result.applicant.middle_name : ''}
               </h2>
               <p style={{ color: '#6b7280', fontSize: '14px' }}>
                 {result.applicant.position_applied} &middot; {result.applicant.reference_no}
