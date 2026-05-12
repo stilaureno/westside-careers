@@ -181,7 +181,7 @@ function StageSection({ title, summary, onStageClick }: { title: string; summary
       <h4 style={{ fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: '#6b7280' }}>{title}</h4>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
         <SummaryCard label="Taken" value={summary.taken} />
-        <SummaryCard label="Pending" value={summary.pending} color="#6b7280" />
+        <SummaryCard label="Pending" value={summary.pending} color="#6b7280" onClick={onStageClick ? () => onStageClick(title, 'Pending') : undefined} filterType="stage" filterValue={`${title}|Pending`} />
         <SummaryCard label="Passed" value={summary.passed} color="#166534" onClick={onStageClick ? () => onStageClick(title, 'Passed') : undefined} filterType="stage" filterValue={`${title}|Passed`} />
         <SummaryCard label="Failed" value={summary.failed} color="#991b1b" onClick={onStageClick ? () => onStageClick(title, 'Failed') : undefined} filterType="stage" filterValue={`${title}|Failed`} />
       </div>
@@ -543,7 +543,25 @@ export default function DashboardContent() {
     
     let matchingRefs: Set<string>;
     
-    if (stage === 'Math Exam') {
+    if (result === 'Pending') {
+      // Pending: applicants in this department whose current_stage is this stage but haven't completed it
+      const pendingRefNos = (apps || [])
+        .filter(a => a.current_stage === stage)
+        .map(a => a.reference_no);
+      
+      // For Math Exam, also check they don't have a completed result in math_exam_results
+      if (stage === 'Math Exam' && pendingRefNos.length > 0) {
+        const { data: completedMathExams } = await supabase
+          .from('math_exam_results')
+          .select('reference_no')
+          .in('reference_no', pendingRefNos)
+          .in('status', ['Passed', 'Failed']);
+        const completedRefs = new Set(completedMathExams?.map(r => r.reference_no) || []);
+        matchingRefs = new Set(pendingRefNos.filter(r => !completedRefs.has(r)));
+      } else {
+        matchingRefs = new Set(pendingRefNos);
+      }
+    } else if (stage === 'Math Exam') {
       // Math Exam data comes from math_exam_results table
       const { data: mathResults } = refNos.length > 0
         ? await supabase
@@ -570,7 +588,7 @@ export default function DashboardContent() {
 
     setModalApplicants(filtered.map(a => ({
       ...a,
-      application_status: result === 'Passed' ? 'Passed' : 'Failed'
+      application_status: result === 'Pending' ? 'Ongoing' : (result === 'Passed' ? 'Passed' : 'Failed')
     })));
     setModalLoading(false);
   }, [supabase]);
