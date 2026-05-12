@@ -533,8 +533,6 @@ export default function DashboardContent() {
     setModalOpen(true);
     setModalLoading(true);
 
-    const stageName = stage === 'Math Exam' ? 'Math Exam' : stage === 'Table Test' ? 'Table Test' : stage;
-
     const { data: apps } = await supabase
       .from('applicants')
       .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, created_at')
@@ -542,16 +540,32 @@ export default function DashboardContent() {
       .limit(500);
 
     const refNos = (apps || []).map(a => a.reference_no).filter(Boolean);
-    const { data: stages } = refNos.length > 0
-      ? await supabase
-          .from('stage_results')
-          .select('reference_no, stage_name, result_status')
-          .in('reference_no', refNos)
-          .eq('stage_name', stageName)
-          .eq('result_status', result)
-      : { data: [] };
-
-    const matchingRefs = new Set(stages?.map(s => s.reference_no) || []);
+    
+    let matchingRefs: Set<string>;
+    
+    if (stage === 'Math Exam') {
+      // Math Exam data comes from math_exam_results table
+      const { data: mathResults } = refNos.length > 0
+        ? await supabase
+            .from('math_exam_results')
+            .select('reference_no, status')
+            .in('reference_no', refNos)
+            .eq('status', result)
+        : { data: [] };
+      matchingRefs = new Set(mathResults?.map(r => r.reference_no) || []);
+    } else {
+      // Other stages come from stage_results table
+      const { data: stages } = refNos.length > 0
+        ? await supabase
+            .from('stage_results')
+            .select('reference_no, stage_name, result_status')
+            .in('reference_no', refNos)
+            .eq('stage_name', stage)
+            .eq('result_status', result)
+        : { data: [] };
+      matchingRefs = new Set(stages?.map(s => s.reference_no) || []);
+    }
+    
     const filtered = (apps || []).filter(a => matchingRefs.has(a.reference_no));
 
     setModalApplicants(filtered.map(a => ({
@@ -684,6 +698,16 @@ export default function DashboardContent() {
       if (!stageMap[row.reference_no]) stageMap[row.reference_no] = {};
       stageMap[row.reference_no][row.stage_name] = row.result_status || '';
     });
+
+    // Query math exam results for Dealer positions
+    const { data: mathExamRows } = refNos.length > 0
+      ? await supabase.from('math_exam_results').select('reference_no, status').in('reference_no', refNos)
+      : { data: [] };
+    
+    const mathExamMap: { [refNo: string]: string } = {};
+    mathExamRows?.forEach((row: any) => {
+      mathExamMap[row.reference_no] = row.status || '';
+    });
     
     const computeAge = (bd: string) => {
       if (!bd) return 0;
@@ -789,28 +813,45 @@ export default function DashboardContent() {
         }
       }
       
+      // Math Exam stats for Dealer position in all departments
+      if (pos === 'Dealer') {
+        const mathResult = mathExamMap[r.reference_no];
+        if (mathResult) {
+          deptData.stageMath.taken++;
+          if (mathResult === 'Passed') deptData.stageMath.passed++;
+          else if (mathResult === 'Failed') deptData.stageMath.failed++;
+        }
+      }
+      
       // Stage stats (only for Experienced Dealer in Table Games)
       const isExperiencedDealer = pos === 'Dealer' && (r.experience_level === 'Experienced Dealer' || r.experience_level === 'Experienced-Dealer');
       if (isExperiencedDealer && dept === 'Table Games') {
         const stages = stageMap[r.reference_no];
         if (stages) {
-          const math = stages['Math Exam'];
           const table = stages['Table Test'];
-          if (math) { deptData.stageMath.taken++; if (math === 'Passed') deptData.stageMath.passed++; else if (math === 'Failed') deptData.stageMath.failed++; }
           if (table) { deptData.stageTable.taken++; if (table === 'Passed') deptData.stageTable.passed++; else if (table === 'Failed') deptData.stageTable.failed++; }
         }
       }
     });
     
-    // Calculate pending stages for Table Games - only Experienced Dealer
+    // Calculate pending Math Exams for all Dealers and pending Table Tests for Experienced Dealer in Table Games
+    // For each department, calculate pending Math Exams for Dealers
+    Object.keys(data).forEach(deptName => {
+      const deptData = data[deptName];
+      const dealerCount = (appRows || []).filter((r: any) => 
+        r.position_applied === 'Dealer' && 
+        r.department === deptName
+      ).length;
+      deptData.stageMath.pending = Math.max(0, dealerCount - deptData.stageMath.taken);
+    });
+    
+    // Calculate pending Table Tests only for Table Games - Experienced Dealer
     if (data['Table Games']) {
-      // Count only Experienced Dealer for stage pending calculation
       const expDealer = (appRows || []).filter((r: any) => 
         r.position_applied === 'Dealer' && 
         r.department === 'Table Games' &&
         (r.experience_level === 'Experienced Dealer' || r.experience_level === 'Experienced-Dealer')
       ).length;
-      data['Table Games'].stageMath.pending = Math.max(0, expDealer - data['Table Games'].stageMath.taken);
       data['Table Games'].stageTable.pending = Math.max(0, expDealer - data['Table Games'].stageTable.taken);
     }
     
