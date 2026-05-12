@@ -20,6 +20,9 @@ function getExamErrorMessage(error: string): string {
   if (error === 'alreadyTaken') {
     return 'You have already taken this exam.';
   }
+  if (error === 'retakeLimitReached') {
+    return 'You have used the online retake. Please contact admin for the Pen & Paper test.';
+  }
   return error;
 }
 

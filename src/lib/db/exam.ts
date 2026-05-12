@@ -158,12 +158,15 @@ export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInf
     .eq('reference_no', referenceNo)
     .single();
 
+  const hasSubmittedAttempt = !!attempt && attempt.attempt_status !== 'IN_PROGRESS';
+  const needsRetake = hasSubmittedAttempt && attempt.status === 'Failed';
+
   return {
     referenceNo: applicant.reference_no,
     lastName: applicant.last_name,
     firstName: applicant.first_name,
     middleName: applicant.middle_name,
-    alreadyTaken: !!attempt && attempt.attempt_status !== 'IN_PROGRESS',
+    alreadyTaken: hasSubmittedAttempt && !needsRetake,
     previousResult: attempt,
     examAuthorized: applicant.exam_authorized || 'No',
   };
@@ -187,8 +190,22 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
     return { success: false, error: getExamWriteErrorMessage('Failed to load exam attempt', existingError) };
   }
 
-  if (existing && existing.attempt_status !== 'IN_PROGRESS') {
-    return { success: false, error: 'alreadyTaken', data: existing };
+  if (existing) {
+    const currentAttemptCount = (existing as any).attempt_count || 1;
+
+    // If an attempt is in progress, allow resume
+    if (existing.attempt_status === 'IN_PROGRESS') {
+      // resume
+    } else {
+      // Completed attempts
+      if (existing.status === 'Passed' || existing.status === 'Completed') {
+        return { success: false, error: 'alreadyTaken', data: existing };
+      }
+      // If failed and already retaken once, require pen & paper
+      if (existing.status === 'Failed' && currentAttemptCount >= 2) {
+        return { success: false, error: 'retakeLimitReached', data: existing };
+      }
+    }
   }
 
   const sets = await getQuestionnaireSets();
@@ -200,8 +217,8 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
   const startedAt = new Date().toISOString();
 
   if (existing) {
-    // Increment attempt count for retakes
     const currentAttemptCount = (existing as any).attempt_count || 1;
+    const isRetake = existing.attempt_status !== 'IN_PROGRESS';
     const { error: updateError } = await supabase
       .from('math_exam_results')
       .update({
@@ -215,7 +232,7 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
         status: null,
         score: null,
         termination_reason: null,
-        attempt_count: currentAttemptCount + 1,
+        attempt_count: isRetake ? currentAttemptCount + 1 : currentAttemptCount,
       })
       .eq('reference_no', referenceNo);
 
@@ -292,7 +309,7 @@ export async function submitExam(
 
   const { data: attempt, error: attemptError } = await supabase
     .from('math_exam_results')
-    .select('questions_json, answers_json, attempt_status, score, status, termination_reason')
+    .select('questions_json, answers_json, attempt_status, score, status, termination_reason, attempt_count')
     .eq('reference_no', referenceNo)
     .single();
 
@@ -350,7 +367,7 @@ export async function submitExam(
     return { success: false, error: getExamWriteErrorMessage('Failed to submit exam', updateError) };
   }
 
-  await syncMathExamStage(referenceNo, score, passed, reason);
+  await syncMathExamStage(referenceNo, score, passed, reason, attempt?.attempt_count || 1);
 
   return {
     success: true,
@@ -358,12 +375,12 @@ export async function submitExam(
   };
 }
 
-async function syncMathExamStage(referenceNo: string, score: number, passed: boolean, reason: string = 'SUBMIT') {
+async function syncMathExamStage(referenceNo: string, score: number, passed: boolean, reason: string = 'SUBMIT', attemptCount: number = 1) {
   const supabase = await createClient();
 
   const { data: applicant } = await supabase
     .from('applicants')
-    .select('applicant_id')
+    .select('applicant_id, experience_level')
     .eq('reference_no', referenceNo)
     .single();
 
@@ -381,11 +398,17 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
   const submissionType = isAutoSubmit ? 'Auto-submitted (lost focus/tab switch)' : 'Submitted via Applicant Portal';
   const remarks = `Math Exam ${submissionType} | Result: ${passed ? 'Passed' : 'Failed'} | Score: ${score}/${MAX_MATH_EXAM_SCORE}`;
 
+  const nextStageLabel =
+    applicant.experience_level === 'Experienced Dealer' || applicant.experience_level === 'Experienced-Dealer'
+      ? 'Table Test'
+      : 'Final Interview';
+
   if (existing) {
     await supabase
       .from('stage_results')
       .update({
         result_status: passed ? 'Passed' : 'Failed',
+        current_stage_label: passed ? nextStageLabel : 'Math Exam Retake',
         score,
         passing_score: PASSING_SCORE,
         max_score: MAX_MATH_EXAM_SCORE,
@@ -403,7 +426,7 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
         stage_name: 'Math Exam',
         stage_sequence: 2,
         result_status: passed ? 'Passed' : 'Failed',
-        current_stage_label: passed ? 'Table Test' : 'Final Interview',
+        current_stage_label: passed ? nextStageLabel : 'Math Exam Retake',
         score,
         passing_score: PASSING_SCORE,
         max_score: MAX_MATH_EXAM_SCORE,
@@ -413,29 +436,81 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
       });
   }
 
-  const applicationStatus = passed ? 'Ongoing' : 'Failed';
+  // If passed -> mark applicant completed. If failed -> either schedule automatic retake (if attemptCount < 2) or schedule pen & paper
+  if (passed) {
+    const { error: appUpdateError } = await supabase
+      .from('applicants')
+      .update({ application_status: 'Completed', overall_result: 'Passed', current_stage: 'Math Exam', updated_at: new Date().toISOString() })
+      .eq('reference_no', referenceNo);
+    if (appUpdateError) console.error('Failed to update applicant after math exam', appUpdateError);
+  } else {
+    if (attemptCount < 2) {
+      const { error: appUpdateError } = await supabase
+        .from('applicants')
+        .update({ application_status: 'Ongoing', overall_result: 'Retake', current_stage: 'Math Exam Retake', updated_at: new Date().toISOString() })
+        .eq('reference_no', referenceNo);
 
-  await supabase
-    .from('applicants')
-    .update({
-      current_stage: 'Math Exam',
-      application_status: applicationStatus,
-      overall_result: passed ? 'Passed' : 'Failed',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('reference_no', referenceNo);
+      if (appUpdateError) console.error('Failed to update applicant after failed math exam', appUpdateError);
 
-  await supabase
-    .from('applicant_notifications')
-    .insert({
-      applicant_id,
-      reference_no: referenceNo,
-      stage_name: 'Math Exam',
-      result_status: passed ? 'Passed' : 'Failed',
-      notification_message: passed
-        ? 'Congratulations! Please proceed to the next stage.'
-        : 'Unfortunately, you did not pass the Math Exam.',
-      visible_to_applicant: 'Yes',
-      created_by: 'HR',
-    });
+      const notification = {
+        reference_no: referenceNo,
+        stage_name: 'Math Exam Retake',
+        notification_message: 'Applicant scheduled for Math Exam retake',
+        created_at: new Date().toISOString(),
+      };
+
+      const { error: notifyError } = await supabase.from('applicant_notifications').insert(notification);
+      if (notifyError) console.error('Failed to create notification for math exam retake', notifyError);
+    } else {
+      // schedule pen & paper (manual) retake
+      try {
+        const { data: existingPen, error: penErr } = await supabase
+          .from('stage_results')
+          .select('id')
+          .eq('reference_no', referenceNo)
+          .eq('stage_name', 'Pen & Paper Test')
+          .single();
+
+        if (penErr && penErr.code !== 'PGRST116') console.error('Failed to check pen & paper stage', penErr);
+
+        if (!existingPen) {
+          const penPayload: any = {
+            applicant_id: applicant_id,
+            reference_no: referenceNo,
+            stage_name: 'Pen & Paper Test',
+            stage_sequence: 99,
+            result_status: null,
+            score: null,
+            passing_score: 30,
+            max_score: 50,
+            current_stage_label: 'Pen & Paper Test',
+            remarks: 'Scheduled Pen & Paper retake',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          const { error: insErr } = await supabase.from('stage_results').insert(penPayload);
+          if (insErr) console.error('Failed to insert pen & paper stage', insErr);
+        }
+
+        const { error: appUpdateError } = await supabase
+          .from('applicants')
+          .update({ application_status: 'Ongoing', overall_result: 'Pen & Paper Pending', current_stage: 'Pen & Paper Test', updated_at: new Date().toISOString() })
+          .eq('reference_no', referenceNo);
+
+        if (appUpdateError) console.error('Failed to update applicant for pen & paper', appUpdateError);
+
+        const notification = {
+          reference_no: referenceNo,
+          stage_name: 'Pen & Paper Test',
+          notification_message: 'Applicant scheduled for Pen & Paper test (50 items). Passing score: 30. Admin will record the result.',
+          created_at: new Date().toISOString(),
+        };
+
+        const { error: notifyError } = await supabase.from('applicant_notifications').insert(notification);
+        if (notifyError) console.error('Failed to create notification for pen & paper', notifyError);
+      } catch (err) {
+        console.error('Error scheduling pen & paper', err);
+      }
+    }
+  }
 }

@@ -46,9 +46,6 @@ export async function upsertStageResult(payload: {
 
   const workflow = await getStageWorkflowForApplicant(position_applied || '', experience_level);
   const requestedStageIndex = workflow.indexOf(payload.stageName);
-  if (requestedStageIndex === -1) {
-    return { success: false, error: `Invalid stage "${payload.stageName}" for this applicant.` };
-  }
 
   const { data: recordedStages, error: recordedStagesError } = await supabase
     .from('stage_results')
@@ -59,12 +56,20 @@ export async function upsertStageResult(payload: {
     return { success: false, error: recordedStagesError.message };
   }
 
+  const alreadyRecorded = (recordedStages || []).some((s: any) => s.stage_name === payload.stageName);
+
+  // If the stage is not part of the regular workflow and hasn't been recorded before, reject it
+  // Allow creating the special 'Pen & Paper Test' stage even if it's not in the position workflow
+  if (!alreadyRecorded && requestedStageIndex === -1 && payload.stageName !== 'Pen & Paper Test') {
+    return { success: false, error: `Invalid stage "${payload.stageName}" for this applicant.` };
+  }
+
   const firstIncompleteStageIndex = getFirstIncompleteStageIndex(
     workflow,
     recordedStages || []
   );
 
-  if (firstIncompleteStageIndex !== -1 && requestedStageIndex > firstIncompleteStageIndex) {
+  if (firstIncompleteStageIndex !== -1 && requestedStageIndex > firstIncompleteStageIndex && !alreadyRecorded) {
     return {
       success: false,
       error: `Cannot skip stages. Complete "${workflow[firstIncompleteStageIndex]}" first.`,
@@ -243,6 +248,123 @@ sweaty_palm_result: payload.sweatyPalmResult,
         created_by: payload.evaluatedBy,
         edit_reason: payload.editReason || (nextVersion === 1 ? 'Initial entry' : 'Updated result'),
       });
+  }
+
+  // If this is a Pen & Paper Test entry, also record/update the math_exam_results row and flag it as pen_and_paper
+  if (payload.stageName === 'Pen & Paper Test') {
+    try {
+      const { data: existingExam, error: existingExamErr } = await supabase
+        .from('math_exam_results')
+        .select('id, attempt_count')
+        .eq('reference_no', payload.referenceNo)
+        .single();
+
+      const now = new Date().toISOString();
+      const attemptCount = (existingExam as any)?.attempt_count ? ((existingExam as any).attempt_count + 1) : 1;
+
+      if (existingExam) {
+        await supabase
+          .from('math_exam_results')
+          .update({
+            score: payload.score ?? null,
+            status: payload.resultStatus === 'Passed' ? 'Passed' : 'Failed',
+            attempt_status: 'SUBMITTED',
+            submitted_at: now,
+            pen_and_paper: true,
+            attempt_count: attemptCount,
+          })
+          .eq('reference_no', payload.referenceNo);
+      } else {
+        await supabase
+          .from('math_exam_results')
+          .insert({
+            reference_no: payload.referenceNo,
+            last_name: null,
+            first_name: null,
+            assigned_set: null,
+            started_at: null,
+            answers_json: {},
+            questions_json: {},
+            time_limit_minutes: null,
+            score: payload.score ?? null,
+            status: payload.resultStatus === 'Passed' ? 'Passed' : 'Failed',
+            attempt_status: 'SUBMITTED',
+            submitted_at: now,
+            pen_and_paper: true,
+            attempt_count: attemptCount,
+          });
+      }
+
+      // Propagate Pen & Paper pass/fail into the canonical Math Exam stage_result so the UI and KPIs reflect final outcome
+      if (payload.resultStatus === 'Passed') {
+        try {
+          const meta = await getApplicantMeta(payload.referenceNo);
+          const experience_level = meta.experience_level || '';
+          const nextStageLabel = experience_level === 'Experienced Dealer' || experience_level === 'Experienced-Dealer' ? 'Table Test' : 'Final Interview';
+
+          // Update Math Exam stage result if exists
+          await supabase
+            .from('stage_results')
+            .update({
+              result_status: 'Passed',
+              current_stage_label: nextStageLabel,
+              score: payload.score ?? null,
+              passing_score: 30,
+              max_score: 50,
+              remarks: payload.remarks || 'Pen & Paper passed',
+              evaluated_by: payload.evaluatedBy || 'Admin',
+              evaluated_at: payload.evaluatedAt || now,
+            })
+            .eq('reference_no', payload.referenceNo)
+            .eq('stage_name', 'Math Exam');
+
+          // Update applicant overall status
+          await supabase
+            .from('applicants')
+            .update({
+              current_stage: 'Math Exam',
+              application_status: 'Completed',
+              overall_result: 'Passed',
+              updated_at: now,
+            })
+            .eq('reference_no', payload.referenceNo);
+        } catch (err) {
+          console.error('Failed to propagate Pen & Paper pass to Math Exam stage', err);
+        }
+      } else {
+        // If Pen & Paper failed, mark Math Exam as Failed and overall_result accordingly
+        try {
+          await supabase
+            .from('stage_results')
+            .update({
+              result_status: 'Failed',
+              current_stage_label: 'Pen & Paper Test',
+              score: payload.score ?? null,
+              passing_score: 30,
+              max_score: 50,
+              remarks: payload.remarks || 'Pen & Paper failed',
+              evaluated_by: payload.evaluatedBy || 'Admin',
+              evaluated_at: payload.evaluatedAt || now,
+            })
+            .eq('reference_no', payload.referenceNo)
+            .eq('stage_name', 'Math Exam');
+
+          await supabase
+            .from('applicants')
+            .update({
+              current_stage: 'Pen & Paper Test',
+              application_status: 'Completed',
+              overall_result: 'Failed',
+              updated_at: now,
+            })
+            .eq('reference_no', payload.referenceNo);
+        } catch (err) {
+          console.error('Failed to propagate Pen & Paper failure to Math Exam stage', err);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to record pen & paper in math_exam_results', err);
+    }
   }
 
   return { success: true };

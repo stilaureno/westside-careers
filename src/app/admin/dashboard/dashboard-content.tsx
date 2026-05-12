@@ -112,6 +112,60 @@ interface DashboardData {
   [deptName: string]: DeptData;
 }
 
+interface MathExamAttempt {
+  reference_no: string;
+  status: string | null;
+  attempt_count?: number | null;
+  submitted_at?: string | null;
+  started_at?: string | null;
+  created_at?: string | null;
+}
+
+function getMathAttemptTimestamp(attempt: MathExamAttempt): number {
+  const ts = attempt.submitted_at || attempt.started_at || attempt.created_at;
+  if (!ts) return 0;
+  const parsed = Date.parse(ts);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function getLatestMathAttempts(attempts: MathExamAttempt[]): Record<string, MathExamAttempt> {
+  const latestByRef: Record<string, MathExamAttempt> = {};
+
+  attempts.forEach((attempt) => {
+    const ref = attempt.reference_no;
+    const existing = latestByRef[ref];
+    if (!existing) {
+      latestByRef[ref] = attempt;
+      return;
+    }
+
+    const currentAttemptCount = attempt.attempt_count ?? 1;
+    const existingAttemptCount = existing.attempt_count ?? 1;
+    if (currentAttemptCount > existingAttemptCount) {
+      latestByRef[ref] = attempt;
+      return;
+    }
+    if (currentAttemptCount < existingAttemptCount) {
+      return;
+    }
+
+    if (getMathAttemptTimestamp(attempt) >= getMathAttemptTimestamp(existing)) {
+      latestByRef[ref] = attempt;
+    }
+  });
+
+  return latestByRef;
+}
+
+function getMathRetakeRefs(attempts: MathExamAttempt[]): Set<string> {
+  const latestAttempts = getLatestMathAttempts(attempts);
+  return new Set(
+    Object.values(latestAttempts)
+      .filter((attempt) => attempt.status === 'Failed')
+      .map((attempt) => attempt.reference_no)
+  );
+}
+
 function SummaryCard({ label, value, color = '#000080', padding = '12px', valueSize = '20px', labelSize = '11px', onClick, filterType, filterValue, department, position }: { label: string; value: number; color?: string; padding?: string; valueSize?: string; labelSize?: string; onClick?: () => void; filterType?: string; filterValue?: string; department?: string; position?: string }) {
   const isClickable = onClick && value > 0;
   return (
@@ -514,7 +568,7 @@ export default function DashboardContent() {
 
     let query = supabase
       .from('applicants')
-      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, created_at')
+      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, experience_level, created_at')
       .eq('department', department)
       .order('created_at', { ascending: false });
 
@@ -542,7 +596,7 @@ export default function DashboardContent() {
 
     const { data: apps } = await supabase
       .from('applicants')
-      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, created_at')
+      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, experience_level, created_at')
       .eq('department', department)
       .limit(500);
 
@@ -569,6 +623,27 @@ export default function DashboardContent() {
         } else {
           matchingRefs = new Set();
         }
+      } else if (stage === 'Table Test') {
+        // Pending Table Test mirrors dashboard count:
+        // experienced dealers in Table Games with no Table Test result yet.
+        const experiencedDealerRefs = (apps || [])
+          .filter(a =>
+            a.position_applied === 'Dealer' &&
+            (a.experience_level === 'Experienced Dealer' || a.experience_level === 'Experienced-Dealer')
+          )
+          .map(a => a.reference_no);
+
+        if (experiencedDealerRefs.length > 0) {
+          const { data: tableTestResults } = await supabase
+            .from('stage_results')
+            .select('reference_no')
+            .in('reference_no', experiencedDealerRefs)
+            .eq('stage_name', 'Table Test');
+          const takenRefs = new Set(tableTestResults?.map(r => r.reference_no) || []);
+          matchingRefs = new Set(experiencedDealerRefs.filter(r => !takenRefs.has(r)));
+        } else {
+          matchingRefs = new Set();
+        }
       } else {
         // For other stages, pending = current_stage matches but no result yet
         const pendingRefNos = (apps || [])
@@ -576,26 +651,26 @@ export default function DashboardContent() {
           .map(a => a.reference_no);
         matchingRefs = new Set(pendingRefNos);
       }
-    } else if (stage === 'Math Exam' && result === 'Retake') {
-      // Retakes: Math Exam with attempt_count > 1
-      const { data: retakeResults } = refNos.length > 0
-        ? await supabase
-            .from('math_exam_results')
-            .select('reference_no')
-            .in('reference_no', refNos)
-            .gt('attempt_count', 1)
-        : { data: [] };
-      matchingRefs = new Set(retakeResults?.map(r => r.reference_no) || []);
-    } else if (stage === 'Math Exam') {
-      // Math Exam data comes from math_exam_results table
+    } else if (stage === 'Math Exam' && (result === 'Retake' || result === 'Passed' || result === 'Failed')) {
       const { data: mathResults } = refNos.length > 0
         ? await supabase
             .from('math_exam_results')
-            .select('reference_no, status')
+            .select('reference_no, status, attempt_count, submitted_at, started_at, created_at')
             .in('reference_no', refNos)
-            .eq('status', result)
         : { data: [] };
-      matchingRefs = new Set(mathResults?.map(r => r.reference_no) || []);
+
+      const allAttempts = (mathResults || []) as MathExamAttempt[];
+      const latestAttempts = getLatestMathAttempts(allAttempts);
+
+      if (result === 'Retake') {
+        matchingRefs = getMathRetakeRefs(allAttempts);
+      } else {
+        matchingRefs = new Set(
+          Object.values(latestAttempts)
+            .filter((attempt) => attempt.status === result)
+            .map((attempt) => attempt.reference_no)
+        );
+      }
     } else {
       // Other stages come from stage_results table
       const { data: stages } = refNos.length > 0
@@ -744,14 +819,14 @@ export default function DashboardContent() {
 
     // Query math exam results for Dealer positions
     const { data: mathExamRows } = refNos.length > 0
-      ? await supabase.from('math_exam_results').select('reference_no, status, attempt_count').in('reference_no', refNos)
+      ? await supabase.from('math_exam_results').select('reference_no, status, attempt_count, submitted_at, started_at, created_at').in('reference_no', refNos)
       : { data: [] };
     
     const mathExamMap: { [refNo: string]: string } = {};
-    const mathExamAttemptCount: { [refNo: string]: number } = {};
-    mathExamRows?.forEach((row: any) => {
+    const mathExamRetakeRefs = getMathRetakeRefs((mathExamRows || []) as MathExamAttempt[]);
+    const latestMathAttempts = getLatestMathAttempts((mathExamRows || []) as MathExamAttempt[]);
+    Object.values(latestMathAttempts).forEach((row) => {
       mathExamMap[row.reference_no] = row.status || '';
-      mathExamAttemptCount[row.reference_no] = row.attempt_count || 1;
     });
     
     const computeAge = (bd: string) => {
@@ -861,13 +936,11 @@ export default function DashboardContent() {
       // Math Exam stats for Dealer position in all departments
       if (pos === 'Dealer') {
         const mathResult = mathExamMap[r.reference_no];
-        const attemptCount = mathExamAttemptCount[r.reference_no] || 1;
         if (mathResult) {
           deptData.stageMath.taken++;
           if (mathResult === 'Passed') deptData.stageMath.passed++;
           else if (mathResult === 'Failed') deptData.stageMath.failed++;
-          // Count retakes (attempt_count > 1)
-          if (attemptCount > 1) deptData.stageMath.retakes++;
+          if (mathExamRetakeRefs.has(r.reference_no)) deptData.stageMath.retakes++;
         }
       }
       

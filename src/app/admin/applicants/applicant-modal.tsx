@@ -237,7 +237,8 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         score: stageResult.score?.toString() || '',
         passingScore: stageResult.passing_score || 8,
         maxScore: stageResult.max_score || 10,
-        remarks: stageResult.remarks || '',
+        // Reset remarks when editing Math Exam to prompt fresh comments
+        remarks: stageName === 'Math Exam' ? '' : (stageResult.remarks || ''),
         evaluatedBy: stageResult.evaluated_by || '',
         editReason: '',
       });
@@ -592,7 +593,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                           </div>
                         )}
 
-                        {stage === 'Math Exam' && (
+                        {(stage === 'Math Exam' || stage === 'Pen & Paper Test') && (
                           <div className="row g-3 mb-3">
                             <div className="col-md-4">
                               <label className="form-label small">Score</label>
@@ -606,6 +607,49 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                               <label className="form-label small">Max Score</label>
                               <input type="number" className="form-control form-control-sm" value={form.maxScore} onChange={(e) => setForm({ ...form, maxScore: e.target.value })} />
                             </div>
+                          </div>
+                        )}
+
+                        {/* Quick access to Pen & Paper stage if present */}
+                        {stage === 'Math Exam' && (
+                          <div className="mb-3 d-flex gap-2">
+                            {data?.stages?.some((s: any) => s.stage_name === 'Pen & Paper Test') ? (
+                              <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleStageChange('Pen & Paper Test')}>Open Pen & Paper Test</button>
+                            ) : (
+                              <button type="button" className="btn btn-outline-warning btn-sm" onClick={async () => {
+                                // Schedule Pen & Paper stage
+                                if (!confirm('Schedule Pen & Paper test for this applicant?')) return;
+                                const payload = {
+                                  referenceNo: data.applicant.reference_no,
+                                  stageName: 'Pen & Paper Test',
+                                  stageSequence: 99,
+                                  resultStatus: '',
+                                  currentStageLabel: 'Pen & Paper Test',
+                                  score: undefined,
+                                  passingScore: 30,
+                                  maxScore: 50,
+                                  remarks: 'Scheduled Pen & Paper retake',
+                                  evaluatedBy: form.evaluatedBy || 'HR',
+                                  evaluatedAt: new Date().toISOString(),
+                                  editReason: 'Scheduled Pen & Paper via admin UI',
+                                };
+                                try {
+                                  setSaving(true);
+                                  const res = await updateStage(payload, '');
+                                  if (res.success) {
+                                    setMessage({ text: 'Pen & Paper test scheduled. You can now open it from the stages list.', type: 'success' });
+                                    await loadData();
+                                    setStage('Pen & Paper Test');
+                                    setStageSeq(99);
+                                    await loadStageResults('Pen & Paper Test', data.applicant);
+                                  } else {
+                                    setMessage({ text: res.error || 'Failed to schedule Pen & Paper test.', type: 'error' });
+                                  }
+                                } finally {
+                                  setSaving(false);
+                                }
+                              }}>Schedule Pen & Paper Test</button>
+                            )}
                           </div>
                         )}
 
