@@ -252,14 +252,13 @@ export default function ApplyPage() {
             </div>
 
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Middle Name" required>
+              <Field label="Middle Name">
                 <input
                   className={styles.control}
                   value={form.middleName}
                   onChange={(e) => setForm({ ...form, middleName: e.target.value })}
                   autoComplete="additional-name"
                   autoCapitalize="words"
-                  required
                 />
               </Field>
               <Field label="Birthdate" required>
