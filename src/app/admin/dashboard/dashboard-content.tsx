@@ -544,21 +544,29 @@ export default function DashboardContent() {
     let matchingRefs: Set<string>;
     
     if (result === 'Pending') {
-      // Pending: applicants in this department whose current_stage is this stage but haven't completed it
-      const pendingRefNos = (apps || [])
-        .filter(a => a.current_stage === stage)
-        .map(a => a.reference_no);
-      
-      // For Math Exam, also check they don't have a completed result in math_exam_results
-      if (stage === 'Math Exam' && pendingRefNos.length > 0) {
-        const { data: completedMathExams } = await supabase
-          .from('math_exam_results')
-          .select('reference_no')
-          .in('reference_no', pendingRefNos)
-          .in('status', ['Passed', 'Failed']);
-        const completedRefs = new Set(completedMathExams?.map(r => r.reference_no) || []);
-        matchingRefs = new Set(pendingRefNos.filter(r => !completedRefs.has(r)));
+      // Pending: for Math Exam, it's all Dealer applicants who haven't taken the exam yet
+      // (matches the dashboard calculation: total Dealers - taken)
+      if (stage === 'Math Exam') {
+        const dealerRefs = (apps || [])
+          .filter(a => a.position_applied === 'Dealer')
+          .map(a => a.reference_no);
+        
+        if (dealerRefs.length > 0) {
+          const { data: completedMathExams } = await supabase
+            .from('math_exam_results')
+            .select('reference_no')
+            .in('reference_no', dealerRefs)
+            .in('status', ['Passed', 'Failed']);
+          const completedRefs = new Set(completedMathExams?.map(r => r.reference_no) || []);
+          matchingRefs = new Set(dealerRefs.filter(r => !completedRefs.has(r)));
+        } else {
+          matchingRefs = new Set();
+        }
       } else {
+        // For other stages, pending = current_stage matches but no result yet
+        const pendingRefNos = (apps || [])
+          .filter(a => a.current_stage === stage)
+          .map(a => a.reference_no);
         matchingRefs = new Set(pendingRefNos);
       }
     } else if (stage === 'Math Exam') {
