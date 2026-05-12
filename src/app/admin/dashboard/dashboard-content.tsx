@@ -524,6 +524,8 @@ export default function DashboardContent() {
 
     if (status === 'Passed') {
       query = query.in('application_status', ['Passed', 'Completed']);
+    } else if (status === 'Failed') {
+      query = query.in('application_status', ['Failed', 'Not Recommended']);
     } else {
       query = query.eq('application_status', status);
     }
