@@ -200,6 +200,8 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
   const startedAt = new Date().toISOString();
 
   if (existing) {
+    // Increment attempt count for retakes
+    const currentAttemptCount = (existing as any).attempt_count || 1;
     const { error: updateError } = await supabase
       .from('math_exam_results')
       .update({
@@ -213,6 +215,7 @@ export async function startExam(referenceNo: string): Promise<{ success: boolean
         status: null,
         score: null,
         termination_reason: null,
+        attempt_count: currentAttemptCount + 1,
       })
       .eq('reference_no', referenceNo);
 

@@ -50,6 +50,7 @@ interface StageSummary {
   pending: number;
   passed: number;
   failed: number;
+  retakes: number;
 }
 
 interface GenderByPosition {
@@ -176,14 +177,18 @@ function PositionSection({ title, summary, onStatusClick }: { title: string; sum
 
 function StageSection({ title, summary, onStageClick }: { title: string; summary: StageSummary; onStageClick?: (stage: string, result: string) => void }) {
   const stageName = title.replace(' ', '_').replace('Test', '_Test');
+  const showRetakes = title === 'Math Exam';
   return (
     <div style={{ marginTop: '14px' }}>
       <h4 style={{ fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: '#6b7280' }}>{title}</h4>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: showRetakes ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: '8px' }}>
         <SummaryCard label="Taken" value={summary.taken} />
         <SummaryCard label="Pending" value={summary.pending} color="#6b7280" onClick={onStageClick ? () => onStageClick(title, 'Pending') : undefined} filterType="stage" filterValue={`${title}|Pending`} />
         <SummaryCard label="Passed" value={summary.passed} color="#166534" onClick={onStageClick ? () => onStageClick(title, 'Passed') : undefined} filterType="stage" filterValue={`${title}|Passed`} />
         <SummaryCard label="Failed" value={summary.failed} color="#991b1b" onClick={onStageClick ? () => onStageClick(title, 'Failed') : undefined} filterType="stage" filterValue={`${title}|Failed`} />
+        {showRetakes && (
+          <SummaryCard label="Retakes" value={summary.retakes} color="#7c3aed" onClick={onStageClick ? () => onStageClick(title, 'Retake') : undefined} filterType="stage" filterValue={`${title}|Retake`} />
+        )}
       </div>
     </div>
   );
@@ -569,6 +574,16 @@ export default function DashboardContent() {
           .map(a => a.reference_no);
         matchingRefs = new Set(pendingRefNos);
       }
+    } else if (stage === 'Math Exam' && result === 'Retake') {
+      // Retakes: Math Exam with attempt_count > 1
+      const { data: retakeResults } = refNos.length > 0
+        ? await supabase
+            .from('math_exam_results')
+            .select('reference_no')
+            .in('reference_no', refNos)
+            .gt('attempt_count', 1)
+        : { data: [] };
+      matchingRefs = new Set(retakeResults?.map(r => r.reference_no) || []);
     } else if (stage === 'Math Exam') {
       // Math Exam data comes from math_exam_results table
       const { data: mathResults } = refNos.length > 0
@@ -596,7 +611,7 @@ export default function DashboardContent() {
 
     setModalApplicants(filtered.map(a => ({
       ...a,
-      application_status: result === 'Pending' ? 'Ongoing' : (result === 'Passed' ? 'Passed' : 'Failed')
+      application_status: result === 'Pending' || result === 'Retake' ? 'Ongoing' : (result === 'Passed' ? 'Passed' : 'Failed')
     })));
     setModalLoading(false);
   }, [supabase]);
@@ -626,7 +641,7 @@ export default function DashboardContent() {
     setLoading(true);
     
     const emptyPos = (): PositionSummary => ({ total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0 });
-    const emptyStage = (): StageSummary => ({ taken: 0, pending: 0, passed: 0, failed: 0 });
+    const emptyStage = (): StageSummary => ({ taken: 0, pending: 0, passed: 0, failed: 0, retakes: 0 });
     const emptyAgeBands = (): AgeBandSummary => ({ age20s: 0, age30s: 0, age40s: 0, age50Plus: 0 });
     const emptyHeightBands = (): HeightBandSummary => ({ below160: 0, height160170: 0, height170180: 0, height180Plus: 0 });
 
@@ -727,12 +742,14 @@ export default function DashboardContent() {
 
     // Query math exam results for Dealer positions
     const { data: mathExamRows } = refNos.length > 0
-      ? await supabase.from('math_exam_results').select('reference_no, status').in('reference_no', refNos)
+      ? await supabase.from('math_exam_results').select('reference_no, status, attempt_count').in('reference_no', refNos)
       : { data: [] };
     
     const mathExamMap: { [refNo: string]: string } = {};
+    const mathExamAttemptCount: { [refNo: string]: number } = {};
     mathExamRows?.forEach((row: any) => {
       mathExamMap[row.reference_no] = row.status || '';
+      mathExamAttemptCount[row.reference_no] = row.attempt_count || 1;
     });
     
     const computeAge = (bd: string) => {
@@ -842,10 +859,13 @@ export default function DashboardContent() {
       // Math Exam stats for Dealer position in all departments
       if (pos === 'Dealer') {
         const mathResult = mathExamMap[r.reference_no];
+        const attemptCount = mathExamAttemptCount[r.reference_no] || 1;
         if (mathResult) {
           deptData.stageMath.taken++;
           if (mathResult === 'Passed') deptData.stageMath.passed++;
           else if (mathResult === 'Failed') deptData.stageMath.failed++;
+          // Count retakes (attempt_count > 1)
+          if (attemptCount > 1) deptData.stageMath.retakes++;
         }
       }
       
