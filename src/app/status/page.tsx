@@ -13,7 +13,7 @@ type MathExamResult = {
 };
 
 export default function StatusPage() {
-  const [form, setForm] = useState({ referenceNo: '', birthdate: '' });
+  const [form, setForm] = useState({ lastName: '', birthdate: '' });
   const [result, setResult] = useState<{ applicant: any; roadmap: StageRoadmapItem[]; mathExam: MathExamResult | null; nextStep: string | null } | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,10 +41,10 @@ const [autoFetched, setAutoFetched] = useState(false);
   const isLocked = !!lockedUntil && lockedUntil > Date.now();
 
   useEffect(() => {
-    const savedRef = localStorage.getItem('savedReferenceNo');
+    const savedLastName = localStorage.getItem('savedLastName');
     const savedDob = localStorage.getItem('savedBirthdate');
-    if (savedRef && savedDob) {
-      setForm({ referenceNo: savedRef, birthdate: savedDob });
+    if (savedLastName && savedDob) {
+      setForm({ lastName: savedLastName, birthdate: savedDob });
       setRememberMe(true);
       setAutoFetched(true);
     }
@@ -58,7 +58,7 @@ const [autoFetched, setAutoFetched] = useState(false);
       setLoading(true);
       setError('');
 
-      const res = await getApplicantStatus(form.referenceNo, form.birthdate);
+      const res = await getApplicantStatus(form.lastName, form.birthdate);
       if (res.error || !res.data) {
         setError(res.error || 'Applicant not found');
         setLockedUntil(res.lockedUntil || null);
@@ -70,19 +70,19 @@ const [autoFetched, setAutoFetched] = useState(false);
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [autoFetched, rememberMe, form.referenceNo, form.birthdate]);
+  }, [autoFetched, rememberMe, form.lastName, form.birthdate]);
 
   function clearSavedInfo() {
     const confirmed = window.confirm(
-      'This will delete your saved Reference Number from this device.\n\n' +
-      'Please make sure to save your personal Reference Number so you can check your application status again later.\n\n' +
+      'This will delete your saved information from this device.\n\n' +
+      'Please make sure to save your personal information so you can check your application status again later.\n\n' +
       'Click OK to continue, or Cancel to stay on this page.'
     );
     if (!confirmed) return;
     
-    localStorage.removeItem('savedReferenceNo');
+    localStorage.removeItem('savedLastName');
     localStorage.removeItem('savedBirthdate');
-    setForm({ referenceNo: '', birthdate: '' });
+    setForm({ lastName: '', birthdate: '' });
     setRememberMe(false);
     setResult(null);
     setError('');
@@ -103,7 +103,7 @@ const [autoFetched, setAutoFetched] = useState(false);
     setError('');
     setResult(null);
 
-    const res = await getApplicantStatus(form.referenceNo, form.birthdate);
+    const res = await getApplicantStatus(form.lastName, form.birthdate);
     if (res.error || !res.data) {
       setError(res.error || 'Applicant not found');
       setLockedUntil(res.lockedUntil || null);
@@ -111,7 +111,7 @@ const [autoFetched, setAutoFetched] = useState(false);
       setResult(res.data);
       setLockedUntil(null);
       if (rememberMe) {
-        localStorage.setItem('savedReferenceNo', form.referenceNo);
+        localStorage.setItem('savedLastName', form.lastName);
         localStorage.setItem('savedBirthdate', form.birthdate);
       }
     }
@@ -130,7 +130,7 @@ const [autoFetched, setAutoFetched] = useState(false);
         <div style={{ textAlign: 'center', marginBottom: '24px', padding: '20px' }}>
           <h1 style={{ color: '#fff', fontSize: '28px', marginBottom: '6px' }}>Check Application Status</h1>
           <p style={{ color: '#b7c6df', fontSize: '15px' }}>
-            {showForm ? 'Enter your reference number and birthdate' : 'Your application status'}
+            {showForm ? 'Enter your last name and birthdate' : 'Your application status'}
           </p>
         </div>
 
@@ -155,14 +155,15 @@ const [autoFetched, setAutoFetched] = useState(false);
             )}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
-                Reference Number *
+                Last Name *
               </label>
               <input
-                value={form.referenceNo}
-                onChange={(e) => setForm({ ...form, referenceNo: e.target.value })}
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                 required
-                placeholder="APP-YYYYMMDDHHMMSS"
-                autoComplete="off"
+                placeholder="Enter your last name"
+                autoComplete="family-name"
+                autoCapitalize="words"
                 style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
               />
             </div>

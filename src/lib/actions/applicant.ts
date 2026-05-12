@@ -171,7 +171,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
 }
 
 export async function getApplicantStatus(
-  referenceNo: string,
+  lastName: string,
   birthdate: string
 ): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[]; mathExam: { score: number | null; passed: boolean | null; takenAt: string | null; status: string | null } | null; nextStep: string | null } | null; error: string | null; lockedUntil?: number | null }> {
   const cookieStore = await cookies();
@@ -182,10 +182,13 @@ export async function getApplicantStatus(
 
   const supabase = await createClient();
 
+  const sanitizedLastName = sanitizeName(lastName);
+
   const { data: applicant, error } = await supabase
     .from('applicants')
     .select('*')
-    .eq('reference_no', referenceNo)
+    .ilike('last_name', sanitizedLastName)
+    .eq('birthdate', birthdate)
     .single();
 
   if (error || !applicant) {
@@ -197,16 +200,9 @@ export async function getApplicantStatus(
     };
   }
 
-  if (applicant.birthdate !== birthdate) {
-    const lockedUntil = await recordFailedStatusCheck(cookieStore);
-    return {
-      data: null,
-      error: lockedUntil ? getStatusLockError(lockedUntil) : 'Invalid reference number or birthdate',
-      lockedUntil,
-    };
-  }
-
   await resetStatusCheckState(cookieStore);
+
+  const referenceNo = applicant.reference_no;
 
   const { data: stageRows } = await supabase
     .from('stage_results')
