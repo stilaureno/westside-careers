@@ -480,6 +480,51 @@ export default function ExamPage() {
           </p>
         </div>
 
+        <div style={{
+          background: '#f0f9ff', border: '1px solid #7dd3fc', borderRadius: '12px', padding: '16px',
+          marginBottom: '20px', fontSize: '13px', color: '#0c4a6e', lineHeight: 1.6,
+        }}>
+          <p style={{ fontWeight: '700', marginTop: 0, marginBottom: '12px' }}>📌 Math Exam Tips</p>
+          
+          <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #38bdf8' }}>
+            <p style={{ fontWeight: '700', marginBottom: '6px' }}>1.5× of a Number</p>
+            <p style={{ margin: '0 0 4px 0' }}><strong>Method:</strong> Multiply the number by 1.5</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '12px', backgroundColor: '#e0f2fe', padding: '6px 8px', borderRadius: '6px' }}>
+              <strong>Quick method:</strong> Get half of the number, then add it to the original<br/>
+              <strong>Example:</strong> 300 → half is 150 → 300 + 150 = 450
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#0369a1' }}>💡 Tip: 1.5× means the whole number plus half of it.</p>
+          </div>
+
+          <div>
+            <p style={{ fontWeight: '700', marginBottom: '6px' }}>5% of a Number</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '12px' }}>
+              <strong>Method 1:</strong> Multiply by 0.05 or divide by 20<br/>
+              <strong>Example:</strong> 5% of 100 = 5
+            </p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '12px', backgroundColor: '#e0f2fe', padding: '6px 8px', borderRadius: '6px' }}>
+              <strong>Method 2 (Quick trick for round numbers):</strong> Divide by 2, then remove one zero<br/>
+              <strong>Example:</strong> 300 ÷ 2 = 150 → Remove one zero → 15
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#0369a1' }}>💡 Tip: 5% is the same as dividing by 20.</p>
+          </div>
+        </div>
+
+        <div style={{
+          background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '16px',
+          marginBottom: '20px', fontSize: '13px', color: '#7c2d12', lineHeight: 1.6,
+        }}>
+          <p style={{ fontWeight: '700', marginTop: 0, marginBottom: '12px' }}>⚡ Important Exam Instructions</p>
+          <p style={{ margin: '0 0 8px 0' }}>While taking the exam, you MUST:</p>
+          <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+            <li style={{ marginBottom: '6px' }}>Stay on this tab — do not switch to other browser tabs</li>
+            <li style={{ marginBottom: '6px' }}>Keep the browser window open — do not minimize or minimize to tray</li>
+            <li style={{ marginBottom: '6px' }}>Do not lock your screen or let your device sleep</li>
+            <li style={{ marginBottom: '6px' }}>Do not open other apps or switch to different windows</li>
+            <li>Activate &quot;Always On Display&quot; or extend your screen sleep timeout to maximum (30 min+) so your phone doesn&apos;t auto-lock</li>
+          </ul>
+        </div>
+
         {message && (
           <div style={{
             padding: '14px', borderRadius: '12px', marginBottom: '16px',
