@@ -28,7 +28,7 @@ function getExamErrorMessage(error: string): string {
 
 export default function ExamPage() {
   const [view, setView] = useState<'start' | 'exam' | 'result'>('start');
-  const [refInput, setRefInput] = useState('');
+  const [form, setForm] = useState({ lastName: '', birthdate: '' });
   const [applicant, setApplicant] = useState<{ referenceNo: string; lastName: string; firstName: string; middleName?: string | null } | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -42,6 +42,7 @@ export default function ExamPage() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
   const [pendingUnanswered, setPendingUnanswered] = useState<number>(0);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
@@ -55,20 +56,21 @@ export default function ExamPage() {
   }, []);
 
   useEffect(() => {
-    const savedRef = localStorage.getItem('examRef');
-    if (savedRef) {
-      setRefInput(savedRef);
-      localStorage.removeItem('examRef');
+    const savedLastName = localStorage.getItem('savedLastName');
+    const savedBirthdate = localStorage.getItem('savedBirthdate');
+    if (savedLastName && savedBirthdate) {
+      setForm({ lastName: savedLastName, birthdate: savedBirthdate });
+      setRememberMe(true);
     }
   }, []);
 
   useEffect(() => {
-    activeReferenceRef.current = applicant?.referenceNo || refInput.trim();
-  }, [applicant, refInput]);
+    activeReferenceRef.current = applicant?.referenceNo || '';
+  }, [applicant]);
 
   async function verifyAndStart() {
-    if (!refInput.trim()) {
-      setMessage({ text: 'Please enter your reference number.', type: 'error' });
+    if (!form.lastName.trim() || !form.birthdate) {
+      setMessage({ text: 'Please enter your last name and birthdate.', type: 'error' });
       return;
     }
     setLoading(true);
@@ -78,11 +80,11 @@ export default function ExamPage() {
       const res = await fetch(`/api/exam`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getInfo', referenceNo: refInput.trim() }),
+        body: JSON.stringify({ action: 'getInfo', lastName: form.lastName.trim(), birthdate: form.birthdate }),
       });
 
       if (!res.ok) {
-        setMessage({ text: 'Failed to verify reference number.', type: 'error' });
+        setMessage({ text: 'Failed to verify information.', type: 'error' });
         setLoading(false);
         return;
       }
@@ -113,7 +115,12 @@ export default function ExamPage() {
         firstName: data.firstName,
         middleName: data.middleName,
       });
-      setRefInput(data.referenceNo);
+      
+      if (rememberMe) {
+        localStorage.setItem('savedLastName', form.lastName);
+        localStorage.setItem('savedBirthdate', form.birthdate);
+      }
+      
       await startExam(data.referenceNo);
     } catch (err) {
       setMessage({ text: 'An unexpected error occurred.', type: 'error' });
@@ -536,15 +543,41 @@ export default function ExamPage() {
 
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
-            Reference Number *
+            Last Name *
           </label>
           <input
-            value={refInput}
-            onChange={(e) => setRefInput(e.target.value)}
-            placeholder="APP-20260414093031"
+            value={form.lastName}
+            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+            placeholder="Enter your last name"
+            autoComplete="family-name"
+            autoCapitalize="words"
             style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
           />
         </div>
+
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+            Birthdate *
+          </label>
+          <input
+            type="date"
+            value={form.birthdate}
+            onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
+            max={new Date().toISOString().split('T')[0]}
+            autoComplete="bday"
+            style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+          />
+        </div>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            style={{ width: '18px', height: '18px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#4b5563' }}>Remember this device</span>
+        </label>
 
         <button
           onClick={verifyAndStart}

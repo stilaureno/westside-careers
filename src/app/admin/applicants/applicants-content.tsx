@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
+import ExamEligibleApplicants from './exam-eligible';
 import type { ApplicantListItem } from '@/lib/db/applicants';
 
 function useWindowSize() {
@@ -131,6 +132,9 @@ export default function ApplicantsContent({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const pageSizeOptions = [25, 50, 100];
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'all' | 'exam-eligible'>('all');
 
   // Load column visibility from database (only for super admins or if no prop provided)
   useEffect(() => {
@@ -438,7 +442,57 @@ export default function ApplicantsContent({
 
   return (
     <div className="container-fluid py-3" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif' }}>
-      {/* Mobile Filter Toggle */}
+      {/* Tab Navigation */}
+      <ul className="nav nav-tabs mb-3" role="tablist" style={{ borderBottom: '2px solid #dee2e6' }}>
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${activeTab === 'all' ? 'active' : ''}`}
+            id="all-tab"
+            type="button"
+            role="tab"
+            onClick={() => setActiveTab('all')}
+            style={{
+              cursor: 'pointer',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: activeTab === 'all' ? '600' : '400',
+              color: activeTab === 'all' ? '#0d6efd' : '#666',
+              borderBottom: activeTab === 'all' ? '3px solid #0d6efd' : 'none',
+              marginBottom: '-2px',
+            }}
+          >
+            Applicants
+          </button>
+        </li>
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${activeTab === 'exam-eligible' ? 'active' : ''}`}
+            id="exam-tab"
+            type="button"
+            role="tab"
+            onClick={() => setActiveTab('exam-eligible')}
+            style={{
+              cursor: 'pointer',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: activeTab === 'exam-eligible' ? '600' : '400',
+              color: activeTab === 'exam-eligible' ? '#0d6efd' : '#666',
+              borderBottom: activeTab === 'exam-eligible' ? '3px solid #0d6efd' : 'none',
+              marginBottom: '-2px',
+            }}
+          >
+            Exam Eligible
+          </button>
+        </li>
+      </ul>
+
+      {/* Tab Content */}
+      {activeTab === 'exam-eligible' && (
+        <ExamEligibleApplicants isSuperAdmin={isSuperAdmin} allowedDepartments={allowedDepartments} />
+      )}
+
+      {activeTab === 'all' && (
+      <div>
       {isMobile && (
         <div className="d-flex justify-content-between align-items-center mb-2">
           <span className="text-muted small">{filteredApplicants.length} results</span>
@@ -707,6 +761,8 @@ export default function ApplicantsContent({
       </div>
 
       <ApplicantModal key={selectedRefNo || 'applicant-modal-closed'} referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
+      </div>
+      )}
     </div>
   );
 }

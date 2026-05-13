@@ -116,14 +116,31 @@ function getExamWriteErrorMessage(context: string, error: { message?: string } |
   return error?.message ? `${context}: ${error.message}` : context;
 }
 
-export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInfo> {
+export async function getExamInfo(lastNameOrRef: string, birthdate?: string): Promise<ExamApplicantInfo> {
   const supabase = await createClient();
 
-  const { data: applicant, error } = await supabase
-    .from('applicants')
-    .select('reference_no, last_name, first_name, middle_name, position_applied, application_status, exam_authorized')
-    .eq('reference_no', referenceNo)
-    .single();
+  // If birthdate is provided, search by lastname and birthdate. Otherwise, search by reference number.
+  let applicant;
+  let error;
+
+  if (birthdate) {
+    const result = await supabase
+      .from('applicants')
+      .select('reference_no, last_name, first_name, middle_name, birthdate, position_applied, application_status, exam_authorized')
+      .ilike('last_name', lastNameOrRef)
+      .eq('birthdate', birthdate)
+      .single();
+    applicant = result.data;
+    error = result.error;
+  } else {
+    const result = await supabase
+      .from('applicants')
+      .select('reference_no, last_name, first_name, middle_name, position_applied, application_status, exam_authorized')
+      .eq('reference_no', lastNameOrRef)
+      .single();
+    applicant = result.data;
+    error = result.error;
+  }
 
   if (error || !applicant) {
     return { error: 'Applicant not found' };
@@ -140,6 +157,8 @@ export async function getExamInfo(referenceNo: string): Promise<ExamApplicantInf
   if (applicant.application_status === 'Completed' || applicant.application_status === 'Not Recommended') {
     return { error: 'notEligible' };
   }
+
+  const referenceNo = applicant.reference_no;
 
   const { data: screeningResult } = await supabase
     .from('stage_results')
