@@ -422,7 +422,7 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
       ? 'Table Test'
       : 'Final Interview';
 
-  if (existing) {
+   if (existing) {
     await supabase
       .from('stage_results')
       .update({
@@ -432,8 +432,6 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
         passing_score: PASSING_SCORE,
         max_score: MAX_MATH_EXAM_SCORE,
         remarks,
-        evaluated_by: 'HR',
-        evaluated_at: new Date().toISOString(),
       })
       .eq('id', existing.id);
   } else {
@@ -450,8 +448,6 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
         passing_score: PASSING_SCORE,
         max_score: MAX_MATH_EXAM_SCORE,
         remarks,
-        evaluated_by: 'HR',
-        evaluated_at: new Date().toISOString(),
       });
   }
 
