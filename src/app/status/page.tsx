@@ -12,6 +12,12 @@ type MathExamResult = {
   status: string | null;
 };
 
+type FeedbackForm = {
+  rating: number;
+  comments: string;
+  email: string;
+};
+
 export default function StatusPage() {
   const [form, setForm] = useState({ lastName: '', birthdate: '' });
   const [result, setResult] = useState<{ applicant: any; roadmap: StageRoadmapItem[]; mathExam: MathExamResult | null; nextStep: string | null } | null>(null);
@@ -23,6 +29,10 @@ const [autoFetched, setAutoFetched] = useState(false);
   const [showExamWarning, setShowExamWarning] = useState(false);
   const [examWarningAcknowledged, setExamWarningAcknowledged] = useState(false);
   const [keepScreenOn, setKeepScreenOn] = useState(false);
+  const [feedbackForm, setFeedbackForm] = useState<FeedbackForm>({ rating: 0, comments: '', email: '' });
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   useEffect(() => {
     if (!lockedUntil) return;
@@ -93,6 +103,48 @@ const [autoFetched, setAutoFetched] = useState(false);
     const minutes = Math.floor(remainingMs / 60000);
     const seconds = Math.floor((remainingMs % 60000) / 1000);
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  async function submitFeedback(e: React.FormEvent) {
+    e.preventDefault();
+    if (feedbackSubmitting || !result) return;
+
+    setFeedbackSubmitting(true);
+    setFeedbackMessage(null);
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reference_no: result.applicant.reference_no,
+          last_name: result.applicant.last_name,
+          first_name: result.applicant.first_name,
+          email: feedbackForm.email || result.applicant.email_address,
+          rating: feedbackForm.rating,
+          comments: feedbackForm.comments,
+        }),
+      });
+
+      if (!res.ok) {
+        setFeedbackMessage({ text: 'Failed to submit feedback', type: 'error' });
+        setFeedbackSubmitting(false);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        setFeedbackMessage({ text: 'Thank you for your feedback!', type: 'success' });
+        setFeedbackSubmitted(true);
+        setFeedbackForm({ rating: 0, comments: '', email: '' });
+      } else {
+        setFeedbackMessage({ text: data.error || 'Failed to submit feedback', type: 'error' });
+      }
+    } catch (err) {
+      setFeedbackMessage({ text: 'An error occurred', type: 'error' });
+    } finally {
+      setFeedbackSubmitting(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -334,15 +386,121 @@ const [autoFetched, setAutoFetched] = useState(false);
             </div>
 
 {result.nextStep && (result.applicant?.application_status === 'Completed' || result.applicant?.application_status === 'Passed') ? (
-              <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                <p style={{ fontSize: '13px', color: '#1e40af', margin: '0 0 8px' }}>
-                  <span style={{ fontWeight: '600' }}>Next Step: </span>
-                  {result.nextStep}
-                </p>
-                <a href="https://westsideresort.darwinbox.com/ms/candidatev2/main/auth_login" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '8px', padding: '10px 16px', background: '#8b1e2d', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
-                  Open Darwinbox →
-                </a>
-              </div>
+              <>
+                <div style={{ marginTop: '16px', padding: '16px', borderRadius: '12px', background: '#ecfdf3', border: '1px solid #86efac' }}>
+                  <p style={{ fontSize: '14px', color: '#166534', margin: 0, lineHeight: 1.6 }}>
+                    {result.nextStep}
+                  </p>
+                </div>
+
+                {!feedbackSubmitted && (
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '12px', background: '#fef3c7', border: '1px solid #fcd34d' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#92400e', marginTop: 0, marginBottom: '12px' }}>📝 Help Us Improve</h3>
+                    <p style={{ fontSize: '12px', color: '#78350f', marginBottom: '12px' }}>How was your application experience?</p>
+                    
+                    <form onSubmit={submitFeedback}>
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#78350f', marginBottom: '8px' }}>Rate your experience</label>
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '24px' }}>
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <button
+                              key={rating}
+                              type="button"
+                              onClick={() => setFeedbackForm({ ...feedbackForm, rating })}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                opacity: feedbackForm.rating >= rating ? 1 : 0.4,
+                                transform: feedbackForm.rating >= rating ? 'scale(1.2)' : 'scale(1)',
+                                transition: 'all 0.2s',
+                              }}
+                            >
+                              {rating === 1 ? '😞' : rating === 2 ? '😕' : rating === 3 ? '😐' : rating === 4 ? '🙂' : '😄'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#78350f', marginBottom: '6px' }}>Comments (optional)</label>
+                        <textarea
+                          value={feedbackForm.comments}
+                          onChange={(e) => setFeedbackForm({ ...feedbackForm, comments: e.target.value })}
+                          placeholder="Share your thoughts..."
+                          style={{
+                            width: '100%',
+                            minHeight: '60px',
+                            padding: '8px',
+                            border: '1px solid #fcd34d',
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            fontFamily: 'inherit',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#78350f', marginBottom: '6px' }}>Email (optional)</label>
+                        <input
+                          type="email"
+                          value={feedbackForm.email}
+                          onChange={(e) => setFeedbackForm({ ...feedbackForm, email: e.target.value })}
+                          placeholder={result.applicant.email_address || 'your@email.com'}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #fcd34d',
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+
+                      {feedbackMessage && (
+                        <div style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          marginBottom: '12px',
+                          background: feedbackMessage.type === 'success' ? '#ecfdf3' : '#fef2f2',
+                          border: `1px solid ${feedbackMessage.type === 'success' ? '#86efac' : '#fecaca'}`,
+                          color: feedbackMessage.type === 'success' ? '#166534' : '#991b1b',
+                          fontSize: '12px',
+                        }}>
+                          {feedbackMessage.text}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={feedbackSubmitting || feedbackForm.rating === 0}
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          background: feedbackForm.rating === 0 ? '#d1d5db' : '#8b1e2d',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: feedbackForm.rating === 0 ? 'not-allowed' : 'pointer',
+                          opacity: feedbackSubmitting ? 0.7 : 1,
+                        }}
+                      >
+                        {feedbackSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {feedbackSubmitted && (
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '12px', background: '#ecfdf3', border: '1px solid #86efac', textAlign: 'center' }}>
+                    <p style={{ fontSize: '13px', color: '#166534', fontWeight: '600', margin: 0 }}>Thank you for your feedback! 🙏</p>
+                  </div>
+                )}
+              </>
             ) : (
               <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
                 <p style={{ fontSize: '13px', color: '#1e40af', margin: 0 }}>

@@ -260,9 +260,7 @@ const workflow = await getStageWorkflowFromDB(applicant.position_applied, applic
   let nextStep: string | null = null;
   
   if (allStagesCompleted) {
-    const stagesList = workflow.join(', ');
-    const pos = applicant.position_applied;
-    nextStep = `You have completed the Hiring Portal process for the ${pos} position, including the ${stagesList}. Please follow the next instructions provided by the final interviewer.`;
+    nextStep = `Thank you for applying! We appreciate your time and interest in joining our team. We will update you on your application status via email or the contact number you provided. Keep an eye on your inbox for further updates.`;
   } else if (lastCompletedIdx < workflow.length) {
     nextStep = workflow[lastCompletedIdx];
   }
