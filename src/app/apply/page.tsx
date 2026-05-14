@@ -37,14 +37,20 @@ export default function ApplyPage() {
     preferredDepartment: '',
   });
   const [games, setGames] = useState<string[]>([]);
+  const [requiredGamesCount, setRequiredGamesCount] = useState(2);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('/api/settings/departments');
-        const data = await res.json();
-        setDepartments(data.departments || []);
-        setPositions(data.positions || []);
+        const [deptRes, configRes] = await Promise.all([
+          fetch('/api/settings/departments'),
+          fetch('/api/config/experienced-games-count')
+        ]);
+        const deptData = await deptRes.json();
+        const configData = await configRes.json();
+        setDepartments(deptData.departments || []);
+        setPositions(deptData.positions || []);
+        setRequiredGamesCount(configData.count || 2);
       } catch (err) {
         console.error('Failed to fetch departments:', err);
       } finally {
@@ -120,8 +126,8 @@ export default function ApplyPage() {
       return;
     }
 
-    if (isExperienced && games.length < 2) {
-      setMessage({ text: 'Please select at least 2 games.', type: 'error' });
+    if (isExperienced && games.length < requiredGamesCount) {
+      setMessage({ text: `Please select at least ${requiredGamesCount} games.`, type: 'error' });
       setLoading(false);
       return;
     }
@@ -404,7 +410,7 @@ export default function ApplyPage() {
 
             {isExperienced && (
               <div className={styles.grid}>
-                <p className={styles.gameHint}>Select at least 2 games you are proficient in:</p>
+                <p className={styles.gameHint}>Select at least {requiredGamesCount} games you are proficient in:</p>
                 <div className={styles.gameGrid}>
                   {ALLOWED_GAMES.map((game) => (
                     <label

@@ -58,6 +58,7 @@ export default function SettingsContent() {
   const [allStages, setAllStages] = useState<{ id: string; name: string; display_order: number }[]>([]);
   const [newStageName, setNewStageName] = useState('');
   const [newStageOrder, setNewStageOrder] = useState<number>(0);
+  const [experiencedRequiredGames, setExperiencedRequiredGames] = useState(2);
 
   // Table column visibility state
   const [tableColumns, setTableColumns] = useState<VisibleField[]>([]);
@@ -75,12 +76,13 @@ export default function SettingsContent() {
 
   async function loadData() {
     setLoading(true);
-    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes] = await Promise.all([
+    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes, gamesConfigRes] = await Promise.all([
       supabase.from('visible_fields').select('*').order('display_order'),
       supabase.from('departments').select('*').order('name'),
       supabase.from('positions').select('*').order('name'),
       supabase.from('config').select('*').like('key', 'ADMIN_PASSWORD%').neq('key', 'SUPER_ADMIN_PASSWORD'),
       supabase.from('stages').select('*').order('display_order'),
+      supabase.from('config').select('value').eq('key', 'EXPERIENCED_DEALER_REQUIRED_GAMES').single(),
     ]);
     
     const allFields = fieldsRes.data || [];
@@ -92,7 +94,29 @@ export default function SettingsContent() {
     setPositions(possRes.data || []);
     setAdminPasswords(adminPassRes.data || []);
     setAllStages(stagesRes.data || []);
+    if (gamesConfigRes.data?.value) {
+      setExperiencedRequiredGames(parseInt(gamesConfigRes.data.value, 10));
+    }
     setLoading(false);
+  }
+
+  async function saveExperiencedRequiredGames(count: number) {
+    if (count < 1 || count > 10) {
+      setMessage({ text: 'Value must be between 1 and 10', type: 'error' });
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .upsert({ key: 'EXPERIENCED_DEALER_REQUIRED_GAMES', value: count.toString() }, { onConflict: 'key' });
+
+    if (!error) {
+      setExperiencedRequiredGames(count);
+      setMessage({ text: 'Required games count updated', type: 'success' });
+    } else {
+      setMessage({ text: error.message, type: 'error' });
+    }
+    setSaving(false);
   }
 
   async function toggleField(field: VisibleField) {
@@ -770,6 +794,41 @@ export default function SettingsContent() {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Application Settings */}
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-header bg-white">
+              <h6 className="mb-0">Application Settings</h6>
+              <small className="text-muted">Configure application requirements</small>
+            </div>
+            <div className="card-body">
+              <div className="mb-3">
+                <label className="form-label small fw-bold">Required Games for Experienced Dealers</label>
+                <div className="d-flex gap-2 align-items-center">
+                  <input
+                    type="number"
+                    className="form-control form-control-sm"
+                    min="1"
+                    max="10"
+                    value={experiencedRequiredGames}
+                    onChange={(e) => setExperiencedRequiredGames(parseInt(e.target.value) || 1)}
+                  />
+                  <button
+                    className="btn btn-sm btn-dark"
+                    onClick={() => saveExperiencedRequiredGames(experiencedRequiredGames)}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+                <small className="text-muted d-block mt-2">
+                  Experienced dealers must select at least this many games on the application form.
+                </small>
+              </div>
             </div>
           </div>
         </div>
