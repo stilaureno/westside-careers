@@ -27,7 +27,7 @@ function getExamErrorMessage(error: string): string {
 }
 
 export default function ExamPage() {
-  const [view, setView] = useState<'start' | 'exam' | 'result'>('start');
+  const [view, setView] = useState<'start' | 'confirm' | 'exam' | 'result'>('start');
   const [form, setForm] = useState({ lastName: '', birthdate: '' });
   const [applicant, setApplicant] = useState<{ referenceNo: string; lastName: string; firstName: string; middleName?: string | null } | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -43,6 +43,8 @@ export default function ExamPage() {
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
   const [pendingUnanswered, setPendingUnanswered] = useState<number>(0);
   const [rememberMe, setRememberMe] = useState(false);
+  const [confirmUnderstood, setConfirmUnderstood] = useState(false);
+  const [confirmAgree, setConfirmAgree] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
@@ -121,10 +123,21 @@ export default function ExamPage() {
         localStorage.setItem('savedBirthdate', form.birthdate);
       }
       
-      await startExam(data.referenceNo);
+      setView('confirm');
+      setLoading(false);
     } catch (err) {
       setMessage({ text: 'An unexpected error occurred.', type: 'error' });
       setLoading(false);
+    }
+  }
+
+  async function proceedToExam() {
+    if (!confirmUnderstood || !confirmAgree) {
+      setMessage({ text: 'Please confirm both statements before proceeding.', type: 'error' });
+      return;
+    }
+    if (applicant?.referenceNo) {
+      await startExam(applicant.referenceNo);
     }
   }
 
@@ -462,6 +475,119 @@ export default function ExamPage() {
             </div>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (view === 'confirm') {
+    return (
+      <div style={{
+        minHeight: '100vh', background: '#f6f8fc', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', padding: '20px',
+      }}>
+        <div style={{
+          background: '#fff', borderRadius: '20px', padding: '40px', maxWidth: '520px',
+          width: '100%', boxShadow: '0 10px 30px rgba(15,23,42,.06)',
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <img
+              src="/WESTSIDE%20LOGO%20COLORED.png"
+              alt="NWR Careers logo"
+              style={{ width: '220px', maxWidth: '100%', margin: '0 auto 16px', display: 'block' }}
+            />
+            <h1 style={{ fontSize: '22px', color: '#8b1e2d', marginBottom: '6px' }}>Confirm & Proceed</h1>
+            <p style={{ fontSize: '14px', color: '#6b7280' }}>
+              Please verify that you understand the exam rules
+            </p>
+          </div>
+
+          <div style={{
+            background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '16px',
+            marginBottom: '20px', fontSize: '13px', color: '#7c2d12', lineHeight: 1.6,
+          }}>
+            <p style={{ fontWeight: '700', marginTop: 0, marginBottom: '12px' }}>⚡ Important Exam Instructions</p>
+            <p style={{ margin: '0 0 8px 0' }}>While taking the exam, you MUST:</p>
+            <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li style={{ marginBottom: '6px' }}>Stay on this tab — do not switch to other browser tabs</li>
+              <li style={{ marginBottom: '6px' }}>Keep the browser window open — do not minimize or minimize to tray</li>
+              <li style={{ marginBottom: '6px' }}>Do not lock your screen or let your device sleep</li>
+              <li style={{ marginBottom: '6px' }}>Do not open other apps or switch to different windows</li>
+              <li>Activate &quot;Always On Display&quot; or extend your screen sleep timeout to maximum (30 min+)</li>
+            </ul>
+          </div>
+
+          <div style={{
+            background: '#fefce8', border: '1px solid #fef08a', borderRadius: '10px', padding: '14px', marginBottom: '20px',
+          }}>
+            <p style={{ margin: 0, fontSize: '13px', color: '#854d0e', fontWeight: '600' }}>
+              🚨 If you switch tabs, minimize, lock screen, or open other apps, your exam will be <span style={{ textDecoration: 'underline' }}>automatically submitted</span> with only answered questions recorded.
+            </p>
+          </div>
+
+          {message && (
+            <div style={{
+              padding: '14px', borderRadius: '12px', marginBottom: '16px',
+              background: message.type === 'success' ? '#ecfdf3' : '#fef2f2',
+              border: `1px solid ${message.type === 'success' ? '#86efac' : '#fecaca'}`,
+              color: message.type === 'success' ? '#166534' : '#991b1b', fontSize: '14px',
+            }}>{message.text}</div>
+          )}
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer', marginBottom: '12px' }}>
+              <input
+                type="checkbox"
+                checked={confirmUnderstood}
+                onChange={(e) => setConfirmUnderstood(e.target.checked)}
+                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#8b1e2d', flexShrink: 0 }}
+              />
+              <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                I have read and understand all the exam instructions and rules listed above.
+              </span>
+            </label>
+
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={confirmAgree}
+                onChange={(e) => setConfirmAgree(e.target.checked)}
+                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#8b1e2d', flexShrink: 0 }}
+              />
+              <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                I confirm that I will follow all exam rules, and I understand that any violation will result in automatic exam submission.
+              </span>
+            </label>
+          </div>
+
+          <button
+            onClick={proceedToExam}
+            disabled={!confirmUnderstood || !confirmAgree}
+            style={{
+              width: '100%', padding: '14px', background: confirmUnderstood && confirmAgree ? '#8b1e2d' : '#9ca3af',
+              color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
+              cursor: confirmUnderstood && confirmAgree ? 'pointer' : 'not-allowed', marginBottom: '12px',
+            }}
+          >
+            Start Exam
+          </button>
+
+          <div style={{ textAlign: 'center' }}>
+            <button
+              onClick={() => {
+                setView('start');
+                setConfirmUnderstood(false);
+                setConfirmAgree(false);
+                setMessage(null);
+              }}
+              style={{
+                background: 'none', border: 'none', color: '#6b7280', fontSize: '13px',
+                textDecoration: 'none', cursor: 'pointer', padding: 0,
+              }}
+            >
+              ← Back
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
