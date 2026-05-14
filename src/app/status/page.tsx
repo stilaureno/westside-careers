@@ -73,6 +73,9 @@ const [autoFetched, setAutoFetched] = useState(false);
       } else {
         setResult(res.data);
         setLockedUntil(null);
+        if (res.data?.hasFeedback) {
+          setFeedbackSubmitted(true);
+        }
       }
       setLoading(false);
     }, 100);

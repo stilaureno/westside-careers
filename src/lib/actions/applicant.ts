@@ -173,7 +173,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
 export async function getApplicantStatus(
   lastName: string,
   birthdate: string
-): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[]; mathExam: { score: number | null; passed: boolean | null; takenAt: string | null; status: string | null } | null; nextStep: string | null } | null; error: string | null; lockedUntil?: number | null }> {
+): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[]; mathExam: { score: number | null; passed: boolean | null; takenAt: string | null; status: string | null } | null; nextStep: string | null; hasFeedback: boolean } | null; error: string | null; lockedUntil?: number | null }> {
   const cookieStore = await cookies();
   const activeLock = await getActiveStatusLock(cookieStore);
   if (activeLock) {
@@ -265,7 +265,15 @@ const workflow = await getStageWorkflowFromDB(applicant.position_applied, applic
     nextStep = workflow[lastCompletedIdx];
   }
 
-  return { data: { applicant: applicant as Applicant, roadmap, mathExam, nextStep }, error: null, lockedUntil: null };
+  const { data: existingFeedback } = await supabase
+    .from('application_feedback')
+    .select('id')
+    .eq('reference_no', referenceNo)
+    .single();
+
+  const hasFeedback = !!existingFeedback;
+
+  return { data: { applicant: applicant as Applicant, roadmap, mathExam, nextStep, hasFeedback }, error: null, lockedUntil: null };
 }
 
 export async function getApplicantInfo(referenceNo: string): Promise<{ data: any; error: string | null }> {
