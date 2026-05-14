@@ -21,6 +21,7 @@ export default function ExamEligibleApplicants({
   const [authorizing, setAuthorizing] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [globalSearch, setGlobalSearch] = useState('');
+  const [examAuthFilter, setExamAuthFilter] = useState<'all' | 'authorized' | 'not-authorized'>('all');
   const [sortField, setSortField] = useState<'created_at' | 'reference_no' | 'displayName' | 'initialScreeningResult'>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
@@ -132,6 +133,12 @@ export default function ExamEligibleApplicants({
       );
     });
 
+    if (examAuthFilter !== 'all') {
+      result = result.filter((app) =>
+        examAuthFilter === 'authorized' ? app.exam_authorized === 'Yes' : app.exam_authorized !== 'Yes'
+      );
+    }
+
     result.sort((a, b) => {
       let aVal: any = a[sortField];
       let bVal: any = b[sortField];
@@ -142,7 +149,7 @@ export default function ExamEligibleApplicants({
     });
 
     return result;
-  }, [applicants, globalSearch, sortField, sortDir]);
+  }, [applicants, globalSearch, examAuthFilter, sortField, sortDir]);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -251,7 +258,7 @@ export default function ExamEligibleApplicants({
       <div className="card mb-3 shadow-sm">
         <div className="card-body">
           <div className="row align-items-end g-3">
-            <div className="col-md-6">
+            <div className="col-md-4">
               <label className="form-label small text-muted mb-1">Search (Name, Reference No)</label>
               <input
                 type="text"
@@ -261,7 +268,19 @@ export default function ExamEligibleApplicants({
                 onChange={(e) => setGlobalSearch(e.target.value)}
               />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
+              <label className="form-label small text-muted mb-1">Exam Auth</label>
+              <select
+                className="form-select form-select-sm"
+                value={examAuthFilter}
+                onChange={(e) => setExamAuthFilter(e.target.value as 'all' | 'authorized' | 'not-authorized')}
+              >
+                <option value="all">All</option>
+                <option value="authorized">Authorized (Yes)</option>
+                <option value="not-authorized">Not Authorized (No)</option>
+              </select>
+            </div>
+            <div className="col-md-4">
               <button
                 className="btn btn-primary btn-sm"
                 onClick={handleAllowExam}
