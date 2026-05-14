@@ -21,7 +21,7 @@ export default function ExamEligibleApplicants({
   const [authorizing, setAuthorizing] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [globalSearch, setGlobalSearch] = useState('');
-  const [examAuthFilter, setExamAuthFilter] = useState<'all' | 'authorized' | 'not-authorized'>('all');
+  const [examAuthFilter, setExamAuthFilter] = useState<'all' | 'authorized' | 'not-authorized'>('not-authorized');
   const [sortField, setSortField] = useState<'created_at' | 'reference_no' | 'displayName' | 'initialScreeningResult'>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
