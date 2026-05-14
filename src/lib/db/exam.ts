@@ -451,11 +451,11 @@ async function syncMathExamStage(referenceNo: string, score: number, passed: boo
       });
   }
 
-  // If passed -> mark applicant completed. If failed -> either schedule automatic retake (if attemptCount < 2) or schedule pen & paper
+  // If passed -> mark applicant Ongoing to continue remaining stages. If failed -> either schedule automatic retake (if attemptCount < 2) or schedule pen & paper
   if (passed) {
     const { error: appUpdateError } = await supabase
       .from('applicants')
-      .update({ application_status: 'Completed', overall_result: 'Passed', current_stage: 'Math Exam', updated_at: new Date().toISOString() })
+      .update({ application_status: 'Ongoing', overall_result: 'Passed', current_stage: nextStageLabel, updated_at: new Date().toISOString() })
       .eq('reference_no', referenceNo);
     if (appUpdateError) console.error('Failed to update applicant after math exam', appUpdateError);
   } else {
