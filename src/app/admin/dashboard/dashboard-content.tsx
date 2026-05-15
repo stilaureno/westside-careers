@@ -558,17 +558,22 @@ export default function DashboardContent() {
   const [modalTitle, setModalTitle] = useState('');
   const [modalApplicants, setModalApplicants] = useState<ApplicantListItem[]>([]);
   const [modalLoading, setModalLoading] = useState(false);
+  const [modalPage, setModalPage] = useState(1);
+  const [modalTotalCount, setModalTotalCount] = useState(0);
+  const [modalAllApplicants, setModalAllApplicants] = useState<ApplicantListItem[]>([]);
+  const MODAL_PAGE_SIZE = 50;
 
-  const handleStatusClick = useCallback(async (status: string, department: string, position?: string) => {
+  const handleStatusClick = useCallback(async (status: string, department: string, position?: string, page = 1) => {
     setModalTitle(position 
       ? `${status} - ${position} in ${department}` 
       : `${status} in ${department}`);
     setModalOpen(true);
     setModalLoading(true);
+    setModalPage(page);
 
     let query = supabase
       .from('applicants')
-      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, experience_level, created_at')
+      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, experience_level, created_at', { count: 'exact' })
       .eq('department', department)
       .order('created_at', { ascending: false });
 
@@ -584,21 +589,25 @@ export default function DashboardContent() {
       query = query.eq('application_status', status);
     }
 
-    const { data } = await query.limit(200);
+    const from = (page - 1) * MODAL_PAGE_SIZE;
+    const to = from + MODAL_PAGE_SIZE - 1;
+    const { data, count } = await query.range(from, to);
+    setModalTotalCount(count || 0);
     setModalApplicants(data || []);
     setModalLoading(false);
   }, [supabase]);
 
-  const handleStageClick = useCallback(async (stage: string, result: string, department: string) => {
+  const handleStageClick = useCallback(async (stage: string, result: string, department: string, page = 1) => {
     setModalTitle(`${stage} ${result} in ${department}`);
     setModalOpen(true);
     setModalLoading(true);
+    setModalPage(page);
 
     const { data: apps } = await supabase
       .from('applicants')
       .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, experience_level, created_at')
       .eq('department', department)
-      .limit(500);
+      .limit(1000);
 
     const refNos = (apps || []).map(a => a.reference_no).filter(Boolean);
     
@@ -686,10 +695,17 @@ export default function DashboardContent() {
     
     const filtered = (apps || []).filter(a => matchingRefs.has(a.reference_no));
 
-    setModalApplicants(filtered.map(a => ({
+    const mapped = filtered.map(a => ({
       ...a,
       application_status: result === 'Pending' || result === 'Retake' ? 'Ongoing' : (result === 'Passed' ? 'Passed' : 'Failed')
-    })));
+    }));
+
+    setModalTotalCount(mapped.length);
+    setModalAllApplicants(mapped);
+
+    const from = (page - 1) * MODAL_PAGE_SIZE;
+    const to = from + MODAL_PAGE_SIZE;
+    setModalApplicants(mapped.slice(from, to));
     setModalLoading(false);
   }, [supabase]);
 
@@ -697,7 +713,50 @@ export default function DashboardContent() {
     setModalOpen(false);
     setModalApplicants([]);
     setModalTitle('');
+    setModalPage(1);
+    setModalTotalCount(0);
+    setModalAllApplicants([]);
   };
+
+  const handleStatusPageChange = useCallback(async (newPage: number, status: string, department: string, position?: string) => {
+    setModalLoading(true);
+    const from = (newPage - 1) * MODAL_PAGE_SIZE;
+    const to = from + MODAL_PAGE_SIZE - 1;
+
+    let query = supabase
+      .from('applicants')
+      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, experience_level, created_at')
+      .eq('department', department)
+      .order('created_at', { ascending: false });
+
+    if (position) {
+      query = query.eq('position_applied', position);
+    }
+
+    if (status === 'Passed') {
+      query = query.in('application_status', ['Passed', 'Completed']);
+    } else if (status === 'Failed') {
+      query = query.in('application_status', ['Failed', 'Not Recommended']);
+    } else {
+      query = query.eq('application_status', status);
+    }
+
+    const { data } = await query.range(from, to);
+    setModalPage(newPage);
+    setModalApplicants(data || []);
+    setModalLoading(false);
+  }, [supabase]);
+
+  const handleStagePageChange = useCallback((newPage: number) => {
+    setModalLoading(true);
+    setTimeout(() => {
+      const from = (newPage - 1) * MODAL_PAGE_SIZE;
+      const to = from + MODAL_PAGE_SIZE;
+      setModalPage(newPage);
+      setModalApplicants(modalAllApplicants.slice(from, to));
+      setModalLoading(false);
+    }, 50);
+  }, [modalAllApplicants]);
 
   useEffect(() => {
     const superAdminCookie = getCookie('super_admin_session');
@@ -1324,8 +1383,90 @@ export default function DashboardContent() {
               </div>
             )}
             
-            <div style={{ marginTop: '16px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
-              {modalApplicants.length} applicant{modalApplicants.length !== 1 ? 's' : ''}
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+              <div style={{ color: '#6b7280', fontSize: '13px' }}>
+                Showing {((modalPage - 1) * MODAL_PAGE_SIZE) + 1} - {Math.min(modalPage * MODAL_PAGE_SIZE, modalTotalCount)} of {modalTotalCount} applicant{modalTotalCount !== 1 ? 's' : ''}
+              </div>
+              {modalTotalCount > MODAL_PAGE_SIZE && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <button
+                    onClick={() => {
+                      if (modalAllApplicants.length > 0) {
+                        handleStagePageChange(modalPage - 1);
+                      } else {
+                        handleStatusPageChange(modalPage - 1, modalTitle.includes('Passed') ? 'Passed' : modalTitle.includes('Failed') ? 'Failed' : modalTitle.includes('Pending') ? 'Pending' : modalTitle.includes('Ongoing') ? 'Ongoing' : modalTitle.includes('Reprofile') ? 'Reprofile' : modalTitle.includes('Pooling') ? 'For Pooling' : 'Pending', modalTitle.split(' in ')[1] || '', undefined);
+                      }
+                    }}
+                    disabled={modalPage === 1}
+                    style={{
+                      padding: '6px 12px',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px',
+                      background: modalPage === 1 ? '#f3f4f6' : '#fff',
+                      color: modalPage === 1 ? '#9ca3af' : '#374151',
+                      cursor: modalPage === 1 ? 'not-allowed' : 'pointer',
+                      fontSize: '13px',
+                    }}
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: Math.ceil(modalTotalCount / MODAL_PAGE_SIZE) }, (_, i) => i + 1).filter(p => {
+                    const totalPages = Math.ceil(modalTotalCount / MODAL_PAGE_SIZE);
+                    return p === 1 || p === totalPages || (p >= modalPage - 1 && p <= modalPage + 1);
+                  }).map((p, idx, arr) => {
+                    if (idx > 0 && arr[idx - 1] !== p - 1) {
+                      return <span key={`ellipsis-${p}`} style={{ color: '#9ca3af', padding: '0 4px' }}>...</span>;
+                    }
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => {
+                          if (modalAllApplicants.length > 0) {
+                            handleStagePageChange(p);
+                          } else {
+                            handleStatusPageChange(p, modalTitle.includes('Passed') ? 'Passed' : modalTitle.includes('Failed') ? 'Failed' : modalTitle.includes('Pending') ? 'Pending' : modalTitle.includes('Ongoing') ? 'Ongoing' : modalTitle.includes('Reprofile') ? 'Reprofile' : modalTitle.includes('Pooling') ? 'For Pooling' : 'Pending', modalTitle.split(' in ')[1] || '', undefined);
+                          }
+                        }}
+                        style={{
+                          padding: '6px 10px',
+                          border: '1px solid',
+                          borderColor: modalPage === p ? '#8b1e2d' : '#e5e7eb',
+                          borderRadius: '6px',
+                          background: modalPage === p ? '#8b1e2d' : '#fff',
+                          color: modalPage === p ? '#fff' : '#374151',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          fontWeight: modalPage === p ? '600' : '400',
+                        }}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => {
+                      const totalPages = Math.ceil(modalTotalCount / MODAL_PAGE_SIZE);
+                      if (modalAllApplicants.length > 0) {
+                        handleStagePageChange(modalPage + 1);
+                      } else {
+                        handleStatusPageChange(modalPage + 1, modalTitle.includes('Passed') ? 'Passed' : modalTitle.includes('Failed') ? 'Failed' : modalTitle.includes('Pending') ? 'Pending' : modalTitle.includes('Ongoing') ? 'Ongoing' : modalTitle.includes('Reprofile') ? 'Reprofile' : modalTitle.includes('Pooling') ? 'For Pooling' : 'Pending', modalTitle.split(' in ')[1] || '', undefined);
+                      }
+                    }}
+                    disabled={modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE)}
+                    style={{
+                      padding: '6px 12px',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px',
+                      background: modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE) ? '#f3f4f6' : '#fff',
+                      color: modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE) ? '#9ca3af' : '#374151',
+                      cursor: modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE) ? 'not-allowed' : 'pointer',
+                      fontSize: '13px',
+                    }}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
