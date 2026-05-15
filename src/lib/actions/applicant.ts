@@ -313,3 +313,54 @@ export async function getApplicantInfo(referenceNo: string): Promise<{ data: any
     error: null,
   };
 }
+
+export async function deleteApplicant(referenceNo: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const { error: deleteNotif } = await supabase
+    .from('applicant_notifications')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteNotif) {
+    return { success: false, error: deleteNotif.message };
+  }
+
+  const { error: deleteGames } = await supabase
+    .from('applicant_games')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteGames) {
+    return { success: false, error: deleteGames.message };
+  }
+
+  const { error: deleteExam } = await supabase
+    .from('math_exam_results')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteExam) {
+    return { success: false, error: deleteExam.message };
+  }
+
+  const { error: deleteStages } = await supabase
+    .from('stage_results')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteStages) {
+    return { success: false, error: deleteStages.message };
+  }
+
+  const { error: deleteApplicant } = await supabase
+    .from('applicants')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteApplicant) {
+    return { success: false, error: deleteApplicant.message };
+  }
+
+  return { success: true };
+}

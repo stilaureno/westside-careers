@@ -5,6 +5,7 @@ import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
 import ExamEligibleApplicants from './exam-eligible';
+import { deleteApplicant } from '@/lib/actions/applicant';
 import type { ApplicantListItem } from '@/lib/db/applicants';
 
 function useWindowSize() {
@@ -127,6 +128,7 @@ export default function ApplicantsContent({
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [deletingRef, setDeletingRef] = useState<string | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -430,6 +432,20 @@ export default function ApplicantsContent({
     { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
   ];
 
+  const handleDelete = async (referenceNo: string) => {
+    if (!confirm(`Are you sure you want to delete applicant ${referenceNo}? This will also delete all related records (stage results, exam results, notifications, games).`)) {
+      return;
+    }
+    setDeletingRef(referenceNo);
+    const result = await deleteApplicant(referenceNo);
+    setDeletingRef(null);
+    if (result.success) {
+      await loadApplicants();
+    } else {
+      alert(`Failed to delete applicant: ${result.error}`);
+    }
+  };
+
   const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== defaultStartDate || filterEndDate !== today;
 
   if (loading) {
@@ -613,6 +629,7 @@ export default function ApplicantsContent({
                       </th>
                     );
                   })}
+                  <th style={{ fontSize: '12px', fontWeight: '600' }}>Actions</th>
                 </tr>
               </thead>
 <tbody>
@@ -675,11 +692,22 @@ export default function ApplicantsContent({
                         {renderFormattedMessage(app.remarks)}
                       </td>
                     )}
+                    <td>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDelete(app.reference_no)}
+                        disabled={deletingRef === app.reference_no}
+                        style={{ padding: '2px 6px', fontSize: '11px' }}
+                        title="Delete applicant"
+                      >
+                        {deletingRef === app.reference_no ? '...' : '✕'}
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {filteredApplicants.length === 0 && (
                   <tr>
-                    <td colSpan={visibleColumns.size} className="text-center text-muted py-4">
+                    <td colSpan={visibleColumns.size + 1} className="text-center text-muted py-4">
                       No matching applicant records.
                     </td>
                   </tr>
