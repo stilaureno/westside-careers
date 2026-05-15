@@ -364,3 +364,33 @@ export async function deleteApplicant(referenceNo: string): Promise<{ success: b
 
   return { success: true };
 }
+
+export async function updateApplicantBasicInfo(
+  referenceNo: string,
+  updates: { first_name?: string; last_name?: string; middle_name?: string; birthdate?: string }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const updateData: Record<string, any> = {};
+  if (updates.first_name !== undefined) updateData.first_name = updates.first_name;
+  if (updates.last_name !== undefined) updateData.last_name = updates.last_name;
+  if (updates.middle_name !== undefined) updateData.middle_name = updates.middle_name;
+  if (updates.birthdate !== undefined) {
+    updateData.birthdate = updates.birthdate;
+    if (updates.birthdate) {
+      const age = Math.floor((Date.now() - new Date(updates.birthdate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+      updateData.age = age;
+    }
+  }
+
+  const { error } = await supabase
+    .from('applicants')
+    .update(updateData)
+    .eq('reference_no', referenceNo);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}

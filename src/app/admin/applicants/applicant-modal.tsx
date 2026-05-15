@@ -5,6 +5,7 @@ import { renderFormattedMessage } from '@/components/formatted-message';
 import { getApplicant, updateStage, allowExam } from '@/lib/actions/admin';
 import { getStagesForPosition } from '@/lib/db/positions';
 import { createClient } from '@/lib/supabase/client';
+import { updateApplicantBasicInfo } from '@/lib/actions/applicant';
 import type { Applicant } from '@/types';
 import styles from './applicant-modal.module.css';
 
@@ -57,6 +58,14 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
   const [reprofilePosition, setReprofilePosition] = useState('');
   const [positionsList, setPositionsList] = useState<{ id: string; name: string; department_id: string }[]>([]);
   const [departmentsList, setDepartmentsList] = useState<{ id: string; name: string }[]>([]);
+  const [isEditingBasic, setIsEditingBasic] = useState(false);
+  const [basicInfoForm, setBasicInfoForm] = useState({
+    first_name: '',
+    last_name: '',
+    middle_name: '',
+    birthdate: '',
+  });
+  const [savingBasic, setSavingBasic] = useState(false);
 
   const finalResultOptions = [
     { value: 'Passed', label: 'Passed', icon: '✓' },
@@ -360,6 +369,37 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     setSaving(false);
   }
 
+  function startEditBasic() {
+    setBasicInfoForm({
+      first_name: applicant?.first_name || '',
+      last_name: applicant?.last_name || '',
+      middle_name: applicant?.middle_name || '',
+      birthdate: applicant?.birthdate || '',
+    });
+    setIsEditingBasic(true);
+  }
+
+  async function saveBasicInfo() {
+    setSavingBasic(true);
+    const result = await updateApplicantBasicInfo(applicant?.reference_no || '', {
+      first_name: basicInfoForm.first_name,
+      last_name: basicInfoForm.last_name,
+      middle_name: basicInfoForm.middle_name || undefined,
+      birthdate: basicInfoForm.birthdate,
+    });
+    setSavingBasic(false);
+    if (result.success) {
+      setIsEditingBasic(false);
+      await loadData();
+    } else {
+      setMessage({ text: `Failed to save: ${result.error}`, type: 'error' });
+    }
+  }
+
+  function cancelEditBasic() {
+    setIsEditingBasic(false);
+  }
+
   if (!isOpen) return null;
 
   const { applicant, games, stages, notifications } = data || {};
@@ -383,13 +423,91 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         <div className="modal-dialog modal-xl modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">
-                {applicant?.last_name?.toUpperCase()}, {applicant?.first_name}{applicant?.middle_name ? ' ' + applicant?.middle_name : ''}
-                <span className="ms-2 text-muted fw-normal" style={{ fontSize: '14px' }}>
-                  {applicant?.reference_no} · {applicant?.position_applied} · {applicant?.experience_level || '-'}
-                </span>
-              </h5>
-              <button type="button" className="btn-close" onClick={onClose} />
+              {isEditingBasic ? (
+                <div className="w-100">
+                  <div className="row g-2 mb-2">
+                    <div className="col-md-3">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder="Last Name"
+                        value={basicInfoForm.last_name}
+                        onChange={(e) => setBasicInfoForm({ ...basicInfoForm, last_name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder="First Name"
+                        value={basicInfoForm.first_name}
+                        onChange={(e) => setBasicInfoForm({ ...basicInfoForm, first_name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder="Middle Name"
+                        value={basicInfoForm.middle_name}
+                        onChange={(e) => setBasicInfoForm({ ...basicInfoForm, middle_name: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <input
+                        type="date"
+                        className="form-control form-control-sm"
+                        value={basicInfoForm.birthdate}
+                        onChange={(e) => setBasicInfoForm({ ...basicInfoForm, birthdate: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-danger"
+                      onClick={saveBasicInfo}
+                      disabled={savingBasic}
+                    >
+                      {savingBasic ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={cancelEditBasic}
+                      disabled={savingBasic}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <h5 className="modal-title">
+                  {applicant?.last_name?.toUpperCase()}, {applicant?.first_name}{applicant?.middle_name ? ' ' + applicant?.middle_name : ''}
+                  <span className="ms-2 text-muted fw-normal" style={{ fontSize: '14px' }}>
+                    {applicant?.reference_no} · {applicant?.position_applied} · {applicant?.experience_level || '-'}
+                  </span>
+                </h5>
+              )}
+              {!isEditingBasic && (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary me-2"
+                    onClick={startEditBasic}
+                    title="Edit Name & Birthdate"
+                  >
+                    Edit Name
+                  </button>
+                  <button type="button" className="btn-close" onClick={onClose} />
+                </>
+              )}
+              {isEditingBasic && (
+                <button type="button" className="btn-close" onClick={cancelEditBasic} disabled={savingBasic} />
+              )}
             </div>
             <div className="modal-body">
               {loading ? (

@@ -7,6 +7,7 @@ import { getStagesForPosition } from '@/lib/db/positions';
 import { createClient } from '@/lib/supabase/client';
 import type { Applicant } from '@/types';
 import { useRouter } from 'next/navigation';
+import { updateApplicantBasicInfo } from '@/lib/actions/applicant';
 
 export default function DetailContent({ initialData, isSuperAdmin = false }: { initialData: any; isSuperAdmin?: boolean }) {
   const [data, setData] = useState<any>(initialData);
@@ -18,6 +19,14 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const [stageLabel, setStageLabel] = useState('');
   const [stageVersions, setStageVersions] = useState<Record<string, number>>({});
   const [stageVersionHistory, setStageVersionHistory] = useState<Record<string, any[]>>({});
+  const [isEditingBasic, setIsEditingBasic] = useState(false);
+  const [basicInfoForm, setBasicInfoForm] = useState({
+    first_name: '',
+    last_name: '',
+    middle_name: '',
+    birthdate: '',
+  });
+  const [savingBasic, setSavingBasic] = useState(false);
   const [form, setForm] = useState<any>({
     heightCm: '',
     weightKg: '',
@@ -214,6 +223,40 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
     setSaving(false);
   }
 
+  function startEditBasic() {
+    setBasicInfoForm({
+      first_name: applicant.first_name || '',
+      last_name: applicant.last_name || '',
+      middle_name: applicant.middle_name || '',
+      birthdate: applicant.birthdate || '',
+    });
+    setIsEditingBasic(true);
+  }
+
+  async function saveBasicInfo() {
+    setSavingBasic(true);
+    const result = await updateApplicantBasicInfo(applicant.reference_no, {
+      first_name: basicInfoForm.first_name,
+      last_name: basicInfoForm.last_name,
+      middle_name: basicInfoForm.middle_name || undefined,
+      birthdate: basicInfoForm.birthdate,
+    });
+    setSavingBasic(false);
+    if (result.success) {
+      setIsEditingBasic(false);
+      const updated = await getApplicant(applicant.reference_no, '');
+      if (updated.data) {
+        setData(updated.data);
+      }
+    } else {
+      alert(`Failed to save: ${result.error}`);
+    }
+  }
+
+  function cancelEditBasic() {
+    setIsEditingBasic(false);
+  }
+
   const { applicant, games, stages, notifications } = data;
 
   return (
@@ -224,12 +267,97 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
         cursor: 'pointer', marginBottom: '20px',
       }}>← Back</button>
 
-      <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>
-        {applicant.last_name?.toUpperCase()}, {applicant.first_name}{applicant.middle_name ? ' ' + applicant.middle_name : ''}
-      </h1>
-      <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '24px' }}>
-        {applicant.reference_no} &middot; {applicant.position_applied} &middot; {applicant.experience_level || '-'}
-      </p>
+      {isEditingBasic ? (
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+            <div>
+              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Last Name *</label>
+              <input
+                value={basicInfoForm.last_name}
+                onChange={(e) => setBasicInfoForm({ ...basicInfoForm, last_name: e.target.value })}
+                style={{ width: '100%', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>First Name *</label>
+              <input
+                value={basicInfoForm.first_name}
+                onChange={(e) => setBasicInfoForm({ ...basicInfoForm, first_name: e.target.value })}
+                style={{ width: '100%', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Middle Name</label>
+              <input
+                value={basicInfoForm.middle_name}
+                onChange={(e) => setBasicInfoForm({ ...basicInfoForm, middle_name: e.target.value })}
+                style={{ width: '100%', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+              />
+            </div>
+          </div>
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Birthdate *</label>
+            <input
+              type="date"
+              value={basicInfoForm.birthdate}
+              onChange={(e) => setBasicInfoForm({ ...basicInfoForm, birthdate: e.target.value })}
+              style={{ padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+              required
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={saveBasicInfo}
+              disabled={savingBasic}
+              style={{
+                padding: '8px 16px', background: '#8b1e2d', color: '#fff',
+                border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                cursor: savingBasic ? 'not-allowed' : 'pointer', opacity: savingBasic ? 0.65 : 1,
+              }}
+            >
+              {savingBasic ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={cancelEditBasic}
+              disabled={savingBasic}
+              style={{
+                padding: '8px 16px', background: '#fff', color: '#6b7280',
+                border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                cursor: savingBasic ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>
+            {applicant.last_name?.toUpperCase()}, {applicant.first_name}{applicant.middle_name ? ' ' + applicant.middle_name : ''}
+          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>
+              {applicant.reference_no} &middot; {applicant.position_applied} &middot; {applicant.experience_level || '-'}
+            </p>
+            <button
+              type="button"
+              onClick={startEditBasic}
+              style={{
+                background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '6px', 
+                cursor: 'pointer', padding: '4px 8px', fontSize: '13px', lineHeight: 1,
+                color: '#6b7280'
+              }}
+              title="Edit Name & Birthdate"
+            >
+              Edit
+            </button>
+          </div>
+        </>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px' }}>
