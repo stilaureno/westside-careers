@@ -30,6 +30,7 @@ export default function ExamEligibleApplicants({
   const loadEligibleApplicantsCallback = async () => {
     setLoading(true);
     try {
+      // Step 1: Fetch all Dealer applicants (1 query)
       const { data: allApplicants, error } = await supabase
         .from('applicants')
         .select(`
@@ -58,47 +59,58 @@ export default function ExamEligibleApplicants({
         return;
       }
 
-      // Filter to only show applicants with completed Initial Screening
-      const filtered: ExamEligibleApplicant[] = [];
-      
-      for (const app of allApplicants || []) {
-        const { data: screeningResult } = await supabase
-          .from('stage_results')
-          .select('id')
-          .eq('reference_no', app.reference_no)
-          .eq('stage_name', 'Initial Screening')
-          .single();
-
-        if (screeningResult) {
-          const applicantListItem: ExamEligibleApplicant = {
-            applicant_id: app.applicant_id,
-            reference_no: app.reference_no,
-            first_name: app.first_name,
-            middle_name: app.middle_name,
-            last_name: app.last_name,
-            contact_number: app.contact_number,
-            currently_employed: app.currently_employed,
-            displayName: [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(' '),
-            position_applied: app.position_applied,
-            experience_level: app.experience_level,
-            application_status: app.application_status,
-            current_stage: app.current_stage,
-            department: app.department,
-            gender: app.gender,
-            birthdate: app.birthdate,
-            created_at: app.created_at,
-            exam_authorized: app.exam_authorized || 'No',
-            initialScreeningResult: 'Passed',
-            mathExamResult: '',
-            tableTestResult: '',
-            sweatyPalmResult: '',
-            finalInterviewResult: '',
-            remarks: '',
-            stages: [],
-          };
-          filtered.push(applicantListItem);
-        }
+      if (!allApplicants?.length) {
+        setApplicants([]);
+        setLoading(false);
+        return;
       }
+
+      // Step 2: Fetch all Initial Screening stage results in ONE query (1 query instead of N)
+      const referenceNumbers = allApplicants.map((app) => app.reference_no).filter(Boolean);
+      const { data: stageResults } = referenceNumbers.length > 0
+        ? await supabase
+            .from('stage_results')
+            .select('reference_no, stage_name, result_status')
+            .in('reference_no', referenceNumbers)
+            .eq('stage_name', 'Initial Screening')
+        : { data: [] };
+
+      // Step 3: Build a set of reference numbers that passed Initial Screening
+      const passedScreeningRefs = new Set(
+        stageResults
+          ?.filter((s) => s.result_status === 'Passed')
+          .map((s) => s.reference_no) ?? []
+      );
+
+      // Step 4: Filter and map applicants in memory
+      const filtered: ExamEligibleApplicant[] = allApplicants
+        .filter((app) => passedScreeningRefs.has(app.reference_no))
+        .map((app) => ({
+          applicant_id: app.applicant_id,
+          reference_no: app.reference_no,
+          first_name: app.first_name,
+          middle_name: app.middle_name,
+          last_name: app.last_name,
+          contact_number: app.contact_number,
+          currently_employed: app.currently_employed,
+          displayName: [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(' '),
+          position_applied: app.position_applied,
+          experience_level: app.experience_level,
+          application_status: app.application_status,
+          current_stage: app.current_stage,
+          department: app.department,
+          gender: app.gender,
+          birthdate: app.birthdate,
+          created_at: app.created_at,
+          exam_authorized: app.exam_authorized || 'No',
+          initialScreeningResult: 'Passed',
+          mathExamResult: '',
+          tableTestResult: '',
+          sweatyPalmResult: '',
+          finalInterviewResult: '',
+          remarks: '',
+          stages: [],
+        }));
 
       // Filter by allowed departments if not superadmin
       let result = filtered;
