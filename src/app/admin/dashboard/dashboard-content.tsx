@@ -1389,6 +1389,7 @@ export default function DashboardContent() {
                       <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Name</th>
                       <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Position</th>
                       <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Status</th>
+                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Current Stage</th>
                       <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Date</th>
                     </tr>
                   </thead>
@@ -1413,6 +1414,7 @@ export default function DashboardContent() {
                             {app.application_status}
                           </span>
                         </td>
+                        <td style={{ padding: '10px 8px', color: '#6b7280' }}>{app.current_stage || '-'}</td>
                         <td style={{ padding: '10px 8px', color: '#6b7280' }}>{app.created_at?.slice(0, 10) || '-'}</td>
                       </tr>
                     ))}
