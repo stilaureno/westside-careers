@@ -41,6 +41,7 @@ export interface Applicant {
   application_status?: string;
   overall_result?: string;
   exam_authorized?: string;
+  applicant_number?: number;
   remarks?: string;
   created_at?: string;
   updated_at?: string;
