@@ -567,33 +567,33 @@ export default function ApplicantsContent({
       )}
 
       {/* Filters Row */}
-      <div className={`card mb-3 shadow-sm ${isMobile && !showFilters ? 'd-none' : ''}`} style={{ minHeight: '118px' }}>
-        <div className="card-body">
-          <div className="row g-3 align-items-end">
-            <div className="col-md-2">
-              <label className="form-label small text-muted mb-1">Search</label>
+      <div className={`card mb-2 shadow-sm ${isMobile && !showFilters ? 'd-none' : ''}`}>
+        <div className="card-body py-2">
+          <div className="row g-2 align-items-center">
+            <div className="col-auto">
               <input
                 type="text"
                 className="form-control form-control-sm"
-                placeholder="Name, reference, remarks..."
+                placeholder="Search..."
+                style={{ width: '150px' }}
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
               />
             </div>
-            <div className="col-md-2">
-              <label className="form-label small text-muted mb-1">Applicant #</label>
+            <div className="col-auto">
               <input
                 type="number"
                 className="form-control form-control-sm"
-                placeholder="Search ID..."
+                placeholder="#"
+                style={{ width: '80px' }}
                 value={filterApplicantNumber}
                 onChange={(e) => setFilterApplicantNumber(e.target.value)}
               />
             </div>
-            <div className="col-md-2">
-              <label className="form-label small text-muted mb-1">Position</label>
+            <div className="col-auto">
               <select
                 className="form-select form-select-sm"
+                style={{ width: '120px' }}
                 value={filterPosition}
                 onChange={(e) => setFilterPosition(e.target.value)}
               >
@@ -603,10 +603,10 @@ export default function ApplicantsContent({
                 ))}
               </select>
             </div>
-            <div className="col-md-2">
-              <label className="form-label small text-muted mb-1">Stage</label>
+            <div className="col-auto">
               <select
                 className="form-select form-select-sm"
+                style={{ width: '130px' }}
                 value={filterStage}
                 onChange={(e) => setFilterStage(e.target.value)}
               >
@@ -616,10 +616,10 @@ export default function ApplicantsContent({
                 ))}
               </select>
             </div>
-            <div className="col-md-2">
-              <label className="form-label small text-muted mb-1">Status</label>
+            <div className="col-auto">
               <select
                 className="form-select form-select-sm"
+                style={{ width: '130px' }}
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
@@ -629,28 +629,32 @@ export default function ApplicantsContent({
                 ))}
               </select>
             </div>
-            <div className="col-md-2">
-              <label className="form-label small text-muted mb-1">Start Date</label>
-              <input
-                type="date"
-                className="form-control form-control-sm"
-                value={filterStartDate}
-                onChange={(e) => setFilterStartDate(e.target.value)}
-              />
+            <div className="col-auto">
+              <div className="input-group input-group-sm" style={{ width: '140px' }}>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={filterStartDate}
+                  onChange={(e) => setFilterStartDate(e.target.value)}
+                  style={{ padding: '4px 8px', fontSize: '12px' }}
+                />
+              </div>
             </div>
-            <div className="col-md-2">
-              <label className="form-label small text-muted mb-1">End Date</label>
-              <input
-                type="date"
-                className="form-control form-control-sm"
-                value={filterEndDate}
-                onChange={(e) => setFilterEndDate(e.target.value)}
-              />
+            <div className="col-auto">
+              <div className="input-group input-group-sm" style={{ width: '140px' }}>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={filterEndDate}
+                  onChange={(e) => setFilterEndDate(e.target.value)}
+                  style={{ padding: '4px 8px', fontSize: '12px' }}
+                />
+              </div>
             </div>
             {hasFilters && (
-              <div className="col-md-2 d-flex align-items-end">
-                <button className="btn btn-sm btn-danger w-100" onClick={clearFilters}>
-                  Clear Filters
+              <div className="col-auto">
+                <button className="btn btn-sm btn-outline-danger" onClick={clearFilters}>
+                  ✕
                 </button>
               </div>
             )}
