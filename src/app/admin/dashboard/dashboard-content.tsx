@@ -1273,6 +1273,65 @@ export default function DashboardContent() {
                 {!isMobile && <SummaryCard label="Fail" value={deptData.failed} color="#fca5a5" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.failed > 0 ? () => handleStatusClick('Failed', deptName) : undefined} />}
               </div>
             </div>
+
+            {/* Stage Breakdown - moved to top, after status cards */}
+            {Object.keys(deptData.stageCounts).length > 0 && (
+              <div style={{
+                marginTop: isMobile ? '12px' : '20px',
+                padding: isMobile ? '12px' : '16px',
+                background: '#f0f9ff',
+                borderRadius: isMobile ? '12px' : '16px',
+                border: '1px solid #bae6fd',
+              }}>
+                <h3 style={{ 
+                  fontSize: isMobile ? '13px' : '15px', 
+                  fontWeight: '700', 
+                  color: '#0369a1',
+                  marginBottom: isMobile ? '10px' : '14px',
+                }}>
+                  Stage Breakdown (by current stage)
+                </h3>
+                <div style={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  gap: isMobile ? '8px' : '12px' 
+                }}>
+                  {Object.entries(deptData.stageCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([stageName, count]) => (
+                      <button
+                        key={stageName}
+                        onClick={() => handleStageBreakdownClick(stageName, deptName)}
+                        style={{
+                          padding: isMobile ? '6px 12px' : '8px 16px',
+                          fontSize: isMobile ? '12px' : '13px',
+                          border: '1px solid #0284c7',
+                          borderRadius: '20px',
+                          background: '#fff',
+                          color: '#0369a1',
+                          cursor: count > 0 ? 'pointer' : 'default',
+                          opacity: count > 0 ? 1 : 0.5,
+                          fontWeight: '600',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <span>{stageName}</span>
+                        <span style={{
+                          background: '#0284c7',
+                          color: '#fff',
+                          borderRadius: '10px',
+                          padding: '2px 8px',
+                          fontSize: isMobile ? '10px' : '11px',
+                        }}>
+                          {count}
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
             
             {/* Position Sections - collapsible on mobile */}
             {(!isMobile || isExpanded) && (
@@ -1354,65 +1413,6 @@ export default function DashboardContent() {
                     <HeightGenderMatrix data={deptData.heightGenderByPosition} useFeet={heightInFeet} />
                   </div>
                 </div>
-
-                {/* Stage Breakdown */}
-                {Object.keys(deptData.stageCounts).length > 0 && (
-                  <div style={{
-                    marginTop: isMobile ? '12px' : '20px',
-                    padding: isMobile ? '12px' : '16px',
-                    background: '#f0f9ff',
-                    borderRadius: isMobile ? '12px' : '16px',
-                    border: '1px solid #bae6fd',
-                  }}>
-                    <h3 style={{ 
-                      fontSize: isMobile ? '13px' : '15px', 
-                      fontWeight: '700', 
-                      color: '#0369a1',
-                      marginBottom: isMobile ? '10px' : '14px',
-                    }}>
-                      Stage Breakdown (by current stage)
-                    </h3>
-                    <div style={{ 
-                      display: 'flex', 
-                      flexWrap: 'wrap', 
-                      gap: isMobile ? '8px' : '12px' 
-                    }}>
-                      {Object.entries(deptData.stageCounts)
-                        .sort((a, b) => b[1] - a[1])
-                        .map(([stageName, count]) => (
-                          <button
-                            key={stageName}
-                            onClick={() => handleStageBreakdownClick(stageName, deptName)}
-                            style={{
-                              padding: isMobile ? '6px 12px' : '8px 16px',
-                              fontSize: isMobile ? '12px' : '13px',
-                              border: '1px solid #0284c7',
-                              borderRadius: '20px',
-                              background: '#fff',
-                              color: '#0369a1',
-                              cursor: count > 0 ? 'pointer' : 'default',
-                              opacity: count > 0 ? 1 : 0.5,
-                              fontWeight: '600',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                            }}
-                          >
-                            <span>{stageName}</span>
-                            <span style={{
-                              background: '#0284c7',
-                              color: '#fff',
-                              borderRadius: '10px',
-                              padding: '2px 8px',
-                              fontSize: isMobile ? '10px' : '11px',
-                            }}>
-                              {count}
-                            </span>
-                          </button>
-                        ))}
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </div>
