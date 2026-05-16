@@ -67,6 +67,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     birthdate: '',
   });
   const [savingBasic, setSavingBasic] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
 
   const finalResultOptions = [
     { value: 'Passed', label: 'Passed', icon: '✓' },
@@ -532,9 +533,19 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                   )}
                   <span>
                     {applicant?.last_name?.toUpperCase()}, {applicant?.first_name}{applicant?.middle_name ? ' ' + applicant?.middle_name : ''}
-                    <span className="ms-2 text-muted fw-normal" style={{ fontSize: '14px' }}>
-                      {applicant?.reference_no} · {applicant?.position_applied} · {applicant?.experience_level || '-'}
+                    <span 
+                      className="ms-2 text-muted fw-normal" 
+                      style={{ fontSize: '14px', cursor: 'pointer' }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(applicant?.reference_no || '');
+                        setCopyFeedback('Copied!');
+                        setTimeout(() => setCopyFeedback(null), 2000);
+                      }}
+                      title="Click to copy reference number"
+                    >
+                      {applicant?.reference_no} {copyFeedback && <span className="text-success ms-1">{copyFeedback}</span>}
                     </span>
+                    <span className="ms-1">· {applicant?.position_applied} · {applicant?.experience_level || '-'}</span>
                   </span>
                 </h5>
               )}
