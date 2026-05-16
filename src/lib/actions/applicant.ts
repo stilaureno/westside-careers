@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
-import { computeBMI, buildDuplicateKey, generateReferenceNo, generateApplicantId, getStageWorkflow, getStageWorkflowFromDB, getNextStage } from '@/lib/db/applicants';
+import { computeBMI, buildDuplicateKey, generateReferenceNo, generateApplicantId, getStageWorkflow, getStageWorkflowFromDB, getNextStage, checkDuplicateApplicant } from '@/lib/db/applicants';
 import type { ApplicationFormData, Applicant, StageRoadmapItem } from '@/types';
 
 const STATUS_CHECK_FAILURES_COOKIE = 'status_check_failures';
@@ -98,6 +98,20 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
   const age = Math.floor((Date.now() - new Date(formData.birthdate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
   if (age < 21) {
     return { success: false, error: 'You must be at least 21 years old to apply.' };
+  }
+
+  const duplicateCheck = await checkDuplicateApplicant(
+    formData.lastName,
+    formData.firstName,
+    formData.birthdate,
+    formData.emailAddress
+  );
+
+  if (duplicateCheck.found && duplicateCheck.referenceNo) {
+    return {
+      success: false,
+      error: `An application with this information already exists. Your reference number is: ${duplicateCheck.referenceNo}. Please use the Status Check page to view your application.`,
+    };
   }
 
   const bmi = formData.heightCm && formData.weightKg ? computeBMI(formData.heightCm, formData.weightKg) : null;

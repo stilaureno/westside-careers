@@ -2,6 +2,24 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import type { Applicant, DashboardSummary, StageRoadmapItem, PositionSummary, StageSummary, GenderByPosition } from '@/types';
 
+function sanitizeName(name: string | undefined): string {
+  if (!name) return '';
+  const cleaned = name.trim().replace(/[^a-zA-Z\s\-']/g, '');
+  return cleaned
+    .split(/[\s\-]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function sanitizeBasic(name: string | undefined): string {
+  if (!name) return '';
+  return name
+    .trim()
+    .split(/[\s\-]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export interface ApplicantStageSummary {
   reference_no: string;
   stage_name: string;
@@ -474,4 +492,70 @@ export async function getAdminPasswordConfig(adminKey: string): Promise<{ column
   }
   
   return data;
+}
+
+export interface DuplicateCheckResult {
+  found: boolean;
+  referenceNo?: string;
+  lastName?: string;
+  firstName?: string;
+  matchType?: 'name_birthdate' | 'email';
+}
+
+export async function checkDuplicateApplicant(
+  lastName: string,
+  firstName: string,
+  birthdate: string,
+  emailAddress?: string | null
+): Promise<DuplicateCheckResult> {
+  const supabase = await createClient();
+
+  const sanitizedLastName = sanitizeName(lastName);
+  const sanitizedFirstName = sanitizeBasic(firstName);
+
+  const { data: byNameAndBirthdate, error: error1 } = await supabase
+    .from('applicants')
+    .select('reference_no, last_name, first_name')
+    .ilike('last_name', sanitizedLastName)
+    .eq('first_name', sanitizedFirstName)
+    .eq('birthdate', birthdate)
+    .maybeSingle();
+
+  if (error1) {
+    console.error('Error checking duplicates:', error1);
+  }
+
+  if (byNameAndBirthdate) {
+    return {
+      found: true,
+      referenceNo: byNameAndBirthdate.reference_no,
+      lastName: byNameAndBirthdate.last_name,
+      firstName: byNameAndBirthdate.first_name,
+      matchType: 'name_birthdate',
+    };
+  }
+
+  if (emailAddress) {
+    const { data: byEmail, error: error2 } = await supabase
+      .from('applicants')
+      .select('reference_no, last_name, first_name')
+      .ilike('email_address', emailAddress.toLowerCase().trim())
+      .maybeSingle();
+
+    if (error2) {
+      console.error('Error checking email duplicates:', error2);
+    }
+
+    if (byEmail) {
+      return {
+        found: true,
+        referenceNo: byEmail.reference_no,
+        lastName: byEmail.last_name,
+        firstName: byEmail.first_name,
+        matchType: 'email',
+      };
+    }
+  }
+
+  return { found: false };
 }
