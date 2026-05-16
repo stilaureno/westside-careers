@@ -133,6 +133,15 @@ export default function ExamEligibleApplicants({
     loadEligibleApplicantsCallback();
   }, [isSuperAdmin, allowedDepartments]);
 
+  // Auto-refresh every 1 minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadEligibleApplicantsCallback();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const filteredApplicants = useMemo(() => {
     let result = applicants.filter((app) => {
       if (!globalSearch) return true;
