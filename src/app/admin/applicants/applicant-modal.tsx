@@ -613,14 +613,16 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
               {!isEditingBasic && (
                 <>
                   <button type="button" className="btn-close me-2" onClick={onClose} />
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={startEditBasic}
-                    title="Edit Name & Birthdate"
-                  >
-                    ✎
-                  </button>
+                  {isSuperAdmin && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={startEditBasic}
+                      title="Edit Name & Birthdate"
+                    >
+                      ✎
+                    </button>
+                  )}
                 </>
               )}
               {isEditingBasic && (
