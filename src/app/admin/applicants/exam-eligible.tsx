@@ -8,6 +8,8 @@ interface ExamEligibleApplicant extends ApplicantListItem {
   exam_authorized: string;
   mathExamScore?: number;
   mathExamTerminationReason?: string;
+  isPenAndPaper?: boolean;
+  attemptCount?: number;
 }
 
 export default function ExamEligibleApplicants({ 
@@ -77,18 +79,42 @@ export default function ExamEligibleApplicants({
             .eq('stage_name', 'Initial Screening')
         : { data: [] };
 
-      // Step 3: Fetch all math exam results
+      // Step 3: Fetch all math exam results (including pen_and_paper flag)
       const { data: examResults } = referenceNumbers.length > 0
         ? await supabase
             .from('math_exam_results')
-            .select('reference_no, score, termination_reason')
+            .select('reference_no, score, termination_reason, pen_and_paper, attempt_count')
             .in('reference_no', referenceNumbers)
         : { data: [] };
 
-      // Build exam results map
-      const examMap: Record<string, { score: number; termination_reason: string | null }> = {};
+      // Step 4: Fetch Pen & Paper Test stage results
+      const { data: penAndPaperResults } = referenceNumbers.length > 0
+        ? await supabase
+            .from('stage_results')
+            .select('reference_no, stage_name, result_status, score, passing_score, max_score')
+            .in('reference_no', referenceNumbers)
+            .eq('stage_name', 'Pen & Paper Test')
+        : { data: [] };
+
+      // Build exam results map (prefer Pen & Paper scores over online exam)
+      const examMap: Record<string, { score: number; termination_reason: string | null; isPenAndPaper: boolean; attemptCount: number }> = {};
       (examResults || []).forEach((e: any) => {
-        examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason };
+        examMap[e.reference_no] = { 
+          score: e.score, 
+          termination_reason: e.termination_reason,
+          isPenAndPaper: e.pen_and_paper || false,
+          attemptCount: e.attempt_count || 1
+        };
+      });
+
+      // Override with Pen & Paper scores if available
+      (penAndPaperResults || []).forEach((pp: any) => {
+        examMap[pp.reference_no] = { 
+          score: pp.score, 
+          termination_reason: null,
+          isPenAndPaper: true,
+          attemptCount: (examMap[pp.reference_no]?.attemptCount || 0) + 1
+        };
       });
 
       // Step 3: Build a set of reference numbers that passed Initial Screening
@@ -122,9 +148,11 @@ export default function ExamEligibleApplicants({
           created_at: app.created_at,
           exam_authorized: app.exam_authorized || 'No',
           initialScreeningResult: 'Passed',
-          mathExamResult: exam ? (exam.score >= 8 ? 'Passed' : 'Failed') : '',
+          mathExamResult: exam ? (exam.score >= (exam.isPenAndPaper ? 30 : 8) ? 'Passed' : 'Failed') : '',
           mathExamScore: exam?.score,
           mathExamTerminationReason: exam?.termination_reason,
+          isPenAndPaper: exam?.isPenAndPaper,
+          attemptCount: exam?.attemptCount,
           tableTestResult: '',
           sweatyPalmResult: '',
           finalInterviewResult: '',
@@ -414,11 +442,12 @@ export default function ExamEligibleApplicants({
                     </span>
                   </td>
                   <td
-                    title={app.mathExamTerminationReason ? `Terminated: ${app.mathExamTerminationReason}` : undefined}
+                    title={app.mathExamTerminationReason ? `Terminated: ${app.mathExamTerminationReason}` : app.isPenAndPaper ? 'Pen & Paper Test (Pass: 30/50)' : 'Online Math Exam (Pass: 8/10)'}
                   >
                     {app.mathExamScore !== undefined ? (
-                      <span className={app.mathExamScore >= 8 ? 'text-success fw-bold' : app.mathExamScore < 8 ? 'text-danger fw-bold' : ''}>
-                        {app.mathExamScore}/10
+                      <span className={app.mathExamScore >= (app.isPenAndPaper ? 30 : 8) ? 'text-success fw-bold' : app.mathExamScore < (app.isPenAndPaper ? 30 : 8) ? 'text-danger fw-bold' : ''}>
+                        {app.isPenAndPaper ? `${app.mathExamScore}/50` : `${app.mathExamScore}/10`}
+                        {app.isPenAndPaper && <span className="badge bg-warning text-dark ms-1" style={{ fontSize: '9px' }}>P&P</span>}
                       </span>
                     ) : '-'}
                   </td>
