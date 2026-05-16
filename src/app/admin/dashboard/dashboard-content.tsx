@@ -95,6 +95,7 @@ interface DeptData {
   genderByPosition: { [posName: string]: GenderByPosition };
   stageMath: StageSummary;
   stageTable: StageSummary;
+  stageCounts: { [stageName: string]: number };
   ageBands: AgeBandSummary;
   heightBands: HeightBandSummary;
   ageGenderByPosition: AgeGenderByPosition;
@@ -598,6 +599,27 @@ export default function DashboardContent() {
     setModalLoading(false);
   }, [supabase]);
 
+  const handleStageBreakdownClick = useCallback(async (stageName: string, department: string, page = 1) => {
+    setModalTitle(`${stageName} in ${department}`);
+    setModalOpen(true);
+    setModalLoading(true);
+    setModalPage(page);
+
+    const from = (page - 1) * MODAL_PAGE_SIZE;
+    const to = from + MODAL_PAGE_SIZE - 1;
+    const { data, count } = await supabase
+      .from('applicants')
+      .select('reference_no, first_name, last_name, middle_name, position_applied, application_status, department, current_stage, experience_level, created_at', { count: 'exact' })
+      .eq('department', department)
+      .eq('current_stage', stageName)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    setModalTotalCount(count || 0);
+    setModalApplicants(data || []);
+    setModalLoading(false);
+  }, [supabase]);
+
   const handleStageClick = useCallback(async (stage: string, result: string, department: string, page = 1) => {
     setModalTitle(`${stage} ${result} in ${department}`);
     setModalOpen(true);
@@ -859,6 +881,7 @@ export default function DashboardContent() {
         genderByPosition: {},
         stageMath: emptyStage(),
         stageTable: emptyStage(),
+        stageCounts: {},
         ageBands: emptyAgeBands(),
         heightBands: emptyHeightBands(),
         ageGenderByPosition: {},
@@ -945,6 +968,14 @@ export default function DashboardContent() {
       else if (status === 'Reprofile') deptData.reprofile++;
       else if (status === 'For Pooling') deptData.pooling++;
       else if (status === 'Failed' || status === 'Not Recommended') deptData.failed++;
+      
+      // Stage breakdown by current_stage
+      const currentStage = r.current_stage || 'Pending';
+      if (deptData.stageCounts[currentStage]) {
+        deptData.stageCounts[currentStage]++;
+      } else {
+        deptData.stageCounts[currentStage] = 1;
+      }
       
       // By position within department
       const posData = deptData.positions[pos];
@@ -1313,17 +1344,75 @@ export default function DashboardContent() {
                           border: '1px solid #000080',
                           borderRadius: '6px',
                           background: heightInFeet ? '#000080' : '#fff',
-                          color: heightInFeet ? '#FFD700' : '#000080',
+                          color: heightInFeet ? '#fff' : '#000080',
                           cursor: 'pointer',
-                          fontWeight: '500',
                         }}
                       >
-                        {heightInFeet ? "cm" : "ft/in"}
+                        {heightInFeet ? 'Feet' : 'cm'}
                       </button>
                     </div>
                     <HeightGenderMatrix data={deptData.heightGenderByPosition} useFeet={heightInFeet} />
                   </div>
                 </div>
+
+                {/* Stage Breakdown */}
+                {Object.keys(deptData.stageCounts).length > 0 && (
+                  <div style={{
+                    marginTop: isMobile ? '12px' : '20px',
+                    padding: isMobile ? '12px' : '16px',
+                    background: '#f0f9ff',
+                    borderRadius: isMobile ? '12px' : '16px',
+                    border: '1px solid #bae6fd',
+                  }}>
+                    <h3 style={{ 
+                      fontSize: isMobile ? '13px' : '15px', 
+                      fontWeight: '700', 
+                      color: '#0369a1',
+                      marginBottom: isMobile ? '10px' : '14px',
+                    }}>
+                      Stage Breakdown (by current stage)
+                    </h3>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexWrap: 'wrap', 
+                      gap: isMobile ? '8px' : '12px' 
+                    }}>
+                      {Object.entries(deptData.stageCounts)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([stageName, count]) => (
+                          <button
+                            key={stageName}
+                            onClick={() => handleStageBreakdownClick(stageName, deptName)}
+                            style={{
+                              padding: isMobile ? '6px 12px' : '8px 16px',
+                              fontSize: isMobile ? '12px' : '13px',
+                              border: '1px solid #0284c7',
+                              borderRadius: '20px',
+                              background: '#fff',
+                              color: '#0369a1',
+                              cursor: count > 0 ? 'pointer' : 'default',
+                              opacity: count > 0 ? 1 : 0.5,
+                              fontWeight: '600',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}
+                          >
+                            <span>{stageName}</span>
+                            <span style={{
+                              background: '#0284c7',
+                              color: '#fff',
+                              borderRadius: '10px',
+                              padding: '2px 8px',
+                              fontSize: isMobile ? '10px' : '11px',
+                            }}>
+                              {count}
+                            </span>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
