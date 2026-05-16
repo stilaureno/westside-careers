@@ -461,6 +461,7 @@ export default function ApplicantsContent({
   const tableHeaders: { key: SortField; label: string; fieldKey: string }[] = [
     { key: 'created_at', label: 'Application Date', fieldKey: 'applicants_table_created_at' },
     { key: 'reference_no', label: 'Reference No', fieldKey: 'applicants_table_reference_no' },
+    { key: 'applicant_number', label: '#', fieldKey: 'applicants_table_applicant_number' },
     { key: 'displayName', label: 'Name', fieldKey: 'applicants_table_displayName' },
     { key: 'position_applied', label: 'Position', fieldKey: 'applicants_table_position_applied' },
     { key: 'experience_level', label: 'Experience', fieldKey: 'applicants_table_experience_level' },
@@ -474,7 +475,6 @@ export default function ApplicantsContent({
     { key: 'sweatyPalmResult', label: 'Sweaty Palm', fieldKey: 'applicants_table_sweatyPalmResult' },
     { key: 'finalInterviewResult', label: 'Final Interview', fieldKey: 'applicants_table_finalInterviewResult' },
     { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
-    { key: 'applicant_number', label: '#', fieldKey: 'applicants_table_applicant_number' },
   ];
 
   const handleDelete = async (referenceNo: string) => {
@@ -698,6 +698,11 @@ export default function ApplicantsContent({
                         </button>
                       </td>
                     )}
+                    {visibleColumns.has('applicants_table_applicant_number') && (
+                      <td className="text-muted fw-bold" style={{ fontSize: '12px' }}>
+                        {app.applicant_number || '-'}
+                      </td>
+                    )}
                     {visibleColumns.has('applicants_table_displayName') && <td style={{ fontSize: '12px' }}>{app.displayName}</td>}
                     {visibleColumns.has('applicants_table_position_applied') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.position_applied}</td>}
                     {visibleColumns.has('applicants_table_experience_level') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.experience_level || '-'}</td>}
@@ -769,11 +774,6 @@ export default function ApplicantsContent({
                     {visibleColumns.has('applicants_table_remarks') && (
                       <td className="text-muted" style={{ maxWidth: '180px', whiteSpace: 'normal', wordBreak: 'break-word', fontSize: '12px' }}>
                         {renderFormattedMessage(app.remarks)}
-                      </td>
-                    )}
-                    {visibleColumns.has('applicants_table_applicant_number') && (
-                      <td className="text-muted fw-bold" style={{ fontSize: '12px' }}>
-                        {app.applicant_number || '-'}
                       </td>
                     )}
                     <td>
