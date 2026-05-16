@@ -59,6 +59,7 @@ export default function SettingsContent() {
   const [newStageName, setNewStageName] = useState('');
   const [newStageOrder, setNewStageOrder] = useState<number>(0);
   const [experiencedRequiredGames, setExperiencedRequiredGames] = useState(2);
+  const [mathExamExperienceFilter, setMathExamExperienceFilter] = useState('all');
 
   // Table column visibility state
   const [tableColumns, setTableColumns] = useState<VisibleField[]>([]);
@@ -76,13 +77,14 @@ export default function SettingsContent() {
 
   async function loadData() {
     setLoading(true);
-    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes, gamesConfigRes] = await Promise.all([
+    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes, gamesConfigRes, mathExamFilterRes] = await Promise.all([
       supabase.from('visible_fields').select('*').order('display_order'),
       supabase.from('departments').select('*').order('name'),
       supabase.from('positions').select('*').order('name'),
       supabase.from('config').select('*').like('key', 'ADMIN_PASSWORD%').neq('key', 'SUPER_ADMIN_PASSWORD'),
       supabase.from('stages').select('*').order('display_order'),
       supabase.from('config').select('value').eq('key', 'EXPERIENCED_DEALER_REQUIRED_GAMES').single(),
+      supabase.from('config').select('value').eq('key', 'MATH_EXAM_EXPERIENCE_FILTER').single(),
     ]);
     
     const allFields = fieldsRes.data || [];
@@ -96,6 +98,9 @@ export default function SettingsContent() {
     setAllStages(stagesRes.data || []);
     if (gamesConfigRes.data?.value) {
       setExperiencedRequiredGames(parseInt(gamesConfigRes.data.value, 10));
+    }
+    if (mathExamFilterRes.data?.value) {
+      setMathExamExperienceFilter(mathExamFilterRes.data.value);
     }
     setLoading(false);
   }
@@ -113,6 +118,21 @@ export default function SettingsContent() {
     if (!error) {
       setExperiencedRequiredGames(count);
       setMessage({ text: 'Required games count updated', type: 'success' });
+    } else {
+      setMessage({ text: error.message, type: 'error' });
+    }
+    setSaving(false);
+  }
+
+  async function saveMathExamExperienceFilter(filter: string) {
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .upsert({ key: 'MATH_EXAM_EXPERIENCE_FILTER', value: filter }, { onConflict: 'key' });
+
+    if (!error) {
+      setMathExamExperienceFilter(filter);
+      setMessage({ text: 'Math Exam filter updated', type: 'success' });
     } else {
       setMessage({ text: error.message, type: 'error' });
     }
@@ -827,6 +847,30 @@ export default function SettingsContent() {
                 </div>
                 <small className="text-muted d-block mt-2">
                   Experienced dealers must select at least this many games on the application form.
+                </small>
+              </div>
+              <div className="mb-3">
+                <label className="form-label small fw-bold">Math Exam KPI - Experience Filter</label>
+                <div className="d-flex gap-2 align-items-center">
+                  <select
+                    className="form-select form-select-sm"
+                    value={mathExamExperienceFilter}
+                    onChange={(e) => setMathExamExperienceFilter(e.target.value)}
+                  >
+                    <option value="all">All Dealers</option>
+                    <option value="experienced">Experienced Dealer Only</option>
+                    <option value="non_experienced">Non-Experienced Dealer Only</option>
+                  </select>
+                  <button
+                    className="btn btn-sm btn-dark"
+                    onClick={() => saveMathExamExperienceFilter(mathExamExperienceFilter)}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+                <small className="text-muted d-block mt-2">
+                  Filter the Math Exam KPI count on the dashboard by experience level.
                 </small>
               </div>
             </div>

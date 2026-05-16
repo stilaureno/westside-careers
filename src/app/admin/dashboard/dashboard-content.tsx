@@ -553,6 +553,7 @@ export default function DashboardContent() {
   const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
   const [showDateFilters, setShowDateFilters] = useState(!isMobile);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
+  const [mathExamExperienceFilter, setMathExamExperienceFilter] = useState('all');
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
@@ -798,6 +799,15 @@ export default function DashboardContent() {
     const data: DashboardData = {};
     const positionsMap: { [dept: string]: string[] } = {};
     
+    // Load math exam experience filter config
+    const { data: mathExamFilterData } = await supabase
+      .from('config')
+      .select('value')
+      .eq('key', 'MATH_EXAM_EXPERIENCE_FILTER')
+      .single();
+    const mathExamFilter = mathExamFilterData?.value || 'all';
+    setMathExamExperienceFilter(mathExamFilter);
+    
     // Query departments and their positions
     let deptQuery = supabase.from('departments').select('id, name, is_active').order('name');
     const { data: deptRows } = await deptQuery;
@@ -992,14 +1002,21 @@ export default function DashboardContent() {
         }
       }
       
-      // Math Exam stats for Dealer position in all departments
+      // Math Exam stats for Dealer position in all departments (filtered by experience level)
       if (pos === 'Dealer') {
-        const mathResult = mathExamMap[r.reference_no];
-        if (mathResult) {
-          deptData.stageMath.taken++;
-          if (mathResult === 'Passed') deptData.stageMath.passed++;
-          else if (mathResult === 'Failed') deptData.stageMath.failed++;
-          if (mathExamRetakeRefs.has(r.reference_no)) deptData.stageMath.retakes++;
+        const isExpDealer = r.experience_level === 'Experienced Dealer' || r.experience_level === 'Experienced-Dealer';
+        const matchesFilter = mathExamFilter === 'all' || 
+          (mathExamFilter === 'experienced' && isExpDealer) ||
+          (mathExamFilter === 'non_experienced' && !isExpDealer);
+        
+        if (matchesFilter) {
+          const mathResult = mathExamMap[r.reference_no];
+          if (mathResult) {
+            deptData.stageMath.taken++;
+            if (mathResult === 'Passed') deptData.stageMath.passed++;
+            else if (mathResult === 'Failed') deptData.stageMath.failed++;
+            if (mathExamRetakeRefs.has(r.reference_no)) deptData.stageMath.retakes++;
+          }
         }
       }
       
@@ -1015,13 +1032,16 @@ export default function DashboardContent() {
     });
     
     // Calculate pending Math Exams for all Dealers and pending Table Tests for Experienced Dealer in Table Games
-    // For each department, calculate pending Math Exams for Dealers
+    // For each department, calculate pending Math Exams for Dealers (filtered by experience level)
     Object.keys(data).forEach(deptName => {
       const deptData = data[deptName];
-      const dealerCount = (appRows || []).filter((r: any) => 
-        r.position_applied === 'Dealer' && 
-        r.department === deptName
-      ).length;
+      const dealerCount = (appRows || []).filter((r: any) => {
+        if (r.position_applied !== 'Dealer' || r.department !== deptName) return false;
+        const isExpDealer = r.experience_level === 'Experienced Dealer' || r.experience_level === 'Experienced-Dealer';
+        return mathExamFilter === 'all' || 
+          (mathExamFilter === 'experienced' && isExpDealer) ||
+          (mathExamFilter === 'non_experienced' && !isExpDealer);
+      }).length;
       deptData.stageMath.pending = Math.max(0, dealerCount - deptData.stageMath.taken);
     });
     
@@ -1038,7 +1058,7 @@ export default function DashboardContent() {
     setDeptPositions(positionsMap);
     setDashboardData(data);
     setLoading(false);
-  }, [supabase, startDate, endDate, isSuperAdmin, allowedDepartments]);
+  }, [supabase, startDate, endDate, isSuperAdmin, allowedDepartments, mathExamExperienceFilter]);
 
   useEffect(() => { loadDashboard(); }, [loadDashboard]);
 
