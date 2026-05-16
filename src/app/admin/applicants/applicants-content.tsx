@@ -776,17 +776,19 @@ export default function ApplicantsContent({
                         {renderFormattedMessage(app.remarks)}
                       </td>
                     )}
-                    <td>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleDelete(app.reference_no)}
-                        disabled={deletingRef === app.reference_no}
-                        style={{ padding: '2px 6px', fontSize: '11px' }}
-                        title="Delete applicant"
-                      >
-                        {deletingRef === app.reference_no ? '...' : '✕'}
-                      </button>
-                    </td>
+                    {isSuperAdmin && (
+                      <td>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => handleDelete(app.reference_no)}
+                          disabled={deletingRef === app.reference_no}
+                          style={{ padding: '2px 6px', fontSize: '11px' }}
+                          title="Delete applicant"
+                        >
+                          {deletingRef === app.reference_no ? '...' : '✕'}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
                 {filteredApplicants.length === 0 && (
