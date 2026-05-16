@@ -658,9 +658,9 @@ export default function ApplicantsContent({
                 </button>
               </div>
             )}
-            <div className="col-auto">
+            <div className="col-auto ms-auto">
               <button 
-                className="btn btn-sm btn-outline-secondary" 
+                className="btn btn-sm btn-outline-success" 
                 onClick={() => loadApplicants()}
                 disabled={loading}
                 title="Refresh data"
