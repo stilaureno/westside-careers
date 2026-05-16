@@ -402,6 +402,19 @@ export default function ApplicantsContent({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPage, totalPages, pageSize]);
 
+  // Keyboard shortcut: Shift+R to refresh
+  useEffect(() => {
+    function handleRefreshKey(e: KeyboardEvent) {
+      if (e.shiftKey && e.key === 'R') {
+        e.preventDefault();
+        loadApplicants();
+      }
+    }
+    
+    window.addEventListener('keydown', handleRefreshKey);
+    return () => window.removeEventListener('keydown', handleRefreshKey);
+  }, []);
+
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
     setCurrentPage(1);
