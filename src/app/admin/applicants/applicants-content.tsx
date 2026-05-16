@@ -21,7 +21,7 @@ function useWindowSize() {
   return size;
 }
 
-type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
+type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'mathExamScore' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
 
 // Map config field_key to data key
@@ -36,6 +36,7 @@ const COLUMN_KEY_MAP: Record<string, keyof ApplicantListItem | 'displayName'> = 
   'applicants_table_height_cm': 'height_cm',
   'applicants_table_initialScreeningResult': 'initialScreeningResult',
   'applicants_table_mathExamResult': 'mathExamResult',
+  'applicants_table_mathExamScore': 'mathExamScore',
   'applicants_table_tableTestResult': 'tableTestResult',
   'applicants_table_sweatyPalmResult': 'sweatyPalmResult',
   'applicants_table_finalInterviewResult': 'finalInterviewResult',
@@ -210,8 +211,17 @@ export default function ApplicantsContent({
     const { data: examResults } = referenceNumbers.length > 0
       ? await supabase
           .from('math_exam_results')
-          .select('reference_no, score, termination_reason')
+          .select('reference_no, score, termination_reason, pen_and_paper')
           .in('reference_no', referenceNumbers)
+      : { data: [] };
+
+    // Fetch Pen & Paper Test stage results for scores
+    const { data: penAndPaperResults } = referenceNumbers.length > 0
+      ? await supabase
+          .from('stage_results')
+          .select('reference_no, stage_name, score, passing_score, max_score')
+          .in('reference_no', referenceNumbers)
+          .eq('stage_name', 'Pen & Paper Test')
       : { data: [] };
 
     const stageMap: Record<string, ApplicantListItem['stages']> = {};
@@ -220,9 +230,15 @@ export default function ApplicantsContent({
       stageMap[s.reference_no].push(s);
     });
 
-    const examMap: Record<string, { score: number; termination_reason: string | null }> = {};
+    // Build exam map - prefer Pen & Paper scores over online exam
+    const examMap: Record<string, { score: number; termination_reason: string | null; isPenAndPaper: boolean }> = {};
     (examResults || []).forEach((e: any) => {
-      examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason };
+      examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason, isPenAndPaper: e.pen_and_paper || false };
+    });
+
+    // Override with Pen & Paper scores if available
+    (penAndPaperResults || []).forEach((pp: any) => {
+      examMap[pp.reference_no] = { score: pp.score, termination_reason: null, isPenAndPaper: true };
     });
 
     const enriched = (apps || []).map((app) => {
@@ -240,6 +256,7 @@ export default function ApplicantsContent({
         mathExamResult: getStageResult('Math Exam'),
         mathExamScore: exam?.score,
         mathExamTerminationReason: exam?.termination_reason,
+        mathExamIsPenAndPaper: exam?.isPenAndPaper,
         tableTestResult: getStageResult('Table Test'),
         sweatyPalmResult:
           appStages.find((x) => x.stage_name === 'Initial Screening')?.sweaty_palm_result ||
@@ -442,6 +459,7 @@ export default function ApplicantsContent({
     { key: 'height_cm', label: 'Height', fieldKey: 'applicants_table_height_cm' },
     { key: 'initialScreeningResult', label: 'Initial Screening', fieldKey: 'applicants_table_initialScreeningResult' },
     { key: 'mathExamResult', label: 'Math Exam', fieldKey: 'applicants_table_mathExamResult' },
+    { key: 'mathExamScore', label: 'Score', fieldKey: 'applicants_table_mathExamScore' },
     { key: 'tableTestResult', label: 'Table Test', fieldKey: 'applicants_table_tableTestResult' },
     { key: 'sweatyPalmResult', label: 'Sweaty Palm', fieldKey: 'applicants_table_sweatyPalmResult' },
     { key: 'finalInterviewResult', label: 'Final Interview', fieldKey: 'applicants_table_finalInterviewResult' },
@@ -690,6 +708,23 @@ export default function ApplicantsContent({
                         }
                       >
                         {app.mathExamResult}
+                      </td>
+                    )}
+                    {visibleColumns.has('applicants_table_mathExamScore') && (
+                      <td
+                        className={app.mathExamScore !== undefined 
+                          ? (app.mathExamScore >= (app.mathExamIsPenAndPaper ? 30 : 8) 
+                              ? 'text-success fw-bold' 
+                              : 'text-danger fw-bold')
+                          : 'text-muted'}
+                        style={{ fontSize: '12px' }}
+                        title={app.mathExamIsPenAndPaper ? 'Pen & Paper Test (Pass: 30/50)' : app.mathExamScore !== undefined ? 'Online Exam (Pass: 8/10)' : 'No exam record'}
+                      >
+                        {app.mathExamScore !== undefined 
+                          ? (app.mathExamIsPenAndPaper 
+                              ? `${app.mathExamScore}/50` 
+                              : `${app.mathExamScore}/10`)
+                          : '-'}
                       </td>
                     )}
                     {visibleColumns.has('applicants_table_tableTestResult') && (
