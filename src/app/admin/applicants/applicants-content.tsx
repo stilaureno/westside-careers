@@ -211,7 +211,7 @@ export default function ApplicantsContent({
     const { data: examResults } = referenceNumbers.length > 0
       ? await supabase
           .from('math_exam_results')
-          .select('reference_no, score, termination_reason, pen_and_paper')
+          .select('reference_no, score, termination_reason')
           .in('reference_no', referenceNumbers)
       : { data: [] };
 
@@ -233,7 +233,7 @@ export default function ApplicantsContent({
     // Build exam map - prefer Pen & Paper scores over online exam
     const examMap: Record<string, { score: number; termination_reason: string | null; isPenAndPaper: boolean }> = {};
     (examResults || []).forEach((e: any) => {
-      examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason, isPenAndPaper: e.pen_and_paper || false };
+      examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason, isPenAndPaper: false };
     });
 
     // Override with Pen & Paper scores if available
