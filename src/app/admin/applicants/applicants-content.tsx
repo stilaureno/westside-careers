@@ -123,6 +123,7 @@ export default function ApplicantsContent({
   const [filterPosition, setFilterPosition] = useState('');
   const [filterStage, setFilterStage] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterApplicantNumber, setFilterApplicantNumber] = useState('');
   const [filterStartDate, setFilterStartDate] = useState(defaultStartDate);
   const [filterEndDate, setFilterEndDate] = useState(today);
 
@@ -344,10 +345,12 @@ export default function ApplicantsContent({
       const pos = filterPosition.toLowerCase();
       const stg = filterStage.toLowerCase();
       const sts = filterStatus.toLowerCase();
+      const appNum = filterApplicantNumber ? app.applicant_number?.toString() : '';
 
       return (!pos || (app.position_applied || '').toLowerCase() === pos) &&
         (!stg || (app.current_stage || '').toLowerCase() === stg) &&
-        (!sts || (app.application_status || '').toLowerCase() === sts);
+        (!sts || (app.application_status || '').toLowerCase() === sts) &&
+        (!filterApplicantNumber || appNum.includes(filterApplicantNumber));
     });
 
     if (!isSuperAdmin && allowedDepartments.length > 0) {
@@ -370,7 +373,7 @@ export default function ApplicantsContent({
     });
 
     return result;
-  }, [filteredBySearch, filterPosition, filterStage, filterStatus, sortField, sortDir, isSuperAdmin, allowedDepartments]);
+  }, [filteredBySearch, filterPosition, filterStage, filterStatus, filterApplicantNumber, sortField, sortDir, isSuperAdmin, allowedDepartments]);
 
   // Pagination logic
   const totalPages = pageSize === 0 ? 1 : Math.ceil(filteredApplicants.length / pageSize);
@@ -381,7 +384,7 @@ export default function ApplicantsContent({
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterPosition, filterStage, filterStatus, filterStartDate, filterEndDate, globalSearch]);
+  }, [filterPosition, filterStage, filterStatus, filterStartDate, filterEndDate, globalSearch, filterApplicantNumber]);
 
   // Keyboard navigation for pagination
   useEffect(() => {
@@ -424,6 +427,7 @@ export default function ApplicantsContent({
     setFilterStatus('');
     setFilterStartDate(defaultStartDate);
     setFilterEndDate(today);
+    setFilterApplicantNumber('');
   }
 
   function openModal(refNo: string) {
@@ -470,7 +474,7 @@ export default function ApplicantsContent({
     { key: 'sweatyPalmResult', label: 'Sweaty Palm', fieldKey: 'applicants_table_sweatyPalmResult' },
     { key: 'finalInterviewResult', label: 'Final Interview', fieldKey: 'applicants_table_finalInterviewResult' },
     { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
-    { key: 'applicant_number', label: 'Applicant ID', fieldKey: 'applicants_table_applicant_number' },
+    { key: 'applicant_number', label: '#', fieldKey: 'applicants_table_applicant_number' },
   ];
 
   const handleDelete = async (referenceNo: string) => {
@@ -487,7 +491,7 @@ export default function ApplicantsContent({
     }
   };
 
-  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== defaultStartDate || filterEndDate !== today;
+  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== defaultStartDate || filterEndDate !== today || filterApplicantNumber;
 
   if (loading) {
     return (
@@ -574,6 +578,16 @@ export default function ApplicantsContent({
                 placeholder="Name, reference, remarks..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
+              />
+            </div>
+            <div className="col-md-2">
+              <label className="form-label small text-muted mb-1">Applicant #</label>
+              <input
+                type="number"
+                className="form-control form-control-sm"
+                placeholder="Search ID..."
+                value={filterApplicantNumber}
+                onChange={(e) => setFilterApplicantNumber(e.target.value)}
               />
             </div>
             <div className="col-md-2">
