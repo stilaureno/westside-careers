@@ -537,9 +537,11 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                       className="ms-2 text-muted fw-normal" 
                       style={{ fontSize: '14px', cursor: 'pointer' }}
                       onClick={() => {
-                        navigator.clipboard.writeText(applicant?.reference_no || '');
-                        setCopyFeedback('Copied!');
-                        setTimeout(() => setCopyFeedback(null), 2000);
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(applicant?.reference_no || '');
+                          setCopyFeedback('Copied!');
+                          setTimeout(() => setCopyFeedback(null), 2000);
+                        }
                       }}
                       title="Click to copy reference number"
                     >
