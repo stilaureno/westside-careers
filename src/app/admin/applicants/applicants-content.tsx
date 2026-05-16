@@ -345,7 +345,7 @@ export default function ApplicantsContent({
       const pos = filterPosition.toLowerCase();
       const stg = filterStage.toLowerCase();
       const sts = filterStatus.toLowerCase();
-      const appNum = filterApplicantNumber ? app.applicant_number?.toString() : '';
+      const appNum = app.applicant_number != null ? String(app.applicant_number) : '';
 
       return (!pos || (app.position_applied || '').toLowerCase() === pos) &&
         (!stg || (app.current_stage || '').toLowerCase() === stg) &&
