@@ -60,6 +60,7 @@ export default function SettingsContent() {
   const [newStageOrder, setNewStageOrder] = useState<number>(0);
   const [experiencedRequiredGames, setExperiencedRequiredGames] = useState(2);
   const [mathExamExperienceFilter, setMathExamExperienceFilter] = useState('all');
+  const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
 
   // Table column visibility state
   const [tableColumns, setTableColumns] = useState<VisibleField[]>([]);
@@ -77,7 +78,7 @@ export default function SettingsContent() {
 
   async function loadData() {
     setLoading(true);
-    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes, gamesConfigRes, mathExamFilterRes] = await Promise.all([
+    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes, gamesConfigRes, mathExamFilterRes, applicantNumRes] = await Promise.all([
       supabase.from('visible_fields').select('*').order('display_order'),
       supabase.from('departments').select('*').order('name'),
       supabase.from('positions').select('*').order('name'),
@@ -85,6 +86,7 @@ export default function SettingsContent() {
       supabase.from('stages').select('*').order('display_order'),
       supabase.from('config').select('value').eq('key', 'EXPERIENCED_DEALER_REQUIRED_GAMES').single(),
       supabase.from('config').select('value').eq('key', 'MATH_EXAM_EXPERIENCE_FILTER').single(),
+      supabase.from('config').select('value').eq('key', 'APPLICANT_NUMBER_REQUIRED').single(),
     ]);
     
     const allFields = fieldsRes.data || [];
@@ -101,6 +103,9 @@ export default function SettingsContent() {
     }
     if (mathExamFilterRes.data?.value) {
       setMathExamExperienceFilter(mathExamFilterRes.data.value);
+    }
+    if (applicantNumRes.data?.value) {
+      setApplicantNumberRequired(applicantNumRes.data.value === 'true');
     }
     setLoading(false);
   }
@@ -133,6 +138,21 @@ export default function SettingsContent() {
     if (!error) {
       setMathExamExperienceFilter(filter);
       setMessage({ text: 'Math Exam filter updated', type: 'success' });
+    } else {
+      setMessage({ text: error.message, type: 'error' });
+    }
+    setSaving(false);
+  }
+
+  async function saveApplicantNumberRequired(required: boolean) {
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .upsert({ key: 'APPLICANT_NUMBER_REQUIRED', value: required.toString() }, { onConflict: 'key' });
+
+    if (!error) {
+      setApplicantNumberRequired(required);
+      setMessage({ text: `Applicant Number is now ${required ? 'required' : 'optional'}`, type: 'success' });
     } else {
       setMessage({ text: error.message, type: 'error' });
     }
@@ -871,6 +891,29 @@ export default function SettingsContent() {
                 </div>
                 <small className="text-muted d-block mt-2">
                   Filter the Math Exam KPI count on the dashboard by experience level.
+                </small>
+              </div>
+              <div className="mb-3">
+                <label className="form-label small fw-bold">Applicant Number Field</label>
+                <div className="d-flex gap-2 align-items-center">
+                  <select
+                    className="form-select form-select-sm"
+                    value={applicantNumberRequired.toString()}
+                    onChange={(e) => setApplicantNumberRequired(e.target.value === 'true')}
+                  >
+                    <option value="false">Optional</option>
+                    <option value="true">Required</option>
+                  </select>
+                  <button
+                    className="btn btn-sm btn-dark"
+                    onClick={() => saveApplicantNumberRequired(applicantNumberRequired)}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+                <small className="text-muted d-block mt-2">
+                  When required, applicants must enter their Applicant Number on the application form.
                 </small>
               </div>
             </div>

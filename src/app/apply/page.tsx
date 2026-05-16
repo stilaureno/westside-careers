@@ -38,19 +38,23 @@ export default function ApplyPage() {
   });
   const [games, setGames] = useState<string[]>([]);
   const [requiredGamesCount, setRequiredGamesCount] = useState(2);
+  const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [deptRes, configRes] = await Promise.all([
+        const [deptRes, configRes, applicantNumRes] = await Promise.all([
           fetch('/api/settings/departments'),
-          fetch('/api/config/experienced-games-count')
+          fetch('/api/config/experienced-games-count'),
+          fetch('/api/config/applicant-number-required')
         ]);
         const deptData = await deptRes.json();
         const configData = await configRes.json();
+        const applicantNumData = await applicantNumRes.json();
         setDepartments(deptData.departments || []);
         setPositions(deptData.positions || []);
         setRequiredGamesCount(configData.count || 2);
+        setApplicantNumberRequired(applicantNumData.required || false);
       } catch (err) {
         console.error('Failed to fetch departments:', err);
       } finally {
@@ -93,6 +97,12 @@ export default function ApplyPage() {
 
     if (!form.lastName || !form.firstName || !form.birthdate || !form.gender || !form.contactNumber || !form.departmentId) {
       setMessage({ text: 'Please fill in all required fields.', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (applicantNumberRequired && !form.applicantNumber.trim()) {
+      setMessage({ text: 'Applicant Number is required.', type: 'error' });
       setLoading(false);
       return;
     }
@@ -237,7 +247,7 @@ export default function ApplyPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Personal Information</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <label style={{ fontSize: '13px', color: '#6b7280' }}>Applicant Number</label>
+                <label style={{ fontSize: '13px', color: '#6b7280' }}>Applicant Number{applicantNumberRequired ? ' *' : ''}</label>
                 <input
                   style={{ 
                     width: '120px', 
@@ -250,7 +260,8 @@ export default function ApplyPage() {
                   type="text"
                   value={form.applicantNumber}
                   onChange={(e) => setForm({ ...form, applicantNumber: e.target.value })}
-                  placeholder="Optional"
+                  placeholder={applicantNumberRequired ? "Required" : "Optional"}
+                  required={applicantNumberRequired}
                 />
               </div>
             </div>
