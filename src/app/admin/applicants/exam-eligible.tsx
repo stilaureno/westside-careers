@@ -27,8 +27,8 @@ export default function ExamEligibleApplicants({
 
   const supabase = createClient();
 
-  const loadEligibleApplicantsCallback = async () => {
-    setLoading(true);
+  const fetchApplicants = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       // Step 1: Fetch all Dealer applicants (1 query)
       const { data: allApplicants, error } = await supabase
@@ -125,18 +125,18 @@ export default function ExamEligibleApplicants({
     } catch (err) {
       setMessage({ text: 'Error loading eligible applicants', type: 'error' });
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadEligibleApplicantsCallback();
+    fetchApplicants(true);
   }, [isSuperAdmin, allowedDepartments]);
 
-  // Auto-refresh every 1 minute
+  // Auto-refresh every 1 minute (background, no loading indicator)
   useEffect(() => {
     const interval = setInterval(() => {
-      loadEligibleApplicantsCallback();
+      fetchApplicants(false);
     }, 60000);
 
     return () => clearInterval(interval);
@@ -216,7 +216,7 @@ export default function ExamEligibleApplicants({
       } else {
         setMessage({ text: `Successfully authorized ${refNosArray.length} applicant(s) to take the exam!`, type: 'success' });
         setSelectedRefNos(new Set());
-        await loadEligibleApplicantsCallback();
+        await fetchApplicants(true);
       }
     } catch (err) {
       setMessage({ text: 'Error authorizing exam access', type: 'error' });
