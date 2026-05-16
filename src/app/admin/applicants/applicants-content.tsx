@@ -271,6 +271,11 @@ export default function ApplicantsContent({
     setLoading(false);
   }, [allowedDepartments, isSuperAdmin, supabase]);
 
+  // Fetch fresh data on mount to get math exam scores
+  useEffect(() => {
+    loadApplicants();
+  }, []);
+
   const filteredByDate = useMemo(() => {
     const start = filterStartDate;
     const end = filterEndDate;
