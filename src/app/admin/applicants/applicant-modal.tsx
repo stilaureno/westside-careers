@@ -53,6 +53,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     remarks: '',
     evaluatedBy: '',
     editReason: '',
+    applicantNumber: '',
   });
   const [reprofileDepartment, setReprofileDepartment] = useState('');
   const [reprofilePosition, setReprofilePosition] = useState('');
@@ -117,6 +118,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       remarks: '',
       evaluatedBy: '',
       editReason: '',
+      applicantNumber: '',
     });
     setReprofileDepartment('');
     setReprofilePosition('');
@@ -250,6 +252,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         remarks: stageName === 'Math Exam' ? '' : (stageResult.remarks || ''),
         evaluatedBy: stageResult.evaluated_by || '',
         editReason: '',
+        applicantNumber: app?.applicant_number?.toString() || '',
       });
       setReprofileDepartment(stageResult.reprofile_department || '');
       setReprofilePosition(stageResult.reprofile_position || '');
@@ -272,6 +275,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
         remarks: '',
         evaluatedBy: '',
         editReason: '',
+        applicantNumber: app?.applicant_number?.toString() || '',
       });
       setReprofileDepartment('');
       setReprofilePosition('');
@@ -297,6 +301,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       remarks: '',
       evaluatedBy: 'HR',
       editReason: '',
+      applicantNumber: app?.applicant_number?.toString() || '',
     });
   }
 
@@ -361,6 +366,32 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     }, '');
 
     if (res.success) {
+      // If this is Initial Screening and applicant_number is provided, save it to applicants table
+      if (stage === 'Initial Screening' && form.applicantNumber) {
+        const applicantNum = parseInt(form.applicantNumber, 10);
+        if (!isNaN(applicantNum) && applicantNum > 0) {
+          // Check for duplicates (exclude current applicant)
+          const { data: existing } = await supabase
+            .from('applicants')
+            .select('applicant_id, reference_no')
+            .eq('applicant_number', applicantNum)
+            .neq('reference_no', data.applicant.reference_no)
+            .single();
+          
+          if (existing) {
+            setMessage({ text: `Error: Applicant number ${applicantNum} is already used by another applicant (${existing.reference_no}).`, type: 'error' });
+            setSaving(false);
+            return;
+          }
+          
+          // Save the applicant_number
+          await supabase
+            .from('applicants')
+            .update({ applicant_number: applicantNum })
+            .eq('reference_no', data.applicant.reference_no);
+        }
+      }
+      
       await onSaved?.();
       onClose();
     } else {
@@ -667,6 +698,22 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
 
                         {stage === 'Initial Screening' && (
                           <div className="row g-3 mb-3">
+                            <div className="col-md-2">
+                              <label htmlFor="applicantNumber" className="form-label small">Applicant ID</label>
+                              <input 
+                                id="applicantNumber" 
+                                type="number" 
+                                className="form-control form-control-sm" 
+                                value={form.applicantNumber} 
+                                onChange={(e) => setForm({ ...form, applicantNumber: e.target.value })}
+                                placeholder="Enter ID from security"
+                              />
+                              {form.applicantNumber && (
+                                <small className="text-muted">
+                                  {data?.applicant?.applicant_number ? 'Current: ' + data.applicant.applicant_number : 'Will be saved'}
+                                </small>
+                              )}
+                            </div>
                             <div className="col-md-2">
                               <label htmlFor="heightCm" className="form-label small">Height (cm)</label>
                               <input id="heightCm" type="number" className="form-control form-control-sm" value={form.heightCm} onChange={(e) => setForm({ ...form, heightCm: e.target.value })} />

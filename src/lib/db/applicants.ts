@@ -24,6 +24,7 @@ export interface ApplicantListItem extends Applicant {
   finalInterviewResult: string;
   remarks?: string;
   stages: ApplicantStageSummary[];
+  applicant_number?: number;
 }
 
 function getDerivedApplicationStatus(applicant: Applicant, applicantStages: ApplicantStageSummary[]): string {
