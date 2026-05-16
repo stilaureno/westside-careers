@@ -18,6 +18,7 @@ export interface ApplicantListItem extends Applicant {
   mathExamResult: string;
   mathExamScore?: number;
   mathExamTerminationReason?: string;
+  mathExamIsPenAndPaper?: boolean;
   tableTestResult: string;
   sweatyPalmResult: string;
   finalInterviewResult: string;

@@ -150,7 +150,7 @@ export default function ExamEligibleApplicants({
           initialScreeningResult: 'Passed',
           mathExamResult: exam ? (exam.score >= (exam.isPenAndPaper ? 30 : 8) ? 'Passed' : 'Failed') : '',
           mathExamScore: exam?.score,
-          mathExamTerminationReason: exam?.termination_reason,
+          mathExamTerminationReason: exam?.termination_reason ?? undefined,
           isPenAndPaper: exam?.isPenAndPaper,
           attemptCount: exam?.attemptCount,
           tableTestResult: '',
