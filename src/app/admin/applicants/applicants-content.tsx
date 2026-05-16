@@ -658,6 +658,20 @@ export default function ApplicantsContent({
                 </button>
               </div>
             )}
+            <div className="col-auto">
+              <button 
+                className="btn btn-sm btn-outline-secondary" 
+                onClick={() => loadApplicants()}
+                disabled={loading}
+                title="Refresh data"
+              >
+                {loading ? (
+                  <span className="spinner-border spinner-border-sm" role="status" style={{ width: '14px', height: '14px' }}></span>
+                ) : (
+                  ↻
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
