@@ -156,6 +156,7 @@ export interface ApplicationFormData {
   currentPosition?: string;
   previousCompanyName?: string;
   preferredDepartment?: string;
+  applicantNumber?: number;
 }
 
 export interface DashboardSummary {

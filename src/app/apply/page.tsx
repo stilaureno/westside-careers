@@ -34,7 +34,7 @@ export default function ApplyPage() {
     departmentId: '', positionApplied: '', experienceLevel: '',
     currentlyEmployed: 'No', currentCompanyName: '',
     currentPosition: '', previousCompanyName: '',
-    preferredDepartment: '',
+    preferredDepartment: '', applicantNumber: '',
   });
   const [games, setGames] = useState<string[]>([]);
   const [requiredGamesCount, setRequiredGamesCount] = useState(2);
@@ -151,6 +151,7 @@ export default function ApplyPage() {
       currentPosition: isEmployed ? form.currentPosition : undefined,
       previousCompanyName: form.previousCompanyName,
       preferredDepartment: form.preferredDepartment,
+      applicantNumber: form.applicantNumber ? parseInt(form.applicantNumber, 10) : undefined,
     });
 
     if (result.success) {
@@ -233,7 +234,26 @@ export default function ApplyPage() {
           )}
 
           <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>Personal Information</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Personal Information</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <label style={{ fontSize: '13px', color: '#6b7280' }}>Applicant Number</label>
+                <input
+                  style={{ 
+                    width: '120px', 
+                    padding: '6px 10px', 
+                    fontSize: '13px', 
+                    border: '2px solid #D4AF37', 
+                    borderRadius: '6px',
+                    outline: 'none',
+                  }}
+                  type="text"
+                  value={form.applicantNumber}
+                  onChange={(e) => setForm({ ...form, applicantNumber: e.target.value })}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
             <div className={`${styles.grid} ${styles.gridTwo}`}>
               <Field label="Last Name" required>
                 <input

@@ -139,6 +139,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
       duplicate_key: duplicateKey,
       current_stage: 'Initial Screening',
       application_status: 'Pending',
+      applicant_number: formData.applicantNumber || null,
     });
 
   if (error) {
