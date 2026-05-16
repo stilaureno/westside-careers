@@ -666,9 +666,9 @@ export default function ApplicantsContent({
                 title="Refresh data"
               >
                 {loading ? (
-                  <span className="spinner-border spinner-border-sm" role="status" style={{ width: '14px', height: '14px' }} />
+                  <span className="spinner-border spinner-border-sm" role="status" style={{ width: '14px', height: '14px' }}></span>
                 ) : (
-                  ↻
+                  <span>↻</span>
                 )}
               </button>
             </div>
