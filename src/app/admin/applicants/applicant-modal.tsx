@@ -536,9 +536,24 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                     <span 
                       className="ms-2 text-muted fw-normal" 
                       style={{ fontSize: '14px', cursor: 'pointer' }}
-                      onClick={() => {
-                        if (navigator.clipboard) {
-                          navigator.clipboard.writeText(applicant?.reference_no || '');
+                      onClick={async () => {
+                        try {
+                          const refNo = applicant?.reference_no || '';
+                          if (refNo) {
+                            await navigator.clipboard.writeText(refNo);
+                            setCopyFeedback('Copied!');
+                            setTimeout(() => setCopyFeedback(null), 2000);
+                          }
+                        } catch (err) {
+                          // Fallback for older browsers
+                          const textArea = document.createElement('textarea');
+                          textArea.value = applicant?.reference_no || '';
+                          textArea.style.position = 'fixed';
+                          textArea.style.left = '-9999px';
+                          document.body.appendChild(textArea);
+                          textArea.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(textArea);
                           setCopyFeedback('Copied!');
                           setTimeout(() => setCopyFeedback(null), 2000);
                         }
