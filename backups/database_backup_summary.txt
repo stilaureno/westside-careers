@@ -1,0 +1,65 @@
+=== SUPABASE DATABASE BACKUP SUMMARY ===
+Project ID: eodgowpdhsdsuwukepsz
+Generated: 2026-04-30
+Backup Type: Full Database
+
+=== TABLE COUNTS ===
+| Table                    | Rows  |
+|-------------------------|-------|
+| applicants              | 534   |
+| stage_results           | 1319  |
+| applicant_games        | 169   |
+| applicant_notifications| 1881  |
+| config                 | 3     |
+| departments            | 4     |
+| math_exam_results      | 282   |
+| position_stages        | 190   |
+| positions              | 44    |
+| questionnaire          | 50    |
+| stages                 | 4     |
+| todos                  | 0     |
+| visible_fields         | 18    |
+
+=== TOTAL ROWS ===
+Total: ~4,198 rows across all tables
+
+=== NOTES ===
+- Primary tables: applicants, stage_results, applicant_games
+- Lookup tables: positions, position_stages, stages, departments, questionnaire
+- Config: config, visible_fields
+- Todos is empty (application feature)
+- Exam results linked to applicants via reference_no
+
+=== APPLICANTS BREAKDOWN ===
+- Table Games:    ~470
+- Slots/E-Gaming: ~64
+
+=== EXPERIENCE LEVELS (Dealer only) ===
+- Experienced Dealer:    71
+- Non-Experienced Dealer: 212
+
+=== APPLICATION STATUSES ===
+- Completed:       287
+- For Pooling:    76
+- Not Recommended: 51
+- Ongoing:        21
+- Reprofile:      20
+- Failed:        7
+- Pending:       4
+
+=== POSITIONS AVAILABLE ===
+Dealer, Pit Supervisor, Pit Manager, Operation Manager,
+Card Room Manager, Card Room Staff, Card Room Supervisor,
+Casino Operations Manager, Compliance Officer,
+Gaming Office Admin, Gaming Operations Admin,
+Inventory & Maintenance Staff,
+Slots Admin, Slots Ambassador, Slots Supervisor, Slots Technicians I and II,
+Table Games Training Administrator, Table Games Training Officer
+
+=== SCHEMA NOTES ===
+- applicants table: main applicant records (reference_no as PK)
+- stage_results: tracks interview/assessment stages per applicant
+- applicant_games: game proficiency (MB, BJ, RL, CRAPS)
+- math_exam_results: exam attempts and scores
+- config: app settings (ADMIN_PASSWORD, etc.)
+- visible_fields: per-admin column visibility settings

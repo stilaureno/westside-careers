@@ -54,7 +54,7 @@ export default async function ApplicantsPage() {
   }
 
   const initialApplicants = await getApplicantsPageData({
-    limit: 300,
+    limit: 5000,
     allowedDepartments,
     isSuperAdmin,
   });

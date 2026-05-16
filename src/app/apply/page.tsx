@@ -37,14 +37,20 @@ export default function ApplyPage() {
     preferredDepartment: '',
   });
   const [games, setGames] = useState<string[]>([]);
+  const [requiredGamesCount, setRequiredGamesCount] = useState(2);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('/api/settings/departments');
-        const data = await res.json();
-        setDepartments(data.departments || []);
-        setPositions(data.positions || []);
+        const [deptRes, configRes] = await Promise.all([
+          fetch('/api/settings/departments'),
+          fetch('/api/config/experienced-games-count')
+        ]);
+        const deptData = await deptRes.json();
+        const configData = await configRes.json();
+        setDepartments(deptData.departments || []);
+        setPositions(deptData.positions || []);
+        setRequiredGamesCount(configData.count || 2);
       } catch (err) {
         console.error('Failed to fetch departments:', err);
       } finally {
@@ -120,8 +126,8 @@ export default function ApplyPage() {
       return;
     }
 
-    if (isExperienced && games.length < 2) {
-      setMessage({ text: 'Please select at least 2 games.', type: 'error' });
+    if (isExperienced && games.length < requiredGamesCount) {
+      setMessage({ text: `Please select at least ${requiredGamesCount} games.`, type: 'error' });
       setLoading(false);
       return;
     }
@@ -214,11 +220,11 @@ export default function ApplyPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div className={styles.hero}>
-          <h1 className={styles.heroTitle}>Westside Resort</h1>
-          <p className={styles.heroSubtitle}>Table Games Hiring Portal — Apply Now</p>
-        </div>
-
+        <img
+          src="/WESTSIDE LOGO WHITE.png"
+          alt="NWR Careers Logo"
+          style={{ width: '160px', margin: '0 auto 24px', display: 'block' }}
+        />
         <form onSubmit={handleSubmit} className={`${styles.card} ${styles.formCard}`}>
           {message && (
             <div className={`${styles.message} ${message.type === 'success' ? styles.messageSuccess : styles.messageError}`}>
@@ -301,7 +307,7 @@ export default function ApplyPage() {
             </div>
 
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Email Address">
+              <Field label="Email Address" required>
                 <input
                   className={styles.control}
                   type="email"
@@ -309,21 +315,29 @@ export default function ApplyPage() {
                   autoComplete="email"
                   value={form.emailAddress}
                   onChange={(e) => setForm({ ...form, emailAddress: e.target.value })}
+                  required
                 />
               </Field>
               <div className={styles.compactGrid}>
-                <Field label="Height (cm)">
+                <Field label="Height (cm)" required>
                   <input
                     className={styles.control}
                     type="number"
                     inputMode="numeric"
                     step="0.1"
+                    min="100"
+                    max="250"
                     value={form.heightCm}
-                    onChange={(e) => setForm({ ...form, heightCm: e.target.value })}
+                    onChange={(e) => {
+                      (e.target as HTMLInputElement).setCustomValidity('');
+                      setForm({ ...form, heightCm: e.target.value });
+                    }}
+                    onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('Your height must be in centimeters')}
                     placeholder="cm"
+                    required
                   />
                 </Field>
-                <Field label="Weight (kg)">
+                <Field label="Weight (kg)" required>
                   <input
                     className={styles.control}
                     type="number"
@@ -332,6 +346,7 @@ export default function ApplyPage() {
                     value={form.weightKg}
                     onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
                     placeholder="kg"
+                    required
                   />
                 </Field>
               </div>
@@ -395,7 +410,7 @@ export default function ApplyPage() {
 
             {isExperienced && (
               <div className={styles.grid}>
-                <p className={styles.gameHint}>Select at least 2 games you are proficient in:</p>
+                <p className={styles.gameHint}>Select at least {requiredGamesCount} games you are proficient in:</p>
                 <div className={styles.gameGrid}>
                   {ALLOWED_GAMES.map((game) => (
                     <label

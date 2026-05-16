@@ -73,9 +73,33 @@ export async function updateStage(
     visibleTattoo: payload.visibleTattoo,
     invisibleTattoo: payload.invisibleTattoo,
     sweatyPalmResult: payload.sweatyPalmResult,
+    reprofileDepartment: payload.reprofileDepartment,
+    reprofilePosition: payload.reprofilePosition,
+    reprofileExperienceLevel: payload.reprofileExperienceLevel,
+    originalPosition: payload.originalPosition,
+    originalDepartment: payload.originalDepartment,
+    originalExperienceLevel: payload.originalExperienceLevel,
     score: payload.score,
     passingScore: payload.passingScore,
     maxScore: payload.maxScore,
     remarks: payload.remarks,
+    evaluatedAt: payload.evaluatedAt,
+    editReason: payload.editReason,
   });
+}
+
+export async function allowExam(
+  referenceNo: string,
+  _adminPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('applicants')
+    .update({ exam_authorized: 'Yes', updated_at: new Date().toISOString() })
+    .eq('reference_no', referenceNo);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  return { success: true };
 }

@@ -12,14 +12,25 @@ type MathExamResult = {
   status: string | null;
 };
 
+type FeedbackForm = {
+  rating: number;
+  comments: string;
+  email: string;
+};
+
 export default function StatusPage() {
-  const [form, setForm] = useState({ referenceNo: '', birthdate: '' });
+  const [form, setForm] = useState({ lastName: '', birthdate: '' });
   const [result, setResult] = useState<{ applicant: any; roadmap: StageRoadmapItem[]; mathExam: MathExamResult | null; nextStep: string | null } | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 const [autoFetched, setAutoFetched] = useState(false);
+  const [keepScreenOn, setKeepScreenOn] = useState(false);
+  const [feedbackForm, setFeedbackForm] = useState<FeedbackForm>({ rating: 0, comments: '', email: '' });
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   useEffect(() => {
     if (!lockedUntil) return;
@@ -38,10 +49,10 @@ const [autoFetched, setAutoFetched] = useState(false);
   const isLocked = !!lockedUntil && lockedUntil > Date.now();
 
   useEffect(() => {
-    const savedRef = localStorage.getItem('savedReferenceNo');
+    const savedLastName = localStorage.getItem('savedLastName');
     const savedDob = localStorage.getItem('savedBirthdate');
-    if (savedRef && savedDob) {
-      setForm({ referenceNo: savedRef, birthdate: savedDob });
+    if (savedLastName && savedDob) {
+      setForm({ lastName: savedLastName, birthdate: savedDob });
       setRememberMe(true);
       setAutoFetched(true);
     }
@@ -55,24 +66,34 @@ const [autoFetched, setAutoFetched] = useState(false);
       setLoading(true);
       setError('');
 
-      const res = await getApplicantStatus(form.referenceNo, form.birthdate);
+      const res = await getApplicantStatus(form.lastName, form.birthdate);
       if (res.error || !res.data) {
         setError(res.error || 'Applicant not found');
         setLockedUntil(res.lockedUntil || null);
       } else {
         setResult(res.data);
         setLockedUntil(null);
+        if (res.data?.hasFeedback) {
+          setFeedbackSubmitted(true);
+        }
       }
       setLoading(false);
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [autoFetched, rememberMe, form.referenceNo, form.birthdate]);
+  }, [autoFetched, rememberMe, form.lastName, form.birthdate]);
 
   function clearSavedInfo() {
-    localStorage.removeItem('savedReferenceNo');
+    const confirmed = window.confirm(
+      'This will delete your saved information from this device.\n\n' +
+      'Please make sure to save your personal information so you can check your application status again later.\n\n' +
+      'Click OK to continue, or Cancel to stay on this page.'
+    );
+    if (!confirmed) return;
+    
+    localStorage.removeItem('savedLastName');
     localStorage.removeItem('savedBirthdate');
-    setForm({ referenceNo: '', birthdate: '' });
+    setForm({ lastName: '', birthdate: '' });
     setRememberMe(false);
     setResult(null);
     setError('');
@@ -85,6 +106,48 @@ const [autoFetched, setAutoFetched] = useState(false);
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
+  async function submitFeedback(e: React.FormEvent) {
+    e.preventDefault();
+    if (feedbackSubmitting || !result) return;
+
+    setFeedbackSubmitting(true);
+    setFeedbackMessage(null);
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reference_no: result.applicant.reference_no,
+          last_name: result.applicant.last_name,
+          first_name: result.applicant.first_name,
+          email: feedbackForm.email || result.applicant.email_address,
+          rating: feedbackForm.rating,
+          comments: feedbackForm.comments,
+        }),
+      });
+
+      if (!res.ok) {
+        setFeedbackMessage({ text: 'Failed to submit feedback', type: 'error' });
+        setFeedbackSubmitting(false);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        setFeedbackMessage({ text: 'Thank you for your feedback!', type: 'success' });
+        setFeedbackSubmitted(true);
+        setFeedbackForm({ rating: 0, comments: '', email: '' });
+      } else {
+        setFeedbackMessage({ text: data.error || 'Failed to submit feedback', type: 'error' });
+      }
+    } catch (err) {
+      setFeedbackMessage({ text: 'An error occurred', type: 'error' });
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (isLocked) return;
@@ -93,7 +156,7 @@ const [autoFetched, setAutoFetched] = useState(false);
     setError('');
     setResult(null);
 
-    const res = await getApplicantStatus(form.referenceNo, form.birthdate);
+    const res = await getApplicantStatus(form.lastName, form.birthdate);
     if (res.error || !res.data) {
       setError(res.error || 'Applicant not found');
       setLockedUntil(res.lockedUntil || null);
@@ -101,7 +164,7 @@ const [autoFetched, setAutoFetched] = useState(false);
       setResult(res.data);
       setLockedUntil(null);
       if (rememberMe) {
-        localStorage.setItem('savedReferenceNo', form.referenceNo);
+        localStorage.setItem('savedLastName', form.lastName);
         localStorage.setItem('savedBirthdate', form.birthdate);
       }
     }
@@ -113,14 +176,14 @@ const [autoFetched, setAutoFetched] = useState(false);
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #08111f 0%, #0d1a2f 26%, #10213b 58%, #0a1424 100%)',
+      background: 'linear-gradient(180deg, #2b0f17 0%, #4a1521 26%, #6f1d2b 58%, #2b0f17 100%)',
       padding: '20px',
     }}>
       <div style={{ maxWidth: '580px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '24px', padding: '20px' }}>
           <h1 style={{ color: '#fff', fontSize: '28px', marginBottom: '6px' }}>Check Application Status</h1>
           <p style={{ color: '#b7c6df', fontSize: '15px' }}>
-            {showForm ? 'Enter your reference number and birthdate' : 'Your application status'}
+            {showForm ? 'Enter your last name and birthdate' : 'Your application status'}
           </p>
         </div>
 
@@ -145,14 +208,15 @@ const [autoFetched, setAutoFetched] = useState(false);
             )}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
-                Reference Number *
+                Last Name *
               </label>
               <input
-                value={form.referenceNo}
-                onChange={(e) => setForm({ ...form, referenceNo: e.target.value })}
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                 required
-                placeholder="APP-YYYYMMDDHHMMSS"
-                autoComplete="off"
+                placeholder="Enter your last name"
+                autoComplete="family-name"
+                autoCapitalize="words"
                 style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
               />
             </div>
@@ -194,7 +258,7 @@ const [autoFetched, setAutoFetched] = useState(false);
               </div>
             )}
             <button type="submit" disabled={loading || isLocked} style={{
-              width: '100%', padding: '14px', background: '#163a70', color: '#fff',
+              width: '100%', padding: '14px', background: '#8b1e2d', color: '#fff',
               border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
               cursor: loading || isLocked ? 'not-allowed' : 'pointer', opacity: loading || isLocked ? 0.65 : 1,
             }}>
@@ -209,7 +273,7 @@ const [autoFetched, setAutoFetched] = useState(false);
             boxShadow: '0 18px 42px rgba(4,12,24,.34)', padding: '40px',
             border: '1px solid rgba(212,175,55,.22)', textAlign: 'center',
           }}>
-            <div style={{ color: '#163a70', fontSize: '16px' }}>Loading your status...</div>
+            <div style={{ color: '#8b1e2d', fontSize: '16px' }}>Loading your status...</div>
           </div>
         )}
 
@@ -220,8 +284,8 @@ const [autoFetched, setAutoFetched] = useState(false);
             border: '1px solid rgba(212,175,55,.22)',
           }}>
             <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ color: '#163a70', fontSize: '20px', marginBottom: '4px' }}>
-                {result.applicant.first_name} {result.applicant.last_name}
+              <h2 style={{ color: '#8b1e2d', fontSize: '20px', marginBottom: '4px' }}>
+                {result.applicant.last_name?.toUpperCase()}, {result.applicant.first_name}{result.applicant.middle_name ? ' ' + result.applicant.middle_name : ''}
               </h2>
               <p style={{ color: '#6b7280', fontSize: '14px' }}>
                 {result.applicant.position_applied} &middot; {result.applicant.reference_no}
@@ -230,14 +294,14 @@ const [autoFetched, setAutoFetched] = useState(false);
 
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
               <span style={{
-                padding: '6px 14px', background: '#f0f4ff', color: '#163a70',
+                padding: '6px 14px', background: '#fbeaec', color: '#8b1e2d',
                 borderRadius: '20px', fontSize: '13px', fontWeight: '600',
               }}>{result.applicant.position_applied}</span>
             </div>
 
             {result.mathExam && (
               <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '14px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ color: '#163a70', fontSize: '15px', marginBottom: '12px' }}>Math Proficiency Exam</h3>
+                <h3 style={{ color: '#8b1e2d', fontSize: '15px', marginBottom: '12px' }}>Math Proficiency Exam</h3>
                 {result.mathExam.status && result.mathExam.status !== 'IN_PROGRESS' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ flex: 1 }}>
@@ -261,7 +325,7 @@ const [autoFetched, setAutoFetched] = useState(false);
               </div>
             )}
 
-            <h3 style={{ color: '#163a70', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
+            <h3 style={{ color: '#8b1e2d', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {result.roadmap.map((item, idx) => (
                 <div key={item.stageName} style={{
@@ -302,7 +366,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                         top: '50%',
                         transform: 'translateY(-50%)',
                         padding: '8px 14px',
-                        background: '#163a70',
+                        background: '#8b1e2d',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '8px',
@@ -318,18 +382,122 @@ const [autoFetched, setAutoFetched] = useState(false);
               ))}
             </div>
 
-            {result.nextStep && result.nextStep.includes('\n') ? (
-              <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                {result.nextStep.split('\n').map((line, idx) => (
-                  <p key={idx} style={{ fontSize: '13px', color: '#1e40af', margin: idx === 0 ? '0 0 8px' : '0 0 8px' }}>
-                    {idx === 0 ? <span style={{ fontWeight: '600' }}>Next Step: </span> : null}
-                    {line}
+{result.nextStep && (result.applicant?.application_status === 'Completed' || result.applicant?.application_status === 'Passed') ? (
+              <>
+                <div style={{ marginTop: '16px', padding: '16px', borderRadius: '12px', background: '#ecfdf3', border: '1px solid #86efac' }}>
+                  <p style={{ fontSize: '14px', color: '#166534', margin: 0, lineHeight: 1.6 }}>
+                    {result.nextStep}
                   </p>
-                ))}
-                <a href="https://westsideresort.darwinbox.com/ms/candidatev2/main/auth/login" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '8px', padding: '10px 16px', background: '#163a70', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
-                  Open Darwinbox →
-                </a>
-              </div>
+                </div>
+
+                {!feedbackSubmitted && (
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '12px', background: '#fef3c7', border: '1px solid #fcd34d' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#92400e', marginTop: 0, marginBottom: '12px' }}>📝 Help Us Improve</h3>
+                    <p style={{ fontSize: '12px', color: '#78350f', marginBottom: '12px' }}>How was your application experience?</p>
+                    
+                    <form onSubmit={submitFeedback}>
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#78350f', marginBottom: '8px' }}>Rate your experience</label>
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '24px' }}>
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <button
+                              key={rating}
+                              type="button"
+                              onClick={() => setFeedbackForm({ ...feedbackForm, rating })}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                opacity: feedbackForm.rating >= rating ? 1 : 0.4,
+                                transform: feedbackForm.rating >= rating ? 'scale(1.2)' : 'scale(1)',
+                                transition: 'all 0.2s',
+                              }}
+                            >
+                              {rating === 1 ? '😞' : rating === 2 ? '😕' : rating === 3 ? '😐' : rating === 4 ? '🙂' : '😄'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#78350f', marginBottom: '6px' }}>Comments (optional)</label>
+                        <textarea
+                          value={feedbackForm.comments}
+                          onChange={(e) => setFeedbackForm({ ...feedbackForm, comments: e.target.value })}
+                          placeholder="Share your thoughts..."
+                          style={{
+                            width: '100%',
+                            minHeight: '60px',
+                            padding: '8px',
+                            border: '1px solid #fcd34d',
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            fontFamily: 'inherit',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#78350f', marginBottom: '6px' }}>Email (optional)</label>
+                        <input
+                          type="email"
+                          value={feedbackForm.email}
+                          onChange={(e) => setFeedbackForm({ ...feedbackForm, email: e.target.value })}
+                          placeholder={result.applicant.email_address || 'your@email.com'}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #fcd34d',
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+
+                      {feedbackMessage && (
+                        <div style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          marginBottom: '12px',
+                          background: feedbackMessage.type === 'success' ? '#ecfdf3' : '#fef2f2',
+                          border: `1px solid ${feedbackMessage.type === 'success' ? '#86efac' : '#fecaca'}`,
+                          color: feedbackMessage.type === 'success' ? '#166534' : '#991b1b',
+                          fontSize: '12px',
+                        }}>
+                          {feedbackMessage.text}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={feedbackSubmitting || feedbackForm.rating === 0}
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          background: feedbackForm.rating === 0 ? '#d1d5db' : '#8b1e2d',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: feedbackForm.rating === 0 ? 'not-allowed' : 'pointer',
+                          opacity: feedbackSubmitting ? 0.7 : 1,
+                        }}
+                      >
+                        {feedbackSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {feedbackSubmitted && (
+                  <div style={{ marginTop: '20px', padding: '16px', borderRadius: '12px', background: '#ecfdf3', border: '1px solid #86efac', textAlign: 'center' }}>
+                    <p style={{ fontSize: '13px', color: '#166534', fontWeight: '600', margin: 0 }}>Thank you for your feedback! 🙏</p>
+                  </div>
+                )}
+              </>
             ) : (
               <div style={{ marginTop: '16px', padding: '14px 16px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
                 <p style={{ fontSize: '13px', color: '#1e40af', margin: 0 }}>
@@ -361,6 +529,8 @@ const [autoFetched, setAutoFetched] = useState(false);
           </Link>
         </div>
       </div>
+
+
     </div>
   );
 }

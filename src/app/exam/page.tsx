@@ -14,15 +14,21 @@ function getExamErrorMessage(error: string): string {
   if (error === 'initialScreeningRequired') {
     return 'You must complete Initial Screening before taking the math exam.';
   }
+  if (error === 'examNotAuthorized') {
+    return 'You are not authorized to take the exam. Please contact HR.';
+  }
   if (error === 'alreadyTaken') {
     return 'You have already taken this exam.';
+  }
+  if (error === 'retakeLimitReached') {
+    return 'You have used the online retake. Please contact admin for the Pen & Paper test.';
   }
   return error;
 }
 
 export default function ExamPage() {
-  const [view, setView] = useState<'start' | 'exam' | 'result'>('start');
-  const [refInput, setRefInput] = useState('');
+  const [view, setView] = useState<'start' | 'confirm' | 'exam' | 'result'>('start');
+  const [form, setForm] = useState({ lastName: '', birthdate: '' });
   const [applicant, setApplicant] = useState<{ referenceNo: string; lastName: string; firstName: string; middleName?: string | null } | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -36,6 +42,9 @@ export default function ExamPage() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
   const [pendingUnanswered, setPendingUnanswered] = useState<number>(0);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [confirmUnderstood, setConfirmUnderstood] = useState(false);
+  const [confirmAgree, setConfirmAgree] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
@@ -49,20 +58,21 @@ export default function ExamPage() {
   }, []);
 
   useEffect(() => {
-    const savedRef = localStorage.getItem('examRef');
-    if (savedRef) {
-      setRefInput(savedRef);
-      localStorage.removeItem('examRef');
+    const savedLastName = localStorage.getItem('savedLastName');
+    const savedBirthdate = localStorage.getItem('savedBirthdate');
+    if (savedLastName && savedBirthdate) {
+      setForm({ lastName: savedLastName, birthdate: savedBirthdate });
+      setRememberMe(true);
     }
   }, []);
 
   useEffect(() => {
-    activeReferenceRef.current = applicant?.referenceNo || refInput.trim();
-  }, [applicant, refInput]);
+    activeReferenceRef.current = applicant?.referenceNo || '';
+  }, [applicant]);
 
   async function verifyAndStart() {
-    if (!refInput.trim()) {
-      setMessage({ text: 'Please enter your reference number.', type: 'error' });
+    if (!form.lastName.trim() || !form.birthdate) {
+      setMessage({ text: 'Please enter your last name and birthdate.', type: 'error' });
       return;
     }
     setLoading(true);
@@ -72,11 +82,11 @@ export default function ExamPage() {
       const res = await fetch(`/api/exam`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getInfo', referenceNo: refInput.trim() }),
+        body: JSON.stringify({ action: 'getInfo', lastName: form.lastName.trim(), birthdate: form.birthdate }),
       });
 
       if (!res.ok) {
-        setMessage({ text: 'Failed to verify reference number.', type: 'error' });
+        setMessage({ text: 'Failed to verify information.', type: 'error' });
         setLoading(false);
         return;
       }
@@ -107,11 +117,27 @@ export default function ExamPage() {
         firstName: data.firstName,
         middleName: data.middleName,
       });
-      setRefInput(data.referenceNo);
-      await startExam(data.referenceNo);
+      
+      if (rememberMe) {
+        localStorage.setItem('savedLastName', form.lastName);
+        localStorage.setItem('savedBirthdate', form.birthdate);
+      }
+      
+      setView('confirm');
+      setLoading(false);
     } catch (err) {
       setMessage({ text: 'An unexpected error occurred.', type: 'error' });
       setLoading(false);
+    }
+  }
+
+  async function proceedToExam() {
+    if (!confirmUnderstood || !confirmAgree) {
+      setMessage({ text: 'Please confirm both statements before proceeding.', type: 'error' });
+      return;
+    }
+    if (applicant?.referenceNo) {
+      await startExam(applicant.referenceNo);
     }
   }
 
@@ -453,6 +479,119 @@ export default function ExamPage() {
     );
   }
 
+  if (view === 'confirm') {
+    return (
+      <div style={{
+        minHeight: '100vh', background: '#f6f8fc', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', padding: '20px',
+      }}>
+        <div style={{
+          background: '#fff', borderRadius: '20px', padding: '40px', maxWidth: '520px',
+          width: '100%', boxShadow: '0 10px 30px rgba(15,23,42,.06)',
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <img
+              src="/WESTSIDE%20LOGO%20COLORED.png"
+              alt="NWR Careers logo"
+              style={{ width: '220px', maxWidth: '100%', margin: '0 auto 16px', display: 'block' }}
+            />
+            <h1 style={{ fontSize: '22px', color: '#8b1e2d', marginBottom: '6px' }}>Confirm & Proceed</h1>
+            <p style={{ fontSize: '14px', color: '#6b7280' }}>
+              Please verify that you understand the exam rules
+            </p>
+          </div>
+
+          <div style={{
+            background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '16px',
+            marginBottom: '20px', fontSize: '13px', color: '#7c2d12', lineHeight: 1.6,
+          }}>
+            <p style={{ fontWeight: '700', marginTop: 0, marginBottom: '12px' }}>⚡ Important Exam Instructions</p>
+            <p style={{ margin: '0 0 8px 0' }}>While taking the exam, you MUST:</p>
+            <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li style={{ marginBottom: '6px' }}>Stay on this tab — do not switch to other browser tabs</li>
+              <li style={{ marginBottom: '6px' }}>Keep the browser window open — do not minimize or minimize to tray</li>
+              <li style={{ marginBottom: '6px' }}>Do not lock your screen or let your device sleep</li>
+              <li style={{ marginBottom: '6px' }}>Do not open other apps or switch to different windows</li>
+              <li>Activate &quot;Always On Display&quot; or extend your screen sleep timeout to maximum (30 min+)</li>
+            </ul>
+          </div>
+
+          <div style={{
+            background: '#fefce8', border: '1px solid #fef08a', borderRadius: '10px', padding: '14px', marginBottom: '20px',
+          }}>
+            <p style={{ margin: 0, fontSize: '13px', color: '#854d0e', fontWeight: '600' }}>
+              🚨 If you switch tabs, minimize, lock screen, or open other apps, your exam will be <span style={{ textDecoration: 'underline' }}>automatically submitted</span> with only answered questions recorded.
+            </p>
+          </div>
+
+          {message && (
+            <div style={{
+              padding: '14px', borderRadius: '12px', marginBottom: '16px',
+              background: message.type === 'success' ? '#ecfdf3' : '#fef2f2',
+              border: `1px solid ${message.type === 'success' ? '#86efac' : '#fecaca'}`,
+              color: message.type === 'success' ? '#166534' : '#991b1b', fontSize: '14px',
+            }}>{message.text}</div>
+          )}
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer', marginBottom: '12px' }}>
+              <input
+                type="checkbox"
+                checked={confirmUnderstood}
+                onChange={(e) => setConfirmUnderstood(e.target.checked)}
+                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#8b1e2d', flexShrink: 0 }}
+              />
+              <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                I have read and understand all the exam instructions and rules listed above.
+              </span>
+            </label>
+
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={confirmAgree}
+                onChange={(e) => setConfirmAgree(e.target.checked)}
+                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#8b1e2d', flexShrink: 0 }}
+              />
+              <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                I confirm that I will follow all exam rules, and I understand that any violation will result in automatic exam submission.
+              </span>
+            </label>
+          </div>
+
+          <button
+            onClick={proceedToExam}
+            disabled={!confirmUnderstood || !confirmAgree}
+            style={{
+              width: '100%', padding: '14px', background: confirmUnderstood && confirmAgree ? '#8b1e2d' : '#9ca3af',
+              color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
+              cursor: confirmUnderstood && confirmAgree ? 'pointer' : 'not-allowed', marginBottom: '12px',
+            }}
+          >
+            Start Exam
+          </button>
+
+          <div style={{ textAlign: 'center' }}>
+            <button
+              onClick={() => {
+                setView('start');
+                setConfirmUnderstood(false);
+                setConfirmAgree(false);
+                setMessage(null);
+              }}
+              style={{
+                background: 'none', border: 'none', color: '#6b7280', fontSize: '13px',
+                textDecoration: 'none', cursor: 'pointer', padding: 0,
+              }}
+            >
+              ← Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: '100vh', background: '#f6f8fc', display: 'flex',
@@ -465,13 +604,58 @@ export default function ExamPage() {
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <img
             src="/WESTSIDE%20LOGO%20COLORED.png"
-            alt="Westside Resort logo"
+            alt="NWR Careers logo"
             style={{ width: '220px', maxWidth: '100%', margin: '0 auto 16px', display: 'block' }}
           />
           <h1 style={{ fontSize: '22px', color: '#8b1e2d', marginBottom: '6px' }}>Math Proficiency Exam</h1>
           <p style={{ fontSize: '14px', color: '#6b7280' }}>
             {EXAM_DURATION_MINUTES} minutes &middot; {PASSING_SCORE}/{MAX_MATH_EXAM_SCORE} passing score
           </p>
+        </div>
+
+        <div style={{
+          background: '#f0f9ff', border: '1px solid #7dd3fc', borderRadius: '12px', padding: '16px',
+          marginBottom: '20px', fontSize: '13px', color: '#0c4a6e', lineHeight: 1.6,
+        }}>
+          <p style={{ fontWeight: '700', marginTop: 0, marginBottom: '12px' }}>📌 Math Exam Tips</p>
+          
+          <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #38bdf8' }}>
+            <p style={{ fontWeight: '700', marginBottom: '6px' }}>1.5× of a Number</p>
+            <p style={{ margin: '0 0 4px 0' }}><strong>Method:</strong> Multiply the number by 1.5</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '12px', backgroundColor: '#e0f2fe', padding: '6px 8px', borderRadius: '6px' }}>
+              <strong>Quick method:</strong> Get half of the number, then add it to the original<br/>
+              <strong>Example:</strong> 300 → half is 150 → 300 + 150 = 450
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#0369a1' }}>💡 Tip: 1.5× means the whole number plus half of it.</p>
+          </div>
+
+          <div>
+            <p style={{ fontWeight: '700', marginBottom: '6px' }}>5% of a Number</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '12px' }}>
+              <strong>Method 1:</strong> Multiply by 0.05 or divide by 20<br/>
+              <strong>Example:</strong> 5% of 100 = 5
+            </p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '12px', backgroundColor: '#e0f2fe', padding: '6px 8px', borderRadius: '6px' }}>
+              <strong>Method 2 (Quick trick for round numbers):</strong> Divide by 2, then remove one zero<br/>
+              <strong>Example:</strong> 300 ÷ 2 = 150 → Remove one zero → 15
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#0369a1' }}>💡 Tip: 5% is the same as dividing by 20.</p>
+          </div>
+        </div>
+
+        <div style={{
+          background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '16px',
+          marginBottom: '20px', fontSize: '13px', color: '#7c2d12', lineHeight: 1.6,
+        }}>
+          <p style={{ fontWeight: '700', marginTop: 0, marginBottom: '12px' }}>⚡ Important Exam Instructions</p>
+          <p style={{ margin: '0 0 8px 0' }}>While taking the exam, you MUST:</p>
+          <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+            <li style={{ marginBottom: '6px' }}>Stay on this tab — do not switch to other browser tabs</li>
+            <li style={{ marginBottom: '6px' }}>Keep the browser window open — do not minimize or minimize to tray</li>
+            <li style={{ marginBottom: '6px' }}>Do not lock your screen or let your device sleep</li>
+            <li style={{ marginBottom: '6px' }}>Do not open other apps or switch to different windows</li>
+            <li>Activate &quot;Always On Display&quot; or extend your screen sleep timeout to maximum (30 min+) so your phone doesn&apos;t auto-lock</li>
+          </ul>
         </div>
 
         {message && (
@@ -485,15 +669,41 @@ export default function ExamPage() {
 
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
-            Reference Number *
+            Last Name *
           </label>
           <input
-            value={refInput}
-            onChange={(e) => setRefInput(e.target.value)}
-            placeholder="APP-20260414093031"
+            value={form.lastName}
+            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+            placeholder="Enter your last name"
+            autoComplete="family-name"
+            autoCapitalize="words"
             style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
           />
         </div>
+
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+            Birthdate *
+          </label>
+          <input
+            type="date"
+            value={form.birthdate}
+            onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
+            max={new Date().toISOString().split('T')[0]}
+            autoComplete="bday"
+            style={{ width: '100%', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' }}
+          />
+        </div>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            style={{ width: '18px', height: '18px' }}
+          />
+          <span style={{ fontSize: '14px', color: '#4b5563' }}>Remember this device</span>
+        </label>
 
         <button
           onClick={verifyAndStart}

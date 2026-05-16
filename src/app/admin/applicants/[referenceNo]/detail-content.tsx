@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { getApplicant, updateStage } from '@/lib/actions/admin';
 import { getStagesForPosition } from '@/lib/db/positions';
+import { createClient } from '@/lib/supabase/client';
 import type { Applicant } from '@/types';
 import { useRouter } from 'next/navigation';
+import { updateApplicantBasicInfo } from '@/lib/actions/applicant';
 
 export default function DetailContent({ initialData, isSuperAdmin = false }: { initialData: any; isSuperAdmin?: boolean }) {
   const [data, setData] = useState<any>(initialData);
@@ -13,11 +15,36 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   const [saving, setSaving] = useState(false);
   const [stage, setStage] = useState('');
   const [stageSeq, setStageSeq] = useState(1);
-  const [resultStatus, setResultStatus] = useState('Passed');
+  const [resultStatus, setResultStatus] = useState('');
   const [stageLabel, setStageLabel] = useState('');
-  const [form, setForm] = useState<any>({});
+  const [stageVersions, setStageVersions] = useState<Record<string, number>>({});
+  const [stageVersionHistory, setStageVersionHistory] = useState<Record<string, any[]>>({});
+  const [isEditingBasic, setIsEditingBasic] = useState(false);
+  const [basicInfoForm, setBasicInfoForm] = useState({
+    first_name: '',
+    last_name: '',
+    middle_name: '',
+    birthdate: '',
+  });
+  const [savingBasic, setSavingBasic] = useState(false);
+  const [form, setForm] = useState<any>({
+    heightCm: '',
+    weightKg: '',
+    bmiValue: '',
+    bmiResult: '',
+    colorBlindResult: '',
+    visibleTattoo: 'No',
+    invisibleTattoo: 'No',
+    sweatyPalmResult: '',
+    score: '',
+    passingScore: 8,
+    maxScore: 10,
+    remarks: '',
+    evaluatedBy: 'HR',
+  });
   const [workflow, setWorkflow] = useState<string[]>(['Initial Screening']);
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     async function loadWorkflow() {
@@ -30,13 +57,93 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
     }
   }, [data?.applicant?.position_applied, data?.applicant?.experience_level]);
 
+  useEffect(() => {
+    async function loadVersionCounts() {
+      if (!data?.stages || data.stages.length === 0) return;
+      const stageIds = data.stages.map((s: any) => s.id).filter(Boolean);
+      if (stageIds.length === 0) return;
+      
+      const { data: versions } = await supabase
+        .from('stage_result_versions')
+        .select('stage_result_id, version_number, result_status, remarks, evaluated_by, evaluated_at, edit_reason')
+        .in('stage_result_id', stageIds);
+      
+      if (versions) {
+        const counts: Record<string, number> = {};
+        const history: Record<string, any[]> = {};
+        versions.forEach((v: any) => {
+          const current = counts[v.stage_result_id] || 0;
+          if (v.version_number > current) {
+            counts[v.stage_result_id] = v.version_number;
+          }
+          if (!history[v.stage_result_id]) history[v.stage_result_id] = [];
+          history[v.stage_result_id].push(v);
+        });
+        Object.keys(history).forEach((stageResultId) => {
+          history[stageResultId].sort((a, b) => b.version_number - a.version_number);
+        });
+        setStageVersions(counts);
+        setStageVersionHistory(history);
+      }
+    }
+    loadVersionCounts();
+  }, [data?.stages]);
+
   const completedStages = data?.stages ? getCompletedStages(data.stages) : [];
   const availableStages = getAvailableStages(workflow, completedStages);
 
-  function handleStageChange(stageName: string) {
+  async function handleStageChange(stageName: string) {
     setStage(stageName);
     setStageSeq(workflow.indexOf(stageName) + 1);
-    updateFormFields(stageName, data?.applicant);
+    await loadStageResults(stageName, data?.applicant);
+  }
+
+  async function loadStageResults(stageName: string, app: Applicant) {
+    const referenceNo = data?.applicant?.reference_no;
+    const { data: stageResult } = await supabase
+      .from('stage_results')
+      .select('*')
+      .eq('reference_no', referenceNo)
+      .eq('stage_name', stageName)
+      .single();
+
+    if (stageResult) {
+      const legacySweatyPalm =
+        stageName === 'Initial Screening'
+          ? data?.stages?.find((s: any) => s.stage_name === 'Final Interview')?.sweaty_palm_result || ''
+          : '';
+      setForm({
+        heightCm: stageResult.height_cm || app?.height_cm || '',
+        weightKg: stageResult.weight_kg || app?.weight_kg || '',
+        bmiValue: stageResult.bmi_value || app?.bmi_value || '',
+        bmiResult: stageResult.bmi_result || '',
+        colorBlindResult: stageResult.color_blind_result || '',
+        visibleTattoo: stageResult.visible_tattoo || 'No',
+        invisibleTattoo: stageResult.invisible_tattoo || 'No',
+        sweatyPalmResult: stageResult.sweaty_palm_result || legacySweatyPalm,
+        score: stageResult.score?.toString() || '',
+        passingScore: stageResult.passing_score || 8,
+        maxScore: stageResult.max_score || 10,
+        remarks: stageResult.remarks || '',
+        evaluatedBy: stageResult.evaluated_by || 'HR',
+      });
+    } else {
+      setForm({
+        heightCm: app?.height_cm || '',
+        weightKg: app?.weight_kg || '',
+        bmiValue: app?.bmi_value || '',
+        bmiResult: '',
+        colorBlindResult: '',
+        visibleTattoo: 'No',
+        invisibleTattoo: 'No',
+        sweatyPalmResult: '',
+        score: '',
+        passingScore: 8,
+        maxScore: 10,
+        remarks: '',
+        evaluatedBy: 'HR',
+      });
+    }
   }
 
   function getCompletedStages(stages: any[]): string[] {
@@ -48,7 +155,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
   function getAvailableStages(workflow: string[], completed: string[]): string[] {
     for (const stage of workflow) {
       if (!completed.includes(stage)) {
-        return workflow.slice(workflow.indexOf(stage));
+        return [stage];
       }
     }
     return [];
@@ -63,7 +170,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       colorBlindResult: 'Passed',
       visibleTattoo: 'No',
       invisibleTattoo: 'No',
-      sweatyPalmResult: 'Passed',
+      sweatyPalmResult: '',
       score: '',
       passingScore: 8,
       maxScore: 10,
@@ -81,6 +188,8 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
     setSaving(true);
     setMessage(null);
 
+    const isDealer = data?.applicant?.position_applied === 'Dealer';
+
     const res = await updateStage({
       referenceNo: data.applicant.reference_no,
       stageName: stage,
@@ -94,7 +203,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
       colorBlindResult: form.colorBlindResult,
       visibleTattoo: form.visibleTattoo,
       invisibleTattoo: form.invisibleTattoo,
-      sweatyPalmResult: form.sweatyPalmResult,
+      ...(isDealer && stage === 'Initial Screening' && { sweatyPalmResult: form.sweatyPalmResult }),
       score: parseFloat(form.score) || undefined,
       passingScore: parseFloat(form.passingScore) || 8,
       maxScore: parseFloat(form.maxScore) || 10,
@@ -114,6 +223,40 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
     setSaving(false);
   }
 
+  function startEditBasic() {
+    setBasicInfoForm({
+      first_name: applicant.first_name || '',
+      last_name: applicant.last_name || '',
+      middle_name: applicant.middle_name || '',
+      birthdate: applicant.birthdate || '',
+    });
+    setIsEditingBasic(true);
+  }
+
+  async function saveBasicInfo() {
+    setSavingBasic(true);
+    const result = await updateApplicantBasicInfo(applicant.reference_no, {
+      first_name: basicInfoForm.first_name,
+      last_name: basicInfoForm.last_name,
+      middle_name: basicInfoForm.middle_name || undefined,
+      birthdate: basicInfoForm.birthdate,
+    });
+    setSavingBasic(false);
+    if (result.success) {
+      setIsEditingBasic(false);
+      const updated = await getApplicant(applicant.reference_no, '');
+      if (updated.data) {
+        setData(updated.data);
+      }
+    } else {
+      alert(`Failed to save: ${result.error}`);
+    }
+  }
+
+  function cancelEditBasic() {
+    setIsEditingBasic(false);
+  }
+
   const { applicant, games, stages, notifications } = data;
 
   return (
@@ -124,12 +267,97 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
         cursor: 'pointer', marginBottom: '20px',
       }}>← Back</button>
 
-      <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>
-        {applicant.first_name} {applicant.last_name}
-      </h1>
-      <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '24px' }}>
-        {applicant.reference_no} &middot; {applicant.position_applied} &middot; {applicant.experience_level || '-'}
-      </p>
+      {isEditingBasic ? (
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+            <div>
+              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Last Name *</label>
+              <input
+                value={basicInfoForm.last_name}
+                onChange={(e) => setBasicInfoForm({ ...basicInfoForm, last_name: e.target.value })}
+                style={{ width: '100%', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>First Name *</label>
+              <input
+                value={basicInfoForm.first_name}
+                onChange={(e) => setBasicInfoForm({ ...basicInfoForm, first_name: e.target.value })}
+                style={{ width: '100%', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Middle Name</label>
+              <input
+                value={basicInfoForm.middle_name}
+                onChange={(e) => setBasicInfoForm({ ...basicInfoForm, middle_name: e.target.value })}
+                style={{ width: '100%', padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+              />
+            </div>
+          </div>
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Birthdate *</label>
+            <input
+              type="date"
+              value={basicInfoForm.birthdate}
+              onChange={(e) => setBasicInfoForm({ ...basicInfoForm, birthdate: e.target.value })}
+              style={{ padding: '8px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px' }}
+              required
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={saveBasicInfo}
+              disabled={savingBasic}
+              style={{
+                padding: '8px 16px', background: '#8b1e2d', color: '#fff',
+                border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                cursor: savingBasic ? 'not-allowed' : 'pointer', opacity: savingBasic ? 0.65 : 1,
+              }}
+            >
+              {savingBasic ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={cancelEditBasic}
+              disabled={savingBasic}
+              style={{
+                padding: '8px 16px', background: '#fff', color: '#6b7280',
+                border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+                cursor: savingBasic ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>
+            {applicant.last_name?.toUpperCase()}, {applicant.first_name}{applicant.middle_name ? ' ' + applicant.middle_name : ''}
+          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>
+              {applicant.reference_no} &middot; {applicant.position_applied} &middot; {applicant.experience_level || '-'}
+            </p>
+            <button
+              type="button"
+              onClick={startEditBasic}
+              style={{
+                background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: '6px', 
+                cursor: 'pointer', padding: '4px 8px', fontSize: '13px', lineHeight: 1,
+                color: '#6b7280'
+              }}
+              title="Edit Name & Birthdate"
+            >
+              Edit
+            </button>
+          </div>
+        </>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '18px', padding: '20px' }}>
@@ -160,7 +388,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {games.map((g: any) => (
                   <span key={g.game_code} style={{
-                    padding: '4px 12px', background: '#f0f4ff', color: '#163a70',
+                    padding: '4px 12px', background: '#fbeaec', color: '#8b1e2d',
                     borderRadius: '20px', fontSize: '13px', fontWeight: '600',
                   }}>{g.game_code}</span>
                 ))}
@@ -172,13 +400,38 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
             <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '14px', color: '#1f2937' }}>Stage History</h3>
             {stages && stages.length > 0 ? stages.map((s: any) => (
               <div key={s.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #f3f4f6' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937' }}>{s.stage_name}</span>
-                  <span style={{
-                    fontSize: '12px', fontWeight: '600',
-                    color: s.result_status === 'Passed' ? '#166534' : '#991b1b',
-                  }}>{s.result_status}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#1f2937' }}>{s.stage_name}</span>
+                    {stageVersions[s.id] > 1 && (
+                      <span style={{ marginLeft: '8px', background: '#6b7280', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '600' }}>v{stageVersions[s.id]}</span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{
+                      fontSize: '12px', fontWeight: '600',
+                      color: s.result_status === 'Passed' ? '#166534' : s.result_status === 'Reprofile' ? '#d97706' : '#991b1b',
+                      marginRight: '8px',
+                    }}>{s.result_status}</span>
+                    <button 
+                      type="button" 
+                      onClick={() => { setStage(s.stage_name); setStageSeq(s.stage_sequence); loadStageResults(s.stage_name, data?.applicant); setResultStatus(s.result_status || ''); }}
+                      style={{ 
+                        background: 'none', border: '1px solid #d1d5db', 
+                        borderRadius: '4px', padding: '2px 6px', cursor: 'pointer',
+                        fontSize: '12px', lineHeight: 1
+                      }}
+                      title="Edit this stage"
+                    >
+                      ✏️
+                    </button>
+</div>
                 </div>
+                {s.result_status === 'Reprofile' && (
+                  <p style={{ fontSize: '12px', background: '#fef3c7', color: '#92400e', padding: '6px 10px', borderRadius: '6px', fontWeight: '500', marginTop: '6px' }}>
+                    🔄 <strong>Original:</strong> {s.original_position || data?.applicant?.position_applied || 'N/A'} → <strong>Reprofiled to:</strong> <span style={{ color: '#b45309', fontWeight: '700' }}>{s.reprofile_position || 'N/A'}</span>
+                  </p>
+                )}
                 {s.stage_name === 'Math Exam' && s.termination_reason === 'WINDOWS_LOST_FOCUS' && (
                   <p style={{ fontSize: '12px', color: '#dc3545', fontWeight: '700', margin: '4px 0 0' }}>Auto submitted due to lost window focus</p>
                 )}
@@ -187,7 +440,26 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                     {renderFormattedMessage(s.remarks)}
                   </p>
                 )}
-                <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>{s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}</p>
+                <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>
+                  {s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}
+                  {s.evaluated_by && <> · Evaluated by: <span style={{ color: '#8b1e2d' }}>{s.evaluated_by}</span></>}
+                </p>
+                {((stageVersionHistory[s.id] || []).filter((v: any) => v.version_number < (stageVersions[s.id] || 1)).length > 0) && (
+                  <div style={{ marginTop: '6px' }}>
+                    <p style={{ fontSize: '11px', color: '#6b7280', margin: 0, fontWeight: 600 }}>Previous Entries</p>
+                    {(stageVersionHistory[s.id] || [])
+                      .filter((v: any) => v.version_number < (stageVersions[s.id] || 1))
+                      .map((v: any) => (
+                        <div key={`${s.id}-v${v.version_number}`} style={{ borderLeft: '2px solid #e5e7eb', paddingLeft: '8px', marginTop: '4px', fontSize: '11px', color: '#6b7280' }}>
+                          <span style={{ fontWeight: 600 }}>v{v.version_number}</span> · {v.result_status}
+                          {v.edit_reason && <> · {v.edit_reason}</>}
+                          {v.evaluated_at && <> · {new Date(v.evaluated_at).toLocaleString()}</>}
+                          {v.evaluated_by && <> · by {v.evaluated_by}</>}
+                          {v.remarks && <div>{renderFormattedMessage(v.remarks)}</div>}
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             )) : (
               <p style={{ color: '#9ca3af', fontSize: '13px' }}>No stages recorded.</p>
@@ -223,23 +495,19 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>Result *</label>
-              <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} style={{
+              <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required style={{
                 width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '14px',
               }}>
+                <option value="">Select...</option>
                 <option>Passed</option>
                 <option>Failed</option>
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>Next Stage Label</label>
-              <input value={stageLabel} onChange={(e) => setStageLabel(e.target.value)} style={{
-                width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '14px',
-              }} placeholder={stage || 'Next Stage'} />
-            </div>
+            
           </div>
 
           {stage === 'Initial Screening' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${data?.applicant?.position_applied === 'Dealer' ? 7 : 6}, 1fr)`, gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Height (cm)</label>
                 <input type="number" value={form.heightCm} onChange={(e) => setForm({ ...form, heightCm: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }} />
@@ -254,13 +522,15 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
               </div>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>BMI Result</label>
-                <select value={form.bmiResult} onChange={(e) => setForm({ ...form, bmiResult: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                <select value={form.bmiResult} onChange={(e) => setForm({ ...form, bmiResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                  <option value="">Select...</option>
                   <option>Passed</option><option>Failed</option>
                 </select>
               </div>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Color Blind</label>
-                <select value={form.colorBlindResult} onChange={(e) => setForm({ ...form, colorBlindResult: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                <select value={form.colorBlindResult} onChange={(e) => setForm({ ...form, colorBlindResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                  <option value="">Select...</option>
                   <option>Passed</option><option>Failed</option>
                 </select>
               </div>
@@ -270,6 +540,15 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                   <option>No</option><option>Yes</option>
                 </select>
               </div>
+              {data?.applicant?.position_applied === 'Dealer' && (
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Sweaty Palm</label>
+                  <select value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                    <option value="">Select...</option>
+                    <option>Passed</option><option>Failed</option>
+                  </select>
+                </div>
+              )}
             </div>
           )}
 
@@ -291,16 +570,11 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
           )}
 
           {stage === 'Final Interview' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-              <div>
-                <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Sweaty Palm</label>
-                <select value={form.sweatyPalmResult} onChange={(e) => setForm({ ...form, sweatyPalmResult: e.target.value })} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
-                  <option>Passed</option><option>Failed</option>
-                </select>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Final Result</label>
-                <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                <select value={resultStatus} onChange={(e) => setResultStatus(e.target.value)} required style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '10px', width: '100%', fontSize: '14px' }}>
+                  <option value="">Select...</option>
                   <option>Passed</option><option>Reprofile</option><option>For Pooling</option><option>Not Recommended</option>
                 </select>
               </div>

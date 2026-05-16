@@ -4,12 +4,25 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { renderFormattedMessage } from '@/components/formatted-message';
 import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
+import ExamEligibleApplicants from './exam-eligible';
+import { deleteApplicant } from '@/lib/actions/applicant';
 import type { ApplicantListItem } from '@/lib/db/applicants';
+
+function useWindowSize() {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    function handleResize() {
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return size;
+}
 
 type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks';
 type SortDir = 'asc' | 'desc';
-
-const POSITIONS = ['Dealer', 'Pit Supervisor', 'Pit Manager', 'Operations Manager'];
 
 // Map config field_key to data key
 const COLUMN_KEY_MAP: Record<string, keyof ApplicantListItem | 'displayName'> = {
@@ -37,6 +50,39 @@ type ApplicantsContentProps = {
   modalSectionVisibility?: string[] | null;
 };
 
+function getDerivedApplicationStatus(app: ApplicantListItem, appStages: any[]): string {
+  const stageNames = appStages.map((s) => s.stage_name);
+  
+  const finalInterviewResult = appStages.find((stage) => stage.stage_name === 'Final Interview')?.result_status;
+  if (finalInterviewResult) {
+    return finalInterviewResult === 'Passed' ? 'Completed' : finalInterviewResult;
+  }
+
+  const requiredStages = getRequiredStages(app.position_applied, app.department, app.experience_level);
+  const hasAllRequired = requiredStages.every((stage) => stageNames.includes(stage));
+
+  if (!hasAllRequired) {
+    return 'Ongoing';
+  }
+
+  return app.application_status || 'Pending';
+}
+
+function getRequiredStages(position: string | null | undefined, department: string | null | undefined, experienceLevel: string | null | undefined): string[] {
+  const isTableGames = department === 'Table Games';
+  const isDealer = position === 'Dealer';
+  const isExperienced = experienceLevel === 'Experienced Dealer' || experienceLevel === 'Experienced-Dealer';
+
+  if (isDealer && isTableGames) {
+    if (isExperienced) {
+      return ['Initial Screening', 'Math Exam', 'Table Test', 'Final Interview'];
+    }
+    return ['Initial Screening', 'Final Interview'];
+  }
+
+  return ['Initial Screening', 'Final Interview'];
+}
+
 export default function ApplicantsContent({
   initialApplicants,
   isSuperAdmin,
@@ -47,6 +93,11 @@ export default function ApplicantsContent({
   const [applicants, setApplicants] = useState<ApplicantListItem[]>(initialApplicants);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+  const windowSize = useWindowSize();
+  const isMobile = windowSize.width < 768;
+  const isTablet = windowSize.width >= 768 && windowSize.width < 1024;
+  const [showFilters, setShowFilters] = useState(!isMobile);
+  const [availablePositions, setAvailablePositions] = useState<string[]>([]);
   
   // Use custom column visibility from props, or load from DB
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
@@ -58,22 +109,34 @@ export default function ApplicantsContent({
 
   const today = new Date().toISOString().split('T')[0];
 
+  // Default date range: last 7 days to show recent applicants
+  const getDefaultStartDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().split('T')[0];
+  };
+  const defaultStartDate = getDefaultStartDate();
+
   const [globalSearch, setGlobalSearch] = useState('');
   const [filterPosition, setFilterPosition] = useState('');
   const [filterStage, setFilterStage] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [filterStartDate, setFilterStartDate] = useState(today);
+  const [filterStartDate, setFilterStartDate] = useState(defaultStartDate);
   const [filterEndDate, setFilterEndDate] = useState(today);
 
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [deletingRef, setDeletingRef] = useState<string | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const pageSizeOptions = [25, 50, 100];
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'all' | 'exam-eligible'>('all');
 
   // Load column visibility from database (only for super admins or if no prop provided)
   useEffect(() => {
@@ -100,7 +163,20 @@ export default function ApplicantsContent({
       }
     }
     loadColumnVisibility();
-  }, [columnVisibility]);
+    // Load available positions from database
+    async function loadPositions() {
+      const { data } = await supabase
+        .from('applicants')
+        .select('position_applied')
+        .not('position_applied', 'is', null);
+      
+      if (data) {
+        const positions = [...new Set(data.map((r: any) => r.position_applied))].filter(Boolean).sort();
+        setAvailablePositions(positions);
+      }
+    }
+    loadPositions();
+  }, [columnVisibility, supabase]);
 
   const loadApplicants = useCallback(async () => {
     setLoading(true);
@@ -109,7 +185,7 @@ export default function ApplicantsContent({
       .from('applicants')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(300);
+      .limit(5000);
 
     if (!isSuperAdmin) {
       if (allowedDepartments.length === 0) {
@@ -123,25 +199,29 @@ export default function ApplicantsContent({
 
     const { data: apps } = await applicantsQuery;
     const referenceNumbers = (apps || []).map((app) => app.reference_no).filter(Boolean);
-    
-    const stagesQuery = referenceNumbers.length > 0
-      ? supabase.from('stage_results').select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks').in('reference_no', referenceNumbers)
-      : null;
-    const examQuery = referenceNumbers.length > 0
-      ? supabase.from('math_exam_results').select('reference_no, score, termination_reason').in('reference_no', referenceNumbers)
-      : null;
 
-    const stagesResult = stagesQuery ? await stagesQuery : { data: [] as any };
-    const examResult = examQuery ? await examQuery : { data: [] as any };
+    const { data: stages } = referenceNumbers.length > 0
+      ? await supabase
+          .from('stage_results')
+          .select('reference_no, stage_name, stage_sequence, result_status, current_stage_label, remarks, sweaty_palm_result')
+          .in('reference_no', referenceNumbers)
+      : { data: [] };
+
+    const { data: examResults } = referenceNumbers.length > 0
+      ? await supabase
+          .from('math_exam_results')
+          .select('reference_no, score, termination_reason')
+          .in('reference_no', referenceNumbers)
+      : { data: [] };
 
     const stageMap: Record<string, ApplicantListItem['stages']> = {};
-    (stagesResult.data || []).forEach((s: any) => {
+    (stages || []).forEach((s: any) => {
       if (!stageMap[s.reference_no]) stageMap[s.reference_no] = [];
       stageMap[s.reference_no].push(s);
     });
 
     const examMap: Record<string, { score: number; termination_reason: string | null }> = {};
-    (examResult.data || []).forEach((e: any) => {
+    (examResults || []).forEach((e: any) => {
       examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason };
     });
 
@@ -154,13 +234,17 @@ export default function ApplicantsContent({
       const exam = examMap[app.reference_no];
       return {
         ...app,
-        displayName: `${app.first_name} ${app.last_name}`,
+        displayName: `${app.last_name?.toUpperCase()}, ${app.first_name}${app.middle_name ? ' ' + app.middle_name : ''}`,
+        application_status: getDerivedApplicationStatus(app, appStages),
         initialScreeningResult: getStageResult('Initial Screening'),
         mathExamResult: getStageResult('Math Exam'),
         mathExamScore: exam?.score,
         mathExamTerminationReason: exam?.termination_reason,
         tableTestResult: getStageResult('Table Test'),
-        sweatyPalmResult: appStages.find((x) => x.stage_name === 'Final Interview')?.result_status || '-',
+        sweatyPalmResult:
+          appStages.find((x) => x.stage_name === 'Initial Screening')?.sweaty_palm_result ||
+          appStages.find((x) => x.stage_name === 'Final Interview')?.sweaty_palm_result ||
+          '-',
         finalInterviewResult: getStageResult('Final Interview'),
         stages: appStages,
       };
@@ -202,13 +286,14 @@ export default function ApplicantsContent({
 
   const positionCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
-    POSITIONS.forEach(p => { counts[p] = 0; });
+    const positions = (availablePositions.length > 0 ? availablePositions : [...new Set(applicantsForCounts.map(a => a.position_applied).filter(Boolean))]);
+    positions.forEach(p => { counts[p] = 0; });
     applicantsForCounts.forEach((app) => {
       const p = app.position_applied;
-      if (p && counts[p] !== undefined) counts[p]++;
+      if (p) counts[p] = (counts[p] || 0) + 1;
     });
     return counts;
-  }, [applicantsForCounts]);
+  }, [applicantsForCounts, availablePositions]);
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = { all: applicantsForCounts.length };
@@ -314,7 +399,7 @@ export default function ApplicantsContent({
     setFilterPosition('');
     setFilterStage('');
     setFilterStatus('');
-    setFilterStartDate(today);
+    setFilterStartDate(defaultStartDate);
     setFilterEndDate(today);
   }
 
@@ -363,7 +448,21 @@ export default function ApplicantsContent({
     { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
   ];
 
-  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== today || filterEndDate !== today;
+  const handleDelete = async (referenceNo: string) => {
+    if (!confirm(`Are you sure you want to delete applicant ${referenceNo}? This will also delete all related records (stage results, exam results, notifications, games).`)) {
+      return;
+    }
+    setDeletingRef(referenceNo);
+    const result = await deleteApplicant(referenceNo);
+    setDeletingRef(null);
+    if (result.success) {
+      await loadApplicants();
+    } else {
+      alert(`Failed to delete applicant: ${result.error}`);
+    }
+  };
+
+  const hasFilters = globalSearch || filterPosition || filterStage || filterStatus || filterStartDate !== defaultStartDate || filterEndDate !== today;
 
   if (loading) {
     return (
@@ -375,8 +474,71 @@ export default function ApplicantsContent({
 
   return (
     <div className="container-fluid py-3" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif' }}>
+      {/* Tab Navigation */}
+      <ul className="nav nav-tabs mb-3" role="tablist" style={{ borderBottom: '2px solid #dee2e6' }}>
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${activeTab === 'all' ? 'active' : ''}`}
+            id="all-tab"
+            type="button"
+            role="tab"
+            onClick={() => setActiveTab('all')}
+            style={{
+              cursor: 'pointer',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: activeTab === 'all' ? '600' : '400',
+              color: activeTab === 'all' ? '#0d6efd' : '#666',
+              borderBottom: activeTab === 'all' ? '3px solid #0d6efd' : 'none',
+              marginBottom: '-2px',
+            }}
+          >
+            Applicants
+          </button>
+        </li>
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${activeTab === 'exam-eligible' ? 'active' : ''}`}
+            id="exam-tab"
+            type="button"
+            role="tab"
+            onClick={() => setActiveTab('exam-eligible')}
+            style={{
+              cursor: 'pointer',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: activeTab === 'exam-eligible' ? '600' : '400',
+              color: activeTab === 'exam-eligible' ? '#0d6efd' : '#666',
+              borderBottom: activeTab === 'exam-eligible' ? '3px solid #0d6efd' : 'none',
+              marginBottom: '-2px',
+            }}
+          >
+            Exam Eligible
+          </button>
+        </li>
+      </ul>
+
+      {/* Tab Content */}
+      {activeTab === 'exam-eligible' && (
+        <ExamEligibleApplicants isSuperAdmin={isSuperAdmin} allowedDepartments={allowedDepartments} />
+      )}
+
+      {activeTab === 'all' && (
+      <div>
+      {isMobile && (
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <span className="text-muted small">{filteredApplicants.length} results</span>
+          <button 
+            className="btn btn-sm btn-outline-secondary" 
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            {showFilters ? 'Hide Filters ▲' : 'Show Filters ▼'}
+          </button>
+        </div>
+      )}
+
       {/* Filters Row */}
-      <div className="card mb-3 shadow-sm" style={{ minHeight: '118px' }}>
+      <div className={`card mb-3 shadow-sm ${isMobile && !showFilters ? 'd-none' : ''}`} style={{ minHeight: '118px' }}>
         <div className="card-body">
           <div className="row g-3 align-items-end">
             <div className="col-md-2">
@@ -397,7 +559,7 @@ export default function ApplicantsContent({
                 onChange={(e) => setFilterPosition(e.target.value)}
               >
                 <option value="">{getPositionLabel('')}</option>
-                {POSITIONS.map(p => (
+                {availablePositions.map(p => (
                   <option key={p} value={p}>{getPositionLabel(p)}</option>
                 ))}
               </select>
@@ -483,6 +645,7 @@ export default function ApplicantsContent({
                       </th>
                     );
                   })}
+                  <th style={{ fontSize: '12px', fontWeight: '600' }}>Actions</th>
                 </tr>
               </thead>
 <tbody>
@@ -535,7 +698,7 @@ export default function ApplicantsContent({
                       </td>
                     )}
                     {visibleColumns.has('applicants_table_sweatyPalmResult') && (
-                      <td className="text-muted" style={{ fontSize: '12px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
+                      <td className={app.sweatyPalmResult === 'Passed' ? 'text-success' : app.sweatyPalmResult === 'Failed' ? 'text-danger' : 'text-muted'} style={{ fontSize: '12px' }}>{app.sweatyPalmResult === '-' ? '-' : app.sweatyPalmResult}</td>
                     )}
                     {visibleColumns.has('applicants_table_finalInterviewResult') && (
                       <td className={
@@ -552,11 +715,22 @@ export default function ApplicantsContent({
                         {renderFormattedMessage(app.remarks)}
                       </td>
                     )}
+                    <td>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDelete(app.reference_no)}
+                        disabled={deletingRef === app.reference_no}
+                        style={{ padding: '2px 6px', fontSize: '11px' }}
+                        title="Delete applicant"
+                      >
+                        {deletingRef === app.reference_no ? '...' : '✕'}
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {filteredApplicants.length === 0 && (
                   <tr>
-                    <td colSpan={visibleColumns.size} className="text-center text-muted py-4">
+                    <td colSpan={visibleColumns.size + 1} className="text-center text-muted py-4">
                       No matching applicant records.
                     </td>
                   </tr>
@@ -567,20 +741,20 @@ export default function ApplicantsContent({
         </div>
       </div>
 
-      <div className="mt-3 d-flex justify-content-between align-items-center">
-        <div className="text-muted small">
+      <div className={`mt-3 d-flex ${isMobile ? 'flex-column' : 'justify-content-between'} align-items-center`}>
+        <div className="text-muted small mb-2 mb-md-0">
           Showing {paginatedApplicants.length} of {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''}
           {hasFilters && <span> (filtered)</span>}
         </div>
         
         {/* Pagination Controls */}
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 flex-wrap justify-content-center">
           {/* Page Size Dropdown */}
           <div className="d-flex align-items-center gap-1">
-            <span className="text-muted small">Show:</span>
+            {!isMobile && <span className="text-muted small">Show:</span>}
             <select
               className="form-select form-select-sm"
-              style={{ width: '80px' }}
+              style={{ width: isMobile ? '70px' : '80px' }}
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             >
@@ -603,7 +777,7 @@ export default function ApplicantsContent({
                 onClick={() => handlePageChange(1)}
                 style={{ padding: '4px 8px', fontSize: '12px' }}
               >
-                ««
+                {isMobile ? '1' : '««'}
               </button>
               <button
                 className="btn btn-sm btn-outline-secondary"
@@ -614,7 +788,7 @@ export default function ApplicantsContent({
                 «
               </button>
               <span className="text-muted small mx-1">
-                Page {currentPage} of {totalPages}
+                {isMobile ? `${currentPage}/${totalPages}` : `Page ${currentPage} of ${totalPages}`}
               </span>
               <button
                 className="btn btn-sm btn-outline-secondary"
@@ -630,14 +804,16 @@ export default function ApplicantsContent({
                 onClick={() => handlePageChange(totalPages)}
                 style={{ padding: '4px 8px', fontSize: '12px' }}
               >
-                »»
+                {isMobile ? totalPages.toString() : '»»'}
               </button>
             </div>
           )}
         </div>
       </div>
 
-      <ApplicantModal referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
+      <ApplicantModal key={selectedRefNo || 'applicant-modal-closed'} referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
+      </div>
+      )}
     </div>
   );
 }

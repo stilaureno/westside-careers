@@ -25,6 +25,14 @@ export interface ApplicantListItem extends Applicant {
   stages: ApplicantStageSummary[];
 }
 
+function getDerivedApplicationStatus(applicant: Applicant, applicantStages: ApplicantStageSummary[]): string {
+  const finalInterviewResult = applicantStages.find((stage) => stage.stage_name === 'Final Interview')?.result_status;
+  if (finalInterviewResult) {
+    return finalInterviewResult === 'Passed' ? 'Completed' : finalInterviewResult;
+  }
+  return applicant.application_status || 'Pending';
+}
+
 function emptyPositionSummary(): PositionSummary {
   return { total: 0, pending: 0, ongoing: 0, qualified: 0, reprofile: 0, pooling: 0, failed: 0 };
 }
@@ -385,7 +393,7 @@ export async function getApplicantsPageData(options?: {
   isSuperAdmin?: boolean;
 }): Promise<ApplicantListItem[]> {
   const supabase = await createClient();
-  const limit = options?.limit ?? 300;
+  const limit = options?.limit ?? 5000;
   const allowedDepartments = options?.allowedDepartments ?? [];
   const isSuperAdmin = options?.isSuperAdmin ?? false;
 
@@ -435,10 +443,14 @@ export async function getApplicantsPageData(options?: {
     return {
       ...(applicant as Applicant),
       displayName: `${applicant.first_name} ${applicant.last_name}`,
+      application_status: getDerivedApplicationStatus(applicant as Applicant, applicantStages),
       initialScreeningResult: getStageResult('Initial Screening'),
       mathExamResult: getStageResult('Math Exam'),
       tableTestResult: getStageResult('Table Test'),
-      sweatyPalmResult: applicantStages.find((item) => item.stage_name === 'Final Interview')?.sweaty_palm_result || '-',
+      sweatyPalmResult:
+        applicantStages.find((item) => item.stage_name === 'Initial Screening')?.sweaty_palm_result ||
+        applicantStages.find((item) => item.stage_name === 'Final Interview')?.sweaty_palm_result ||
+        '-',
       finalInterviewResult: getStageResult('Final Interview'),
       remarks: applicant.remarks,
       stages: applicantStages,

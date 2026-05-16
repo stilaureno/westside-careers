@@ -4,23 +4,26 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { action, referenceNo, answers, reason } = body;
+    const { action, referenceNo, lastName, birthdate, answers, reason } = body;
 
-    if (!referenceNo) {
-      return NextResponse.json({ error: 'Missing referenceNo' }, { status: 400 });
+    // Support both old referenceNo and new lastName/birthdate auth
+    if (!referenceNo && (!lastName || !birthdate)) {
+      return NextResponse.json({ error: 'Missing credentials' }, { status: 400 });
     }
+
+    const ref = referenceNo || '';
 
     switch (action) {
       case 'getInfo':
-        return NextResponse.json(await getExamInfo(referenceNo));
+        return NextResponse.json(await getExamInfo(lastName || ref, birthdate || undefined));
       case 'start':
-        return NextResponse.json(await startExam(referenceNo));
+        return NextResponse.json(await startExam(ref || lastName || ''));
       case 'saveProgress':
-        return NextResponse.json(await saveExamProgress(referenceNo, answers || {}));
+        return NextResponse.json(await saveExamProgress(ref || lastName || '', answers || {}));
       case 'heartbeat':
-        return NextResponse.json(await heartbeat(referenceNo));
+        return NextResponse.json(await heartbeat(ref || lastName || ''));
       case 'submit':
-        return NextResponse.json(await submitExam(referenceNo, answers || {}, reason || 'SUBMIT'));
+        return NextResponse.json(await submitExam(ref || lastName || '', answers || {}, reason || 'SUBMIT'));
       default:
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }

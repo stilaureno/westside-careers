@@ -10,6 +10,24 @@ const STATUS_CHECK_LOCK_COOKIE = 'status_check_lock_until';
 const STATUS_CHECK_LIMIT = 5;
 const STATUS_CHECK_LOCK_MINUTES = 5;
 
+function sanitizeName(name: string | undefined): string {
+  if (!name) return '';
+  const cleaned = name.trim().replace(/[^a-zA-Z\s\-']/g, '');
+  return cleaned
+    .split(/[\s\-]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function sanitizeBasic(name: string | undefined): string {
+  if (!name) return '';
+  return name
+    .trim()
+    .split(/[\s\-]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 function getStatusCheckCookieOptions() {
   return {
     path: '/',
@@ -83,7 +101,13 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
   }
 
   const bmi = formData.heightCm && formData.weightKg ? computeBMI(formData.heightCm, formData.weightKg) : null;
-  const duplicateKey = buildDuplicateKey(formData.lastName, formData.firstName, formData.middleName || '', formData.birthdate, formData.contactNumber);
+  const duplicateKey = buildDuplicateKey(
+    sanitizeName(formData.lastName),
+    sanitizeBasic(formData.firstName),
+    sanitizeBasic(formData.middleName) || '',
+    formData.birthdate,
+    formData.contactNumber
+  );
   const referenceNo = generateReferenceNo();
   const applicantId = generateApplicantId();
   const workflow = getStageWorkflow(formData.positionApplied, formData.experienceLevel);
@@ -93,9 +117,9 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
     .insert({
       applicant_id: applicantId,
       reference_no: referenceNo,
-      last_name: formData.lastName,
-      first_name: formData.firstName,
-      middle_name: formData.middleName || null,
+      last_name: sanitizeName(formData.lastName),
+      first_name: sanitizeBasic(formData.firstName),
+      middle_name: sanitizeBasic(formData.middleName) || null,
       birthdate: formData.birthdate,
       age,
       gender: formData.gender,
@@ -147,9 +171,9 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
 }
 
 export async function getApplicantStatus(
-  referenceNo: string,
+  lastName: string,
   birthdate: string
-): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[]; mathExam: { score: number | null; passed: boolean | null; takenAt: string | null; status: string | null } | null; nextStep: string | null } | null; error: string | null; lockedUntil?: number | null }> {
+): Promise<{ data: { applicant: Applicant; roadmap: StageRoadmapItem[]; mathExam: { score: number | null; passed: boolean | null; takenAt: string | null; status: string | null } | null; nextStep: string | null; hasFeedback: boolean } | null; error: string | null; lockedUntil?: number | null }> {
   const cookieStore = await cookies();
   const activeLock = await getActiveStatusLock(cookieStore);
   if (activeLock) {
@@ -158,10 +182,13 @@ export async function getApplicantStatus(
 
   const supabase = await createClient();
 
+  const sanitizedLastName = sanitizeName(lastName);
+
   const { data: applicant, error } = await supabase
     .from('applicants')
     .select('*')
-    .eq('reference_no', referenceNo)
+    .ilike('last_name', sanitizedLastName)
+    .eq('birthdate', birthdate)
     .single();
 
   if (error || !applicant) {
@@ -173,16 +200,9 @@ export async function getApplicantStatus(
     };
   }
 
-  if (applicant.birthdate !== birthdate) {
-    const lockedUntil = await recordFailedStatusCheck(cookieStore);
-    return {
-      data: null,
-      error: lockedUntil ? getStatusLockError(lockedUntil) : 'Invalid reference number or birthdate',
-      lockedUntil,
-    };
-  }
-
   await resetStatusCheckState(cookieStore);
+
+  const referenceNo = applicant.reference_no;
 
   const { data: stageRows } = await supabase
     .from('stage_results')
@@ -240,14 +260,20 @@ const workflow = await getStageWorkflowFromDB(applicant.position_applied, applic
   let nextStep: string | null = null;
   
   if (allStagesCompleted) {
-    const stagesList = workflow.join(', ');
-    const pos = applicant.position_applied;
-    nextStep = `You have completed the Hiring Portal process for the ${pos} position, including the ${stagesList}. Please follow the next instructions provided by the final interviewer.\n\nFor application monitoring purposes, please create your Darwinbox account, complete all required information, and select the position you applied for today.\n\nDarwinbox link = https://westsideresort.darwinbox.com/ms/candidatev2/main/auth/login`;
+    nextStep = `Thank you for applying! We appreciate your time and interest in joining our team. We will update you on your application status via email or the contact number you provided. Keep an eye on your inbox for further updates.`;
   } else if (lastCompletedIdx < workflow.length) {
     nextStep = workflow[lastCompletedIdx];
   }
 
-  return { data: { applicant: applicant as Applicant, roadmap, mathExam, nextStep }, error: null, lockedUntil: null };
+  const { data: existingFeedback } = await supabase
+    .from('application_feedback')
+    .select('id')
+    .eq('reference_no', referenceNo)
+    .single();
+
+  const hasFeedback = !!existingFeedback;
+
+  return { data: { applicant: applicant as Applicant, roadmap, mathExam, nextStep, hasFeedback }, error: null, lockedUntil: null };
 }
 
 export async function getApplicantInfo(referenceNo: string): Promise<{ data: any; error: string | null }> {
@@ -286,4 +312,85 @@ export async function getApplicantInfo(referenceNo: string): Promise<{ data: any
     },
     error: null,
   };
+}
+
+export async function deleteApplicant(referenceNo: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const { error: deleteNotif } = await supabase
+    .from('applicant_notifications')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteNotif) {
+    return { success: false, error: deleteNotif.message };
+  }
+
+  const { error: deleteGames } = await supabase
+    .from('applicant_games')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteGames) {
+    return { success: false, error: deleteGames.message };
+  }
+
+  const { error: deleteExam } = await supabase
+    .from('math_exam_results')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteExam) {
+    return { success: false, error: deleteExam.message };
+  }
+
+  const { error: deleteStages } = await supabase
+    .from('stage_results')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteStages) {
+    return { success: false, error: deleteStages.message };
+  }
+
+  const { error: deleteApplicant } = await supabase
+    .from('applicants')
+    .delete()
+    .eq('reference_no', referenceNo);
+
+  if (deleteApplicant) {
+    return { success: false, error: deleteApplicant.message };
+  }
+
+  return { success: true };
+}
+
+export async function updateApplicantBasicInfo(
+  referenceNo: string,
+  updates: { first_name?: string; last_name?: string; middle_name?: string; birthdate?: string }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const updateData: Record<string, any> = {};
+  if (updates.first_name !== undefined) updateData.first_name = updates.first_name;
+  if (updates.last_name !== undefined) updateData.last_name = updates.last_name;
+  if (updates.middle_name !== undefined) updateData.middle_name = updates.middle_name;
+  if (updates.birthdate !== undefined) {
+    updateData.birthdate = updates.birthdate;
+    if (updates.birthdate) {
+      const age = Math.floor((Date.now() - new Date(updates.birthdate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+      updateData.age = age;
+    }
+  }
+
+  const { error } = await supabase
+    .from('applicants')
+    .update(updateData)
+    .eq('reference_no', referenceNo);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }

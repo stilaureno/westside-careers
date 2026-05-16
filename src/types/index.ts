@@ -40,6 +40,7 @@ export interface Applicant {
   current_stage?: string;
   application_status?: string;
   overall_result?: string;
+  exam_authorized?: string;
   remarks?: string;
   created_at?: string;
   updated_at?: string;

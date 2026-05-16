@@ -1,0 +1,93 @@
+=== DUPLICATE APPLICANTS CHECK ===
+Generated: 2026-04-30
+Source: Supabase (eodgowpdhsdsuwukepsz)
+Method: contact_number + birthdate combination
+
+=== SUMMARY ===
+Total Applicants: 549
+Duplicate Pairs: 17 (34 records total)
+Stage Results Duplicates: 0
+Applicant Games Duplicates: 0
+
+=== DUPLICATE RECORDS (by contact_number + birthdate) ===
+
+1. Banaag, Chryslyne (Chryslyne Joyce)
+   - APP-20260430043647 | Slots/E-Gaming | Slots Ambassador | Pending | 2026-04-30 04:36
+   - APP-20260430050823 | Slots/E-Gaming | Slots Ambassador | Pending | 2026-04-30 05:08
+
+2. Catapang, Drix Mikee
+   - APP-20260430035705 | Table Games | Dealer (Non-Experienced) | Pending | 2026-04-30 03:57
+   - APP-20260430035914 | Table Games | Dealer (Non-Experienced) | Completed | 2026-04-30 03:59
+
+3. Lawis, Catherine
+   - APP-20260430063305 | Table Games | Pit Supervisor | For Pooling | 2026-04-30 06:33
+   - APP-20260430064906 | Table Games | Pit Supervisor | Completed | 2026-04-30 06:49
+
+4. Ramos, Jeffrey
+   - APP-20260430063914 | Slots/E-Gaming | Slots Tech I/II | For Pooling | 2026-04-30 06:39
+   - APP-20260430065018 | Slots/E-Gaming | Slots Tech I/II | For Pooling | 2026-04-30 06:50
+
+5. Tabug, Romel
+   - APP-20260430025935 | Table Games | Pit Supervisor | Ongoing | 2026-04-30 02:59
+   - APP-20260430071317 | Table Games | Pit Supervisor | Not Recommended | 2026-04-30 07:13
+
+6. Arnel/Tarangco, (two different first names: Tarangco vs Arnel?)
+   - APP-20260430064004 | Slots/E-Gaming | Slots Supervisor | Pending | 2026-04-30 06:40
+   - APP-20260430064607 | Slots/E-Gaming | Slots Supervisor | Pending | 2026-04-30 06:46
+
+7. Samad, Farsaudi
+   - APP-20260430062721 | Slots/E-Gaming | Slots Tech I/II | For Pooling | 2026-04-30 06:27
+   - APP-20260430081933 | Slots/E-Gaming | Slots Tech I/II | For Pooling | 2026-04-30 08:19
+
+8. Ramos, Aruel
+   - APP-20260430035611 | Table Games | Card Room Manager | Pending | 2026-04-30 03:56
+   - APP-20260430035808 | Table Games | Card Room Manager | For Pooling | 2026-04-30 03:58
+
+9. Begueras, Sarah Jane
+   - APP-20260430053731 | Table Games | Dealer (Non-Experienced) | Pending | 2026-04-30 05:37
+   - APP-20260430053900 | Table Games | Dealer (Non-Experienced) | Not Recommended | 2026-04-30 05:39
+
+10. Cabasal, Kylie
+    - APP-20260430011357 | Slots/E-Gaming | Slots Ambassador | Pending | 2026-04-30 01:13
+    - APP-20260430011409 | Slots/E-Gaming | Slots Ambassador | Pending | 2026-04-30 01:14
+
+11. Villanada, Ana Regine
+    - APP-20260430055339 | Slots/E-Gaming | Slots Ambassador | Pending | 2026-04-30 05:53
+    - APP-20260430055349 | Slots/E-Gaming | Slots Ambassador | Completed | 2026-04-30 05:53
+
+12. Santos, Glyden (different experience levels!)
+    - APP-20260430030721 | Table Games | Dealer (Experienced) | Ongoing | 2026-04-30 03:07
+    - APP-20260430072526 | Table Games | Dealer (Non-Experienced) | Completed | 2026-04-30 07:25
+
+13. Millalos/Milallos, Mary Joyce (typo in last name)
+    - APP-20260430062348 | Table Games | Dealer (Non-Experienced) | Completed | 2026-04-30 06:23
+    - APP-20260430082351 | Table Games | Dealer (Non-Experienced) | Pending | 2026-04-30 08:23
+
+14. Clementir, Jeremy Draven
+    - APP-20260430025750 | Slots/E-Gaming | Slots Ambassador | Pending | 2026-04-30 02:57
+    - APP-20260430031050 | Slots/E-Gaming | Slots Ambassador | Pending | 2026-04-30 03:10
+
+15. Santos, Junice Mariel (different middle names!)
+    - APP-20260430044358 | Slots/E-Gaming | Slots Ambassador | Completed | 2026-04-30 04:43
+    - APP-20260430065945 | Slots/E-Gaming | Slots Ambassador | For Pooling | 2026-04-30 06:59
+
+16. Dela Rosa, Nestor
+    - APP-20260430025557 | Table Games | Pit Supervisor | For Pooling | 2026-04-30 02:55
+    - APP-20260430032820 | Table Games | Pit Supervisor | Pending | 2026-04-30 03:28
+
+17. Tayag, Romar
+    - APP-20260430042234 | Slots/E-Gaming | Slots Tech I/II | Pending | 2026-04-30 04:22
+    - APP-20260430050547 | Slots/E-Gaming | Slots Tech I/II | Pending | 2026-04-30 05:05
+
+=== NOTES ===
+- Most duplicates appear to be RE-APPLICANTS (same person applied multiple times)
+- Some have different statuses (one passed/failed, another pending) = different application rounds
+- A few show variations in name spelling (likely same person, typo in form)
+- Records show different experience levels (e.g., Experienced vs Non-Experienced Dealer)
+- This is likely NORMAL behavior - people re-applying after not being selected
+
+=== POSSIBLE ACTIONS ===
+1. Keep as-is (legitimate re-applications)
+2. Add unique constraint to prevent future duplicates
+3. Add "is_latest" flag to mark the most recent application
+4. Manually review cases where status differs significantly

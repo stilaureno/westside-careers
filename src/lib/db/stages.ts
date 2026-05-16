@@ -1,6 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
 import type { StageResult } from '@/types';
-import { getNextStage } from './applicants';
+import { getNextStage, getStageWorkflow } from './applicants';
+
+const COMPLETED_STAGE_STATUSES = new Set([
+  'Passed',
+  'Failed',
+  'Reprofile',
+  'For Pooling',
+  'Not Recommended',
+]);
 
 export async function upsertStageResult(payload: {
   referenceNo: string;
@@ -9,6 +17,7 @@ export async function upsertStageResult(payload: {
   resultStatus: string;
   currentStageLabel: string;
   evaluatedBy?: string;
+  evaluatedAt?: string;
   heightCm?: number;
   weightKg?: number;
   bmiValue?: number;
@@ -17,6 +26,13 @@ export async function upsertStageResult(payload: {
   visibleTattoo?: string;
   invisibleTattoo?: string;
   sweatyPalmResult?: string;
+  reprofileDepartment?: string;
+  reprofilePosition?: string;
+  reprofileExperienceLevel?: string;
+  originalPosition?: string;
+  originalDepartment?: string;
+  originalExperienceLevel?: string;
+  editReason?: string;
   score?: number;
   passingScore?: number;
   maxScore?: number;
@@ -28,6 +44,38 @@ export async function upsertStageResult(payload: {
   const { applicant_id, position_applied, experience_level } = meta;
   if (!applicant_id) return { success: false, error: 'Applicant not found' };
 
+  const workflow = await getStageWorkflowForApplicant(position_applied || '', experience_level);
+  const requestedStageIndex = workflow.indexOf(payload.stageName);
+
+  const { data: recordedStages, error: recordedStagesError } = await supabase
+    .from('stage_results')
+    .select('stage_name, result_status')
+    .eq('reference_no', payload.referenceNo);
+
+  if (recordedStagesError) {
+    return { success: false, error: recordedStagesError.message };
+  }
+
+  const alreadyRecorded = (recordedStages || []).some((s: any) => s.stage_name === payload.stageName);
+
+  // If the stage is not part of the regular workflow and hasn't been recorded before, reject it
+  // Allow creating the special 'Pen & Paper Test' stage even if it's not in the position workflow
+  if (!alreadyRecorded && requestedStageIndex === -1 && payload.stageName !== 'Pen & Paper Test') {
+    return { success: false, error: `Invalid stage "${payload.stageName}" for this applicant.` };
+  }
+
+  const firstIncompleteStageIndex = getFirstIncompleteStageIndex(
+    workflow,
+    recordedStages || []
+  );
+
+  if (firstIncompleteStageIndex !== -1 && requestedStageIndex > firstIncompleteStageIndex && !alreadyRecorded) {
+    return {
+      success: false,
+      error: `Cannot skip stages. Complete "${workflow[firstIncompleteStageIndex]}" first.`,
+    };
+  }
+
   const nextStage = getNextStage(payload.stageName, position_applied || '', experience_level);
   const isFinalInterview = payload.stageName === 'Final Interview';
   const applicationStatus = getApplicationStatus(payload.stageName, payload.resultStatus);
@@ -35,13 +83,45 @@ export async function upsertStageResult(payload: {
 
   const { data: existing } = await supabase
     .from('stage_results')
-    .select('id')
+    .select('id, result_status, score, passing_score, max_score, remarks, evaluated_by, evaluated_at')
     .eq('reference_no', payload.referenceNo)
     .eq('stage_name', payload.stageName)
     .single();
 
   let stageResult;
+  let latestVersionNumber = 0;
   if (existing) {
+    const { data: existingVersions } = await supabase
+      .from('stage_result_versions')
+      .select('version_number')
+      .eq('stage_result_id', existing.id)
+      .order('version_number', { ascending: false })
+      .limit(1);
+
+    latestVersionNumber = existingVersions?.[0]?.version_number || 0;
+
+    // Backfill legacy rows that predate version tracking so pre-edit values are retained.
+    if (latestVersionNumber === 0) {
+      const { error: backfillError } = await supabase
+        .from('stage_result_versions')
+        .insert({
+          stage_result_id: existing.id,
+          version_number: 1,
+          result_status: existing.result_status,
+          score: existing.score,
+          passing_score: existing.passing_score,
+          max_score: existing.max_score,
+          remarks: existing.remarks,
+          evaluated_by: existing.evaluated_by,
+          evaluated_at: existing.evaluated_at || new Date().toISOString(),
+          created_by: existing.evaluated_by || payload.evaluatedBy,
+          edit_reason: 'Initial entry',
+        });
+
+      if (backfillError) return { success: false, error: backfillError.message };
+      latestVersionNumber = 1;
+    }
+
     const { data, error } = await supabase
       .from('stage_results')
       .update({
@@ -55,6 +135,11 @@ export async function upsertStageResult(payload: {
         visible_tattoo: payload.visibleTattoo,
         invisible_tattoo: payload.invisibleTattoo,
         sweaty_palm_result: payload.sweatyPalmResult,
+        reprofile_department: payload.reprofileDepartment,
+        reprofile_position: payload.reprofilePosition,
+        original_position: payload.resultStatus === 'Reprofile' ? payload.originalPosition : null,
+        original_department: payload.resultStatus === 'Reprofile' ? payload.originalDepartment : null,
+        original_experience_level: payload.resultStatus === 'Reprofile' ? payload.originalExperienceLevel : null,
         score: payload.score,
         passing_score: payload.passingScore,
         max_score: payload.maxScore,
@@ -84,7 +169,12 @@ export async function upsertStageResult(payload: {
         color_blind_result: payload.colorBlindResult,
         visible_tattoo: payload.visibleTattoo,
         invisible_tattoo: payload.invisibleTattoo,
-        sweaty_palm_result: payload.sweatyPalmResult,
+sweaty_palm_result: payload.sweatyPalmResult,
+        reprofile_department: payload.reprofileDepartment,
+        reprofile_position: payload.reprofilePosition,
+        original_position: payload.resultStatus === 'Reprofile' ? payload.originalPosition : null,
+        original_department: payload.resultStatus === 'Reprofile' ? payload.originalDepartment : null,
+        original_experience_level: payload.resultStatus === 'Reprofile' ? payload.originalExperienceLevel : null,
         score: payload.score,
         passing_score: payload.passingScore,
         max_score: payload.maxScore,
@@ -116,6 +206,13 @@ export async function upsertStageResult(payload: {
       current_stage: isFinalInterview ? 'Completed' : payload.stageName,
       application_status: dynamicStatus,
       overall_result: overallResult,
+      department: payload.resultStatus === 'Reprofile' && payload.reprofileDepartment ? payload.reprofileDepartment : undefined,
+      position_applied: payload.resultStatus === 'Reprofile' && payload.reprofilePosition ? payload.reprofilePosition : undefined,
+      experience_level: payload.resultStatus === 'Reprofile'
+        ? (payload.reprofilePosition === 'Dealer'
+          ? (payload.reprofileExperienceLevel || null)
+          : null)
+        : undefined,
       updated_at: new Date().toISOString(),
     })
     .eq('reference_no', payload.referenceNo);
@@ -127,10 +224,148 @@ export async function upsertStageResult(payload: {
       reference_no: payload.referenceNo,
       stage_name: payload.stageName,
       result_status: payload.resultStatus,
-      notification_message: getStageInstruction(payload.stageName, payload.resultStatus),
+      notification_message: getStageInstruction(payload.stageName, payload.resultStatus, payload.reprofilePosition, payload.reprofileDepartment),
       visible_to_applicant: 'Yes',
       created_by: payload.evaluatedBy,
     });
+
+  // Create version record for history tracking
+  if (stageResult?.id) {
+    const nextVersion = existing ? latestVersionNumber + 1 : 1;
+
+    await supabase
+      .from('stage_result_versions')
+      .insert({
+        stage_result_id: stageResult.id,
+        version_number: nextVersion,
+        result_status: payload.resultStatus,
+        score: payload.score,
+        passing_score: payload.passingScore,
+        max_score: payload.maxScore,
+        remarks: payload.remarks,
+        evaluated_by: payload.evaluatedBy,
+        evaluated_at: payload.evaluatedAt || new Date().toISOString(),
+        created_by: payload.evaluatedBy,
+        edit_reason: payload.editReason || (nextVersion === 1 ? 'Initial entry' : 'Updated result'),
+      });
+  }
+
+  // If this is a Pen & Paper Test entry, also record/update the math_exam_results row and flag it as pen_and_paper
+  if (payload.stageName === 'Pen & Paper Test') {
+    try {
+      const { data: existingExam, error: existingExamErr } = await supabase
+        .from('math_exam_results')
+        .select('id, attempt_count')
+        .eq('reference_no', payload.referenceNo)
+        .single();
+
+      const now = new Date().toISOString();
+      const attemptCount = (existingExam as any)?.attempt_count ? ((existingExam as any).attempt_count + 1) : 1;
+
+      if (existingExam) {
+        await supabase
+          .from('math_exam_results')
+          .update({
+            score: payload.score ?? null,
+            status: payload.resultStatus === 'Passed' ? 'Passed' : 'Failed',
+            attempt_status: 'SUBMITTED',
+            submitted_at: now,
+            pen_and_paper: true,
+            attempt_count: attemptCount,
+          })
+          .eq('reference_no', payload.referenceNo);
+      } else {
+        await supabase
+          .from('math_exam_results')
+          .insert({
+            reference_no: payload.referenceNo,
+            last_name: null,
+            first_name: null,
+            assigned_set: null,
+            started_at: null,
+            answers_json: {},
+            questions_json: {},
+            time_limit_minutes: null,
+            score: payload.score ?? null,
+            status: payload.resultStatus === 'Passed' ? 'Passed' : 'Failed',
+            attempt_status: 'SUBMITTED',
+            submitted_at: now,
+            pen_and_paper: true,
+            attempt_count: attemptCount,
+          });
+      }
+
+      // Propagate Pen & Paper pass/fail into the canonical Math Exam stage_result so the UI and KPIs reflect final outcome
+      if (payload.resultStatus === 'Passed') {
+        try {
+          const meta = await getApplicantMeta(payload.referenceNo);
+          const experience_level = meta.experience_level || '';
+          const nextStageLabel = experience_level === 'Experienced Dealer' || experience_level === 'Experienced-Dealer' ? 'Table Test' : 'Final Interview';
+
+          // Update Math Exam stage result if exists
+          await supabase
+            .from('stage_results')
+            .update({
+              result_status: 'Passed',
+              current_stage_label: nextStageLabel,
+              score: payload.score ?? null,
+              passing_score: 30,
+              max_score: 50,
+              remarks: payload.remarks || 'Pen & Paper passed',
+              evaluated_by: payload.evaluatedBy || 'Admin',
+              evaluated_at: payload.evaluatedAt || now,
+            })
+            .eq('reference_no', payload.referenceNo)
+            .eq('stage_name', 'Math Exam');
+
+          // Update applicant overall status
+          await supabase
+            .from('applicants')
+            .update({
+              current_stage: 'Math Exam',
+              application_status: 'Completed',
+              overall_result: 'Passed',
+              updated_at: now,
+            })
+            .eq('reference_no', payload.referenceNo);
+        } catch (err) {
+          console.error('Failed to propagate Pen & Paper pass to Math Exam stage', err);
+        }
+      } else {
+        // If Pen & Paper failed, mark Math Exam as Failed and overall_result accordingly
+        try {
+          await supabase
+            .from('stage_results')
+            .update({
+              result_status: 'Failed',
+              current_stage_label: 'Pen & Paper Test',
+              score: payload.score ?? null,
+              passing_score: 30,
+              max_score: 50,
+              remarks: payload.remarks || 'Pen & Paper failed',
+              evaluated_by: payload.evaluatedBy || 'Admin',
+              evaluated_at: payload.evaluatedAt || now,
+            })
+            .eq('reference_no', payload.referenceNo)
+            .eq('stage_name', 'Math Exam');
+
+          await supabase
+            .from('applicants')
+            .update({
+              current_stage: 'Pen & Paper Test',
+              application_status: 'Completed',
+              overall_result: 'Failed',
+              updated_at: now,
+            })
+            .eq('reference_no', payload.referenceNo);
+        } catch (err) {
+          console.error('Failed to propagate Pen & Paper failure to Math Exam stage', err);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to record pen & paper in math_exam_results', err);
+    }
+  }
 
   return { success: true };
 }
@@ -145,6 +380,68 @@ async function getApplicantMeta(referenceNo: string): Promise<{ applicant_id?: s
   return data as { applicant_id?: string; position_applied?: string; experience_level?: string } || {};
 }
 
+function getFirstIncompleteStageIndex(
+  workflow: string[],
+  stageResults: Array<{ stage_name: string; result_status: string | null }>
+): number {
+  const stageResultMap = new Map(
+    stageResults.map((stageResult) => [stageResult.stage_name, stageResult.result_status])
+  );
+
+  for (let index = 0; index < workflow.length; index++) {
+    const status = stageResultMap.get(workflow[index]);
+    if (!status || !COMPLETED_STAGE_STATUSES.has(status)) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+async function getStageWorkflowForApplicant(position: string, experienceLevel?: string): Promise<string[]> {
+  const supabase = await createClient();
+  const normalizedExperienceLevel = experienceLevel === 'Experienced Dealer' ? 'Experienced' : 'Non-Experienced';
+
+  const { data: positionData, error: positionError } = await supabase
+    .from('positions')
+    .select('id')
+    .eq('name', position)
+    .single();
+
+  if (positionError || !positionData) {
+    return getStageWorkflow(position, experienceLevel);
+  }
+
+  const { data: positionStages, error: positionStagesError } = await supabase
+    .from('position_stages')
+    .select('stage_id, stage_order')
+    .eq('position_id', positionData.id)
+    .eq('experience_level', normalizedExperienceLevel)
+    .eq('is_enabled', true)
+    .order('stage_order', { ascending: true });
+
+  if (positionStagesError || !positionStages || positionStages.length === 0) {
+    return getStageWorkflow(position, experienceLevel);
+  }
+
+  const stageIds = positionStages.map((positionStage) => positionStage.stage_id);
+  const { data: stages, error: stagesError } = await supabase
+    .from('stages')
+    .select('id, name')
+    .in('id', stageIds);
+
+  if (stagesError || !stages) {
+    return getStageWorkflow(position, experienceLevel);
+  }
+
+  const stageNameById = new Map(stages.map((stage) => [stage.id, stage.name]));
+  const workflow = positionStages
+    .map((positionStage) => stageNameById.get(positionStage.stage_id))
+    .filter((stageName): stageName is string => Boolean(stageName));
+
+  return workflow.length > 0 ? workflow : getStageWorkflow(position, experienceLevel);
+}
+
 export function calculateApplicationStatus(
   stageResults: { stage_name: string; result_status: string }[],
   position: string,
@@ -152,9 +449,7 @@ export function calculateApplicationStatus(
 ): string {
   if (!stageResults || stageResults.length === 0) return 'Pending';
 
-  const workflow = position === 'Dealer' 
-    ? ['Initial Screening', 'Math Exam', 'Table Test', 'Sweaty Palm', 'Final Interview'] 
-    : ['Initial Screening', 'Math Exam', 'Table Test', 'Final Interview'];
+  const workflow = getStageWorkflow(position, experienceLevel || undefined);
 
   const lastResult = stageResults[stageResults.length - 1];
   const lastStageName = lastResult?.stage_name;
@@ -213,7 +508,7 @@ function getApplicationStatus(stageName: string, resultStatus: string): string {
   return resultStatus;
 }
 
-function getStageInstruction(stageName: string, resultStatus: string): string {
+function getStageInstruction(stageName: string, resultStatus: string, reprofilePosition?: string, reprofileDepartment?: string): string {
   if (stageName === 'Initial Screening') {
     if (resultStatus === 'Passed') return 'Please proceed to the Math Exam Area.';
     return 'Unfortunately, you did not pass the Initial Screening.';
@@ -228,9 +523,15 @@ function getStageInstruction(stageName: string, resultStatus: string): string {
   }
   if (stageName === 'Final Interview') {
     if (resultStatus === 'Passed') {
-      return 'Congratulations! You have passed all stages. Please create your account at https://westsideresort.darwinbox.com/ms/candidatev2/main/auth/login to proceed with your application.';
+      return 'Congratulations! You have passed all stages. Please follow the next instructions provided by the final interviewer.';
     }
     if (resultStatus === 'Reprofile') {
+      if (reprofilePosition && reprofileDepartment) {
+        return `You have been Reprofiled for ${reprofilePosition} in ${reprofileDepartment}. Please check for other available positions.`;
+      }
+      if (reprofilePosition) {
+        return `You have been Reprofiled for ${reprofilePosition}. Please check for other available positions.`;
+      }
       return 'You have been Reprofiled. Please check for other available positions.';
     }
     if (resultStatus === 'For Pooling') {

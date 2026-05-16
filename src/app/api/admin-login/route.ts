@@ -69,14 +69,12 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24,
     });
 
-    if (allowedDepartments && allowedDepartments.length > 0) {
-      response.cookies.set('allowed_departments', JSON.stringify(allowedDepartments), {
-        path: '/',
-        httpOnly: false,
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24,
-      });
-    }
+    response.cookies.set('allowed_departments', JSON.stringify(allowedDepartments || []), {
+      path: '/',
+      httpOnly: false,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24,
+    });
 
     return response;
   } catch (err) {
