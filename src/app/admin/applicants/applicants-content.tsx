@@ -684,7 +684,7 @@ export default function ApplicantsContent({
                       </th>
                     );
                   })}
-                  <th style={{ fontSize: '12px', fontWeight: '600' }}>Actions</th>
+                  {isSuperAdmin && <th style={{ fontSize: '12px', fontWeight: '600' }}>Actions</th>}
                 </tr>
               </thead>
 <tbody>
@@ -793,7 +793,7 @@ export default function ApplicantsContent({
                 ))}
                 {filteredApplicants.length === 0 && (
                   <tr>
-                    <td colSpan={visibleColumns.size + 1} className="text-center text-muted py-4">
+                    <td colSpan={visibleColumns.size + (isSuperAdmin ? 1 : 0)} className="text-center text-muted py-4">
                       No matching applicant records.
                     </td>
                   </tr>
