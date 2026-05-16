@@ -65,6 +65,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     last_name: '',
     middle_name: '',
     birthdate: '',
+    applicant_number: '',
   });
   const [savingBasic, setSavingBasic] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -407,12 +408,45 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
       last_name: applicant?.last_name || '',
       middle_name: applicant?.middle_name || '',
       birthdate: applicant?.birthdate || '',
+      applicant_number: applicant?.applicant_number?.toString() || '',
     });
     setIsEditingBasic(true);
   }
 
   async function saveBasicInfo() {
     setSavingBasic(true);
+    
+    // Check for duplicate applicant_number if provided
+    if (basicInfoForm.applicant_number) {
+      const applicantNum = parseInt(basicInfoForm.applicant_number, 10);
+      if (!isNaN(applicantNum) && applicantNum > 0) {
+        const { data: existing } = await supabase
+          .from('applicants')
+          .select('applicant_id, reference_no')
+          .eq('applicant_number', applicantNum)
+          .neq('reference_no', applicant?.reference_no)
+          .single();
+        
+        if (existing) {
+          setSavingBasic(false);
+          setMessage({ text: `Error: Applicant number ${applicantNum} is already used by ${existing.reference_no}`, type: 'error' });
+          return;
+        }
+        
+        // Update applicant_number first
+        await supabase
+          .from('applicants')
+          .update({ applicant_number: applicantNum })
+          .eq('reference_no', applicant?.reference_no);
+      }
+    } else {
+      // If cleared, set to null
+      await supabase
+        .from('applicants')
+        .update({ applicant_number: null })
+        .eq('reference_no', applicant?.reference_no);
+    }
+    
     const result = await updateApplicantBasicInfo(applicant?.reference_no || '', {
       first_name: basicInfoForm.first_name,
       last_name: basicInfoForm.last_name,
@@ -494,6 +528,15 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                         value={basicInfoForm.birthdate}
                         onChange={(e) => setBasicInfoForm({ ...basicInfoForm, birthdate: e.target.value })}
                         required
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <input
+                        type="number"
+                        className="form-control form-control-sm"
+                        placeholder="Applicant Number (optional)"
+                        value={basicInfoForm.applicant_number}
+                        onChange={(e) => setBasicInfoForm({ ...basicInfoForm, applicant_number: e.target.value })}
                       />
                     </div>
                   </div>
