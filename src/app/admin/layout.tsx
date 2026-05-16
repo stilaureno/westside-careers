@@ -12,8 +12,8 @@ import { AdminHeader } from './header';
 import '/node_modules/bootstrap/dist/css/bootstrap.min.css';
 
 export const metadata = {
-  title: 'NWR Careers Admin',
-  description: 'NWR Careers Admin Dashboard',
+  title: 'Westside Careers Admin',
+  description: 'Westside Careers Admin Dashboard',
 };
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -45,7 +45,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
       {isAuthenticated && (
         <footer style={{ padding: '24px 32px', textAlign: 'center', color: '#9ca3af', fontSize: '12px' }}>
-          &copy; {new Date().getFullYear()} NWR Careers Admin. All rights reserved.
+          &copy; {new Date().getFullYear()} Westside Careers Admin. All rights reserved.
         </footer>
       )}
     </div>

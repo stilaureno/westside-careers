@@ -708,7 +708,7 @@ export default function ApplicantsContent({
                       >
                         {label}
                         {isSortable && (
-                          <span className="ms-1" style={{ color: isActive ? '#8b1e2d' : '#ccc' }}>
+                          <span className="ms-1" style={{ color: isActive ? '#000080' : '#ccc' }}>
                             {isActive ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
                           </span>
                         )}
@@ -724,7 +724,7 @@ export default function ApplicantsContent({
                     {visibleColumns.has('applicants_table_created_at') && <td className="text-muted" style={{ fontSize: '12px' }}>{app.created_at?.slice(0, 10) || '-'}</td>}
                     {visibleColumns.has('applicants_table_reference_no') && (
                       <td>
-                        <button className="btn btn-link p-0 fw-bold text-decoration-none" style={{ color: '#8b1e2d', fontSize: '12px' }} onClick={() => openModal(app.reference_no)}>
+                        <button className="btn btn-link p-0 fw-bold text-decoration-none" style={{ color: '#000080', fontSize: '12px' }} onClick={() => openModal(app.reference_no)}>
                           {app.reference_no}
                         </button>
                       </td>

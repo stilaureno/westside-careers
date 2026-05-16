@@ -68,14 +68,14 @@ export default function LoginForm() {
           }}>
             <img
               src="/WESTSIDE LOGO COLORED.png"
-              alt="NWR Careers Logo"
+              alt="Westside Careers Logo"
               style={{ width: '140px', height: 'auto', objectFit: 'contain' }}
             />
           </div>
           <h1 style={{ 
             fontSize: '28px', 
             fontWeight: '800', 
-            color: '#8b1e2d', 
+            color: '#000080', 
             marginBottom: '8px',
             letterSpacing: '-0.025em' 
           }}>
@@ -151,7 +151,7 @@ export default function LoginForm() {
                   boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
                 }}
                 onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#8b1e2d';
+                  e.currentTarget.style.borderColor = '#000080';
                   e.currentTarget.style.boxShadow = '0 0 0 4px rgba(139, 30, 45, 0.1)';
                 }}
                 onBlur={(e) => {
@@ -168,7 +168,7 @@ export default function LoginForm() {
             style={{
               width: '100%', 
               padding: '16px', 
-              background: '#8b1e2d', 
+              background: '#000080', 
               color: '#fff',
               border: 'none', 
               borderRadius: '14px', 

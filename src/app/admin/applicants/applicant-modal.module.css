@@ -65,12 +65,12 @@
 .radioCard.reprofile.selected .label { color: #fff; }
 
 /* For Pooling - Maroon */
-.radioCard.pooling { border-color: #8b1e2d; }
+.radioCard.pooling { border-color: #000080; }
 .radioCard.pooling .icon,
-.radioCard.pooling .label { color: #8b1e2d; }
+.radioCard.pooling .label { color: #000080; }
 .radioCard.pooling.selected {
-  background: #8b1e2d;
-  border-color: #8b1e2d;
+  background: #000080;
+  border-color: #000080;
 }
 .radioCard.pooling.selected .icon,
 .radioCard.pooling.selected .label { color: #fff; }
@@ -96,7 +96,7 @@
 .statusPassed { color: #28a745; font-weight: 700; font-size: 15px; }
 .statusFailed { color: #dc3545; font-weight: 700; font-size: 15px; }
 .statusPending { color: #6c757d; font-weight: 700; font-size: 15px; }
-.statusOngoing { color: #8b1e2d; font-weight: 700; font-size: 15px; }
+.statusOngoing { color: #000080; font-weight: 700; font-size: 15px; }
 .statusReprofile { color: #fd7e14; font-weight: 700; font-size: 15px; }
 .statusForPooling { color: #6610f2; font-weight: 700; font-size: 15px; }
 .statusNotRecommended { color: #dc3545; font-weight: 700; font-size: 15px; }

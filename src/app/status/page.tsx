@@ -176,7 +176,7 @@ const [autoFetched, setAutoFetched] = useState(false);
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #2b0f17 0%, #4a1521 26%, #6f1d2b 58%, #2b0f17 100%)',
+      background: 'linear-gradient(180deg, #001f3f 0%, #003366 26%, #004080 58%, #001f3f 100%)',
       padding: '20px',
     }}>
       <div style={{ maxWidth: '580px', margin: '0 auto' }}>
@@ -258,7 +258,7 @@ const [autoFetched, setAutoFetched] = useState(false);
               </div>
             )}
             <button type="submit" disabled={loading || isLocked} style={{
-              width: '100%', padding: '14px', background: '#8b1e2d', color: '#fff',
+              width: '100%', padding: '14px', background: '#000080', color: '#fff',
               border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
               cursor: loading || isLocked ? 'not-allowed' : 'pointer', opacity: loading || isLocked ? 0.65 : 1,
             }}>
@@ -273,7 +273,7 @@ const [autoFetched, setAutoFetched] = useState(false);
             boxShadow: '0 18px 42px rgba(4,12,24,.34)', padding: '40px',
             border: '1px solid rgba(212,175,55,.22)', textAlign: 'center',
           }}>
-            <div style={{ color: '#8b1e2d', fontSize: '16px' }}>Loading your status...</div>
+            <div style={{ color: '#000080', fontSize: '16px' }}>Loading your status...</div>
           </div>
         )}
 
@@ -284,7 +284,7 @@ const [autoFetched, setAutoFetched] = useState(false);
             border: '1px solid rgba(212,175,55,.22)',
           }}>
             <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ color: '#8b1e2d', fontSize: '20px', marginBottom: '4px' }}>
+              <h2 style={{ color: '#000080', fontSize: '20px', marginBottom: '4px' }}>
                 {result.applicant.last_name?.toUpperCase()}, {result.applicant.first_name}{result.applicant.middle_name ? ' ' + result.applicant.middle_name : ''}
               </h2>
               <p style={{ color: '#6b7280', fontSize: '14px' }}>
@@ -294,14 +294,14 @@ const [autoFetched, setAutoFetched] = useState(false);
 
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
               <span style={{
-                padding: '6px 14px', background: '#fbeaec', color: '#8b1e2d',
+                padding: '6px 14px', background: '#fbeaec', color: '#000080',
                 borderRadius: '20px', fontSize: '13px', fontWeight: '600',
               }}>{result.applicant.position_applied}</span>
             </div>
 
             {result.mathExam && (
               <div style={{ marginBottom: '20px', padding: '16px', borderRadius: '14px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ color: '#8b1e2d', fontSize: '15px', marginBottom: '12px' }}>Math Proficiency Exam</h3>
+                <h3 style={{ color: '#000080', fontSize: '15px', marginBottom: '12px' }}>Math Proficiency Exam</h3>
                 {result.mathExam.status && result.mathExam.status !== 'IN_PROGRESS' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ flex: 1 }}>
@@ -325,7 +325,7 @@ const [autoFetched, setAutoFetched] = useState(false);
               </div>
             )}
 
-            <h3 style={{ color: '#8b1e2d', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
+            <h3 style={{ color: '#000080', fontSize: '16px', marginBottom: '12px' }}>Application Roadmap</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {result.roadmap.map((item, idx) => (
                 <div key={item.stageName} style={{
@@ -366,7 +366,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                         top: '50%',
                         transform: 'translateY(-50%)',
                         padding: '8px 14px',
-                        background: '#8b1e2d',
+                        background: '#000080',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '8px',
@@ -476,7 +476,7 @@ const [autoFetched, setAutoFetched] = useState(false);
                         style={{
                           width: '100%',
                           padding: '8px',
-                          background: feedbackForm.rating === 0 ? '#d1d5db' : '#8b1e2d',
+                          background: feedbackForm.rating === 0 ? '#d1d5db' : '#000080',
                           color: '#fff',
                           border: 'none',
                           borderRadius: '8px',

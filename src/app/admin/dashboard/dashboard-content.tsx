@@ -1201,7 +1201,7 @@ export default function DashboardContent() {
               onClick={clearFilters}
               style={{
                 padding: isMobile ? '6px 10px' : '8px 14px', 
-                background: '#fff', color: '#8b1e2d', border: '1px solid #8b1e2d',
+                background: '#fff', color: '#000080', border: '1px solid #000080',
                 borderRadius: '8px', fontSize: isMobile ? '11px' : '13px', cursor: 'pointer', fontWeight: '500',
               }}
             >
@@ -1220,7 +1220,7 @@ export default function DashboardContent() {
 {deptNames.map(deptName => {
         const deptData = dashboardData[deptName];
         const positions = deptPositions[deptName] || [];
-        const deptHeaderColor = deptName === 'Table Games' ? '#800000' : deptName === 'Business Development' ? '#006400' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#FF8C00' : '#000080';
+        const deptHeaderColor = deptName === 'Table Games' ? '#000080' : deptName === 'Business Development' ? '#006400' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#FF8C00' : '#000080';
         const isExpanded = expandedDepts.has(deptName) || !isMobile;
         const toggleCard = () => { if (isMobile) toggleDept(deptName); };
         
@@ -1485,7 +1485,7 @@ export default function DashboardContent() {
                   <tbody>
                     {modalApplicants.map((app) => (
                       <tr key={app.reference_no} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                        <td style={{ padding: '10px 8px', color: '#8b1e2d', fontWeight: '600' }}>{app.reference_no}</td>
+                        <td style={{ padding: '10px 8px', color: '#000080', fontWeight: '600' }}>{app.reference_no}</td>
                         <td style={{ padding: '10px 8px' }}>{app.last_name?.toUpperCase()}, {app.first_name}{app.middle_name ? ' ' + app.middle_name : ''}</td>
                         <td style={{ padding: '10px 8px', color: '#6b7280' }}>{app.position_applied}</td>
                         <td style={{ padding: '10px 8px' }}>
@@ -1559,9 +1559,9 @@ export default function DashboardContent() {
                         style={{
                           padding: '6px 10px',
                           border: '1px solid',
-                          borderColor: modalPage === p ? '#8b1e2d' : '#e5e7eb',
+                          borderColor: modalPage === p ? '#000080' : '#e5e7eb',
                           borderRadius: '6px',
-                          background: modalPage === p ? '#8b1e2d' : '#fff',
+                          background: modalPage === p ? '#000080' : '#fff',
                           color: modalPage === p ? '#fff' : '#374151',
                           cursor: 'pointer',
                           fontSize: '13px',

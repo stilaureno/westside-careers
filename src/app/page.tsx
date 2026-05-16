@@ -7,7 +7,7 @@ export default function HomePage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(180deg, #2b0f17 0%, #4a1521 26%, #6f1d2b 58%, #2b0f17 100%)',
+      background: 'linear-gradient(180deg, #001f3f 0%, #003366 26%, #004080 58%, #001f3f 100%)',
       padding: '20px',
     }}>
       <div style={{
@@ -22,14 +22,14 @@ export default function HomePage() {
       }}>
         <img
           src="/WESTSIDE LOGO COLORED.png"
-          alt="NWR Careers Logo"
+          alt="Westside Careers"
           style={{ width: '160px', margin: '0 auto 24px', display: 'block' }}
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <Link href="/apply" style={{
             display: 'block',
             padding: '14px 24px',
-            background: '#8b1e2d',
+            background: '#000080',
             color: '#fff',
             borderRadius: '12px',
             fontWeight: '700',
@@ -42,8 +42,8 @@ export default function HomePage() {
             display: 'block',
             padding: '14px 24px',
             background: '#fff',
-            color: '#8b1e2d',
-            border: '2px solid #8b1e2d',
+            color: '#000080',
+            border: '2px solid #000080',
             borderRadius: '12px',
             fontWeight: '700',
             textDecoration: 'none',
@@ -55,7 +55,7 @@ export default function HomePage() {
             display: 'block',
             padding: '14px 24px',
             background: '#fff',
-            color: '#8b1e2d',
+            color: '#000080',
             border: '2px solid #e5e7eb',
             borderRadius: '12px',
             fontWeight: '700',

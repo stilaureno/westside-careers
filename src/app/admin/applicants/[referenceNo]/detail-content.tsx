@@ -313,7 +313,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
               onClick={saveBasicInfo}
               disabled={savingBasic}
               style={{
-                padding: '8px 16px', background: '#8b1e2d', color: '#fff',
+                padding: '8px 16px', background: '#000080', color: '#fff',
                 border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
                 cursor: savingBasic ? 'not-allowed' : 'pointer', opacity: savingBasic ? 0.65 : 1,
               }}
@@ -388,7 +388,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {games.map((g: any) => (
                   <span key={g.game_code} style={{
-                    padding: '4px 12px', background: '#fbeaec', color: '#8b1e2d',
+                    padding: '4px 12px', background: '#fbeaec', color: '#000080',
                     borderRadius: '20px', fontSize: '13px', fontWeight: '600',
                   }}>{g.game_code}</span>
                 ))}
@@ -442,7 +442,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
                 )}
                 <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>
                   {s.evaluated_at ? new Date(s.evaluated_at).toLocaleString() : ''}
-                  {s.evaluated_by && <> · Evaluated by: <span style={{ color: '#8b1e2d' }}>{s.evaluated_by}</span></>}
+                  {s.evaluated_by && <> · Evaluated by: <span style={{ color: '#000080' }}>{s.evaluated_by}</span></>}
                 </p>
                 {((stageVersionHistory[s.id] || []).filter((v: any) => v.version_number < (stageVersions[s.id] || 1)).length > 0) && (
                   <div style={{ marginTop: '6px' }}>
@@ -596,7 +596,7 @@ export default function DetailContent({ initialData, isSuperAdmin = false }: { i
           </div>
 
           <button type="submit" disabled={saving} style={{
-            marginTop: '16px', padding: '14px 24px', background: '#8b1e2d', color: '#fff',
+            marginTop: '16px', padding: '14px 24px', background: '#000080', color: '#fff',
             border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700',
             cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.65 : 1,
           }}>

@@ -563,7 +563,7 @@ export default function SettingsContent() {
         {/* Table Column Visibility */}
         <div className="col-md-6">
           <div className="card border-dark">
-            <div className="card-header" style={{ background: '#8b1e2d', color: '#fff' }}>
+            <div className="card-header" style={{ background: '#000080', color: '#fff' }}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="mb-0" style={{ color: '#fff' }}>Table Column Visibility</h6>
@@ -646,19 +646,19 @@ export default function SettingsContent() {
                           disabled={saving || isProtected}
                           onChange={() => toggleTableColumn(field)}
                           style={{ 
-                            accentColor: '#8b1e2d',
+                            accentColor: '#000080',
                             cursor: isProtected ? 'not-allowed' : 'pointer'
                           }}
                         />
                         {field.field_label}
-                        {isProtected && <span className="ms-1" style={{ color: '#8b1e2d', fontSize: '11px' }}>🔒</span>}
+                        {isProtected && <span className="ms-1" style={{ color: '#000080', fontSize: '11px' }}>🔒</span>}
                       </label>
                     </div>
                   );
                 })}
               </div>
               <div className="d-flex align-items-center gap-2 mt-3 pt-2" style={{ borderTop: '1px solid #e5e7eb' }}>
-                <span style={{ color: '#8b1e2d', fontSize: '12px' }}>🔒</span>
+                <span style={{ color: '#000080', fontSize: '12px' }}>🔒</span>
                 <small style={{ color: '#6b7280', fontSize: '11px' }}>Protected columns are always visible</small>
               </div>
             </div>
@@ -928,7 +928,7 @@ export default function SettingsContent() {
         {/* Positions */}
         <div className="col-md-12">
           <div className="card border-dark">
-            <div className="card-header" style={{ background: '#8b1e2d', color: '#fff' }}>
+            <div className="card-header" style={{ background: '#000080', color: '#fff' }}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h6 className="mb-0" style={{ color: '#fff' }}>Positions</h6>
@@ -988,7 +988,7 @@ export default function SettingsContent() {
                 if (deptPositions.length === 0) return null;
                 return (
                   <div key={dept.id} className="mb-4 pb-3" style={{ borderBottom: '1px solid #e5e7eb' }}>
-                    <h6 className="fw-bold mb-3" style={{ color: '#8b1e2d', fontSize: '14px' }}>
+                    <h6 className="fw-bold mb-3" style={{ color: '#000080', fontSize: '14px' }}>
                       <span style={{ color: '#FFD700' }}>▎</span> {dept.name}
                     </h6>
                     <div className="d-flex flex-wrap gap-2">
@@ -1015,7 +1015,7 @@ export default function SettingsContent() {
                               onChange={() => togglePosition(pos)}
                               style={{ 
                                 marginBottom: 0,
-                                accentColor: '#8b1e2d',
+                                accentColor: '#000080',
                                 cursor: saving ? 'not-allowed' : 'pointer'
                               }}
                             />
@@ -1046,7 +1046,7 @@ export default function SettingsContent() {
         {/* Admin Passwords */}
         <div className="col-12">
           <div className="card border-dark">
-            <div className="card-header" style={{ background: '#8b1e2d', color: '#fff' }}>
+            <div className="card-header" style={{ background: '#000080', color: '#fff' }}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <h5 className="mb-0" style={{ color: '#fff' }}>Admin Passwords, Departments & Column Access</h5>
@@ -1102,7 +1102,7 @@ export default function SettingsContent() {
                         <div 
                           className="card-header d-flex justify-content-between align-items-center py-3"
                           style={{ 
-                            background: '#8b1e2d', 
+                            background: '#000080', 
                             borderRadius: '12px 12px 0 0'
                           }}
                         >
@@ -1118,7 +1118,7 @@ export default function SettingsContent() {
                                 className="badge" 
                                 style={{ 
                                   background: '#fff', 
-                                  color: '#8b1e2d', 
+                                  color: '#000080', 
                                   fontSize: '11px',
                                   padding: '3px 10px'
                                 }}
@@ -1183,8 +1183,8 @@ export default function SettingsContent() {
                                   fontWeight: '600',
                                   cursor: 'pointer',
                                   border: 'none',
-                                  borderBottom: (activeAdminTab[admin.key] || 'departments') === 'departments' ? '2px solid #8b1e2d' : '2px solid transparent',
-                                  color: (activeAdminTab[admin.key] || 'departments') === 'departments' ? '#8b1e2d' : '#6b7280',
+                                  borderBottom: (activeAdminTab[admin.key] || 'departments') === 'departments' ? '2px solid #000080' : '2px solid transparent',
+                                  color: (activeAdminTab[admin.key] || 'departments') === 'departments' ? '#000080' : '#6b7280',
                                   background: 'transparent'
                                 }}
                                 onClick={() => setActiveAdminTab(prev => ({ ...prev, [admin.key]: 'departments' }))}
@@ -1200,8 +1200,8 @@ export default function SettingsContent() {
                                   fontWeight: '600',
                                   cursor: 'pointer',
                                   border: 'none',
-                                  borderBottom: activeAdminTab[admin.key] === 'columns' ? '2px solid #8b1e2d' : '2px solid transparent',
-                                  color: activeAdminTab[admin.key] === 'columns' ? '#8b1e2d' : '#6b7280',
+                                  borderBottom: activeAdminTab[admin.key] === 'columns' ? '2px solid #000080' : '2px solid transparent',
+                                  color: activeAdminTab[admin.key] === 'columns' ? '#000080' : '#6b7280',
                                   background: 'transparent'
                                 }}
                                 onClick={() => setActiveAdminTab(prev => ({ ...prev, [admin.key]: 'columns' }))}
@@ -1230,7 +1230,7 @@ export default function SettingsContent() {
                                           checked={isChecked}
                                           disabled={saving}
                                           onChange={() => toggleAdminDept(admin, dept.name)}
-                                          style={{ accentColor: '#8b1e2d' }}
+                                          style={{ accentColor: '#000080' }}
                                         />
                                         <label className="form-check-label ms-2" style={{ fontSize: '13px', color: '#374151' }} htmlFor={`${admin.key}-${dept.id}`}>
                                           {dept.name}
@@ -1249,12 +1249,12 @@ export default function SettingsContent() {
                             <div className="d-flex justify-content-between align-items-center mb-3">
                               <div className="d-flex align-items-center gap-2">
                                 <label className="form-label small fw-bold mb-0" style={{ color: '#1f2937', fontSize: '13px' }}>
-                                  <span style={{ color: '#8b1e2d' }}>▎</span> Table Columns
+                                  <span style={{ color: '#000080' }}>▎</span> Table Columns
                                 </label>
                                 <span 
                                   className="badge" 
                                   style={{ 
-                                    background: '#8b1e2d', 
+                                    background: '#000080', 
                                     color: '#fff', 
                                     fontSize: '10px', 
                                     padding: '2px 8px',
@@ -1339,7 +1339,7 @@ export default function SettingsContent() {
                                           disabled={saving || isProtected}
                                           onChange={() => toggleAdminColumnVisibility(admin, field.field_key)}
                                           style={{ 
-                                            accentColor: '#8b1e2d',
+                                            accentColor: '#000080',
                                             cursor: isProtected ? 'not-allowed' : 'pointer'
                                           }}
                                         />
@@ -1348,7 +1348,7 @@ export default function SettingsContent() {
                                           <span 
                                             className="ms-1" 
                                             style={{ 
-                                              color: '#8b1e2d',
+                                              color: '#000080',
                                               fontSize: '10px',
                                               fontWeight: '600'
                                             }}
@@ -1364,7 +1364,7 @@ export default function SettingsContent() {
                               </div>
                             </div>
                             <div className="d-flex align-items-center gap-2 mt-2">
-                              <span style={{ color: '#8b1e2d', fontSize: '12px' }}>🔒</span>
+                              <span style={{ color: '#000080', fontSize: '12px' }}>🔒</span>
                               <small style={{ color: '#6b7280', fontSize: '11px' }}>Protected columns are always visible and cannot be hidden</small>
                             </div>
                           </div>
@@ -1407,7 +1407,7 @@ export default function SettingsContent() {
                                   checked={(admin.modal_section_visibility || []).includes('notifications')}
                                   disabled={saving}
                                   onChange={() => toggleAdminModalSectionVisibility(admin, 'notifications')}
-                                  style={{ accentColor: '#8b1e2d' }}
+                                  style={{ accentColor: '#000080' }}
                                 />
                                 <label 
                                   className="form-check-label ms-2" 

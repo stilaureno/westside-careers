@@ -41,7 +41,7 @@ export function AdminHeader({ isSuperAdmin, adminLabel }: { isSuperAdmin: boolea
       width: '14px',
       height: '14px',
       border: '2px solid rgba(139, 30, 45, 0.3)',
-      borderTopColor: '#8b1e2d',
+      borderTopColor: '#000080',
       borderRadius: '50%',
       animation: 'spin 0.8s linear infinite',
       marginRight: '6px',
@@ -62,12 +62,12 @@ return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
             <img
               src="/WESTSIDE LOGO COLORED.png"
-              alt="NWR Careers Logo"
+              alt="Westside Careers Logo"
               style={{ width: isMobile ? '36px' : '56px', height: isMobile ? '36px' : '56px', objectFit: 'contain', flexShrink: 0 }}
             />
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <span style={{ fontSize: isMobile ? '14px' : '18px', fontWeight: '800', color: '#8b1e2d', letterSpacing: '-0.025em', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-              NWR Careers
+            <span style={{ fontSize: isMobile ? '14px' : '18px', fontWeight: '800', color: '#000080', letterSpacing: '-0.025em', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+              Westside Careers
             </span>
             <span style={{ fontSize: isMobile ? '10px' : '12px', color: '#6b7280', fontWeight: '500', marginTop: '-2px', whiteSpace: 'nowrap' }}>
               {portalLabel}
@@ -88,7 +88,7 @@ return (
             style={{
               padding: isMobile ? '6px 12px' : '8px 20px',
               background: isDashboardRoute ? '#fff' : 'transparent',
-              color: isDashboardRoute ? '#8b1e2d' : '#4b5563',
+              color: isDashboardRoute ? '#000080' : '#4b5563',
               borderRadius: '8px',
               fontSize: isMobile ? '12px' : '14px',
               fontWeight: '600',
@@ -110,7 +110,7 @@ return (
             style={{
               padding: isMobile ? '6px 12px' : '8px 20px',
               background: isApplicantsRoute ? '#fff' : 'transparent',
-              color: isApplicantsRoute ? '#8b1e2d' : '#4b5563',
+              color: isApplicantsRoute ? '#000080' : '#4b5563',
               borderRadius: '8px',
               fontSize: isMobile ? '12px' : '14px',
               fontWeight: '600',

@@ -8,7 +8,7 @@ export default function Loading() {
         width: '40px',
         height: '40px',
         border: '4px solid #e5e7eb',
-        borderTop: '4px solid #8b1e2d',
+        borderTop: '4px solid #000080',
         borderRadius: '50%',
         animation: 'spin 1s linear infinite',
       }} />

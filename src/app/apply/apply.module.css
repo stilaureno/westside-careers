@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #2b0f17 0%, #4a1521 26%, #6f1d2b 58%, #2b0f17 100%);
+  background: linear-gradient(180deg, #001f3f 0%, #003366 26%, #004080 58%, #001f3f 100%);
   padding: 18px 14px calc(28px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -43,7 +43,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #2b0f17 0%, #4a1521 26%, #6f1d2b 58%, #2b0f17 100%);
+  background: linear-gradient(180deg, #001f3f 0%, #003366 26%, #004080 58%, #001f3f 100%);
   padding: 18px 14px calc(28px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -60,7 +60,7 @@
 }
 
 .successTitle {
-  color: #8b1e2d;
+  color: #000080;
   font-size: clamp(1.5rem, 4vw, 1.75rem);
   margin: 0 0 8px;
 }
@@ -136,7 +136,7 @@
 }
 
 .sectionTitle {
-  color: #8b1e2d;
+  color: #000080;
   margin: 0 0 14px;
   font-size: 1.05rem;
 }
@@ -199,7 +199,7 @@
 
 .control:focus {
   outline: none;
-  border-color: #8b1e2d;
+  border-color: #000080;
   box-shadow: 0 0 0 3px rgba(139, 30, 45, 0.14);
 }
 
@@ -239,16 +239,16 @@
 }
 
 .gameOptionSelected {
-  border-color: #8b1e2d;
+  border-color: #000080;
   background: #fbeaec;
-  color: #8b1e2d;
+  color: #000080;
   font-weight: 700;
 }
 
 .gameCheckbox {
   width: 18px;
   height: 18px;
-  accent-color: #8b1e2d;
+  accent-color: #000080;
   flex: 0 0 auto;
 }
 
@@ -268,7 +268,7 @@
 }
 
 .primaryButton {
-  background: #8b1e2d;
+  background: #000080;
   color: #fff;
 }
 
@@ -278,7 +278,7 @@
 }
 
 .linkButton {
-  background: #8b1e2d;
+  background: #000080;
   color: #fff;
 }
 

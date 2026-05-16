@@ -1,7 +1,7 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 :root {
-  --color-primary: #8b1e2d;
+  --color-primary: #000080;
   --color-primary-dark: #6f1824;
   --color-primary-light: #a53a49;
   --color-surface: #f9f1f3;

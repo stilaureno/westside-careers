@@ -308,7 +308,7 @@ export default function ExamPage() {
       const el = document.getElementById(`question-${unanswered.question_no}`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.style.boxShadow = '0 0 0 3px #8b1e2d';
+        el.style.boxShadow = '0 0 0 3px #000080';
         setTimeout(() => { el.style.boxShadow = '0 10px 30px rgba(15,23,42,.06)'; }, 2000);
       }
       return;
@@ -353,7 +353,7 @@ export default function ExamPage() {
             Passing score: {PASSING_SCORE}/{MAX_MATH_EXAM_SCORE}
           </p>
           <Link href="/" style={{
-            display: 'block', padding: '14px 24px', background: '#8b1e2d', color: '#fff',
+            display: 'block', padding: '14px 24px', background: '#000080', color: '#fff',
             borderRadius: '12px', fontWeight: '700', textDecoration: 'none', fontSize: '15px',
           }}>
             Back to Home
@@ -396,7 +396,7 @@ export default function ExamPage() {
               boxShadow: '0 10px 30px rgba(15,23,42,.06)',
               transition: 'all 0.3s ease'
             }}>
-              <p style={{ fontSize: '14px', fontWeight: '700', color: '#8b1e2d', marginBottom: '10px' }}>
+              <p style={{ fontSize: '14px', fontWeight: '700', color: '#000080', marginBottom: '10px' }}>
                 Question {q.question_no}
               </p>
               <p style={{ fontSize: '16px', color: '#1f2937', marginBottom: '16px', lineHeight: 1.5 }}>
@@ -409,9 +409,9 @@ export default function ExamPage() {
                     type="button"
                     onClick={() => handleAnswer(q.question_no.toString(), choice.key)}
                     style={{
-                      padding: '12px 16px', borderRadius: '12px', border: `2px solid ${answers[q.question_no.toString()] === choice.key ? '#8b1e2d' : '#e5e7eb'}`,
+                      padding: '12px 16px', borderRadius: '12px', border: `2px solid ${answers[q.question_no.toString()] === choice.key ? '#000080' : '#e5e7eb'}`,
                       background: answers[q.question_no.toString()] === choice.key ? '#fbeaec' : '#fff',
-                      color: answers[q.question_no.toString()] === choice.key ? '#8b1e2d' : '#1f2937',
+                      color: answers[q.question_no.toString()] === choice.key ? '#000080' : '#1f2937',
                       fontWeight: answers[q.question_no.toString()] === choice.key ? '700' : '400',
                       cursor: 'pointer', textAlign: 'left', fontSize: '14px',
                     }}
@@ -427,7 +427,7 @@ export default function ExamPage() {
 
         <div style={{ width: '100%', maxWidth: '720px', marginTop: '20px', paddingBottom: '40px' }}>
           <button onClick={submitExam} disabled={submitting} style={{
-            width: '100%', padding: '16px', background: '#8b1e2d', color: '#fff',
+            width: '100%', padding: '16px', background: '#000080', color: '#fff',
             border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: '700',
             cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.65 : 1,
           }}>
@@ -466,7 +466,7 @@ export default function ExamPage() {
                   onClick={() => void completeSubmit()}
                   style={{
                     minHeight: '48px', borderRadius: '12px', border: 'none',
-                    background: '#8b1e2d', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+                    background: '#000080', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
                   }}
                 >
                   Submit Anyway
@@ -492,10 +492,10 @@ export default function ExamPage() {
           <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <img
               src="/WESTSIDE%20LOGO%20COLORED.png"
-              alt="NWR Careers logo"
+              alt="Westside Careers logo"
               style={{ width: '220px', maxWidth: '100%', margin: '0 auto 16px', display: 'block' }}
             />
-            <h1 style={{ fontSize: '22px', color: '#8b1e2d', marginBottom: '6px' }}>Confirm & Proceed</h1>
+            <h1 style={{ fontSize: '22px', color: '#000080', marginBottom: '6px' }}>Confirm & Proceed</h1>
             <p style={{ fontSize: '14px', color: '#6b7280' }}>
               Please verify that you understand the exam rules
             </p>
@@ -539,7 +539,7 @@ export default function ExamPage() {
                 type="checkbox"
                 checked={confirmUnderstood}
                 onChange={(e) => setConfirmUnderstood(e.target.checked)}
-                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#8b1e2d', flexShrink: 0 }}
+                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#000080', flexShrink: 0 }}
               />
               <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
                 I have read and understand all the exam instructions and rules listed above.
@@ -551,7 +551,7 @@ export default function ExamPage() {
                 type="checkbox"
                 checked={confirmAgree}
                 onChange={(e) => setConfirmAgree(e.target.checked)}
-                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#8b1e2d', flexShrink: 0 }}
+                style={{ marginTop: '4px', width: '18px', height: '18px', accentColor: '#000080', flexShrink: 0 }}
               />
               <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
                 I confirm that I will follow all exam rules, and I understand that any violation will result in automatic exam submission.
@@ -563,7 +563,7 @@ export default function ExamPage() {
             onClick={proceedToExam}
             disabled={!confirmUnderstood || !confirmAgree}
             style={{
-              width: '100%', padding: '14px', background: confirmUnderstood && confirmAgree ? '#8b1e2d' : '#9ca3af',
+              width: '100%', padding: '14px', background: confirmUnderstood && confirmAgree ? '#000080' : '#9ca3af',
               color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
               cursor: confirmUnderstood && confirmAgree ? 'pointer' : 'not-allowed', marginBottom: '12px',
             }}
@@ -604,10 +604,10 @@ export default function ExamPage() {
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <img
             src="/WESTSIDE%20LOGO%20COLORED.png"
-            alt="NWR Careers logo"
+            alt="Westside Careers logo"
             style={{ width: '220px', maxWidth: '100%', margin: '0 auto 16px', display: 'block' }}
           />
-          <h1 style={{ fontSize: '22px', color: '#8b1e2d', marginBottom: '6px' }}>Math Proficiency Exam</h1>
+          <h1 style={{ fontSize: '22px', color: '#000080', marginBottom: '6px' }}>Math Proficiency Exam</h1>
           <p style={{ fontSize: '14px', color: '#6b7280' }}>
             {EXAM_DURATION_MINUTES} minutes &middot; {PASSING_SCORE}/{MAX_MATH_EXAM_SCORE} passing score
           </p>
@@ -709,7 +709,7 @@ export default function ExamPage() {
           onClick={verifyAndStart}
           disabled={loading}
           style={{
-            width: '100%', padding: '14px', background: '#8b1e2d', color: '#fff',
+            width: '100%', padding: '14px', background: '#000080', color: '#fff',
             border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700',
             cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.65 : 1, marginBottom: '12px',
           }}

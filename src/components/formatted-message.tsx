@@ -51,7 +51,7 @@ export function renderFormattedMessage(value?: string): ReactNode {
             href={safeHref}
             target={isExternal ? '_blank' : undefined}
             rel={isExternal ? 'noopener noreferrer' : undefined}
-            style={{ color: '#8b1e2d', fontWeight: 600 }}
+            style={{ color: '#000080', fontWeight: 600 }}
           >
             {anchorText}
           </a>
