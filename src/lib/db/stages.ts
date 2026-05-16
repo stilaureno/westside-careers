@@ -203,7 +203,7 @@ sweaty_palm_result: payload.sweatyPalmResult,
   await supabase
     .from('applicants')
     .update({
-      current_stage: isFinalInterview ? 'Completed' : payload.stageName,
+      current_stage: isFinalInterview ? 'Completed' : (nextStage || payload.stageName),
       application_status: dynamicStatus,
       overall_result: overallResult,
       department: payload.resultStatus === 'Reprofile' && payload.reprofileDepartment ? payload.reprofileDepartment : undefined,
