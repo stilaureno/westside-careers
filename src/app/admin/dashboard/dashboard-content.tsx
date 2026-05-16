@@ -618,8 +618,15 @@ export default function DashboardContent() {
       // Pending: for Math Exam, it's all Dealer applicants who haven't taken the exam yet
       // (matches the dashboard calculation: total Dealers - taken)
       if (stage === 'Math Exam') {
+        const isExpDealer = (a: any) => a.experience_level === 'Experienced Dealer' || a.experience_level === 'Experienced-Dealer';
         const dealerRefs = (apps || [])
-          .filter(a => a.position_applied === 'Dealer')
+          .filter(a => {
+            if (a.position_applied !== 'Dealer') return false;
+            if (mathExamExperienceFilter === 'all') return true;
+            if (mathExamExperienceFilter === 'experienced') return isExpDealer(a);
+            if (mathExamExperienceFilter === 'non_experienced') return !isExpDealer(a);
+            return true;
+          })
           .map(a => a.reference_no);
         
         if (dealerRefs.length > 0) {
@@ -662,11 +669,22 @@ export default function DashboardContent() {
         matchingRefs = new Set(pendingRefNos);
       }
     } else if (stage === 'Math Exam' && (result === 'Retake' || result === 'Passed' || result === 'Failed')) {
-      const { data: mathResults } = refNos.length > 0
+      // Filter apps by experience level first
+      const isExpDealer = (a: any) => a.experience_level === 'Experienced Dealer' || a.experience_level === 'Experienced-Dealer';
+      const filteredApps = (apps || []).filter(a => {
+        if (a.position_applied !== 'Dealer') return false;
+        if (mathExamExperienceFilter === 'all') return true;
+        if (mathExamExperienceFilter === 'experienced') return isExpDealer(a);
+        if (mathExamExperienceFilter === 'non_experienced') return !isExpDealer(a);
+        return true;
+      });
+      const filteredRefNos = filteredApps.map(a => a.reference_no).filter(Boolean);
+      
+      const { data: mathResults } = filteredRefNos.length > 0
         ? await supabase
             .from('math_exam_results')
             .select('reference_no, status, attempt_count, submitted_at, started_at, created_at')
-            .in('reference_no', refNos)
+            .in('reference_no', filteredRefNos)
         : { data: [] };
 
       const allAttempts = (mathResults || []) as MathExamAttempt[];
@@ -708,7 +726,7 @@ export default function DashboardContent() {
     const to = from + MODAL_PAGE_SIZE;
     setModalApplicants(mapped.slice(from, to));
     setModalLoading(false);
-  }, [supabase]);
+  }, [supabase, mathExamExperienceFilter]);
 
   const closeModal = () => {
     setModalOpen(false);
