@@ -457,6 +457,7 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
     if (result.success) {
       setIsEditingBasic(false);
       await loadData();
+      await onSaved?.();
     } else {
       setMessage({ text: `Failed to save: ${result.error}`, type: 'error' });
     }
