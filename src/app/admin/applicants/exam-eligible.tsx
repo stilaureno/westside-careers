@@ -6,6 +6,8 @@ import type { ApplicantListItem } from '@/lib/db/applicants';
 
 interface ExamEligibleApplicant extends ApplicantListItem {
   exam_authorized: string;
+  mathExamScore?: number;
+  mathExamTerminationReason?: string;
 }
 
 export default function ExamEligibleApplicants({ 
@@ -22,7 +24,7 @@ export default function ExamEligibleApplicants({
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [globalSearch, setGlobalSearch] = useState('');
   const [examAuthFilter, setExamAuthFilter] = useState<'all' | 'authorized' | 'not-authorized'>('not-authorized');
-  const [sortField, setSortField] = useState<'created_at' | 'reference_no' | 'displayName' | 'initialScreeningResult'>('created_at');
+  const [sortField, setSortField] = useState<'created_at' | 'reference_no' | 'displayName' | 'initialScreeningResult' | 'mathExamResult'>('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const supabase = createClient();
@@ -75,6 +77,20 @@ export default function ExamEligibleApplicants({
             .eq('stage_name', 'Initial Screening')
         : { data: [] };
 
+      // Step 3: Fetch all math exam results
+      const { data: examResults } = referenceNumbers.length > 0
+        ? await supabase
+            .from('math_exam_results')
+            .select('reference_no, score, termination_reason')
+            .in('reference_no', referenceNumbers)
+        : { data: [] };
+
+      // Build exam results map
+      const examMap: Record<string, { score: number; termination_reason: string | null }> = {};
+      (examResults || []).forEach((e: any) => {
+        examMap[e.reference_no] = { score: e.score, termination_reason: e.termination_reason };
+      });
+
       // Step 3: Build a set of reference numbers that passed Initial Screening
       const passedScreeningRefs = new Set(
         stageResults
@@ -85,7 +101,9 @@ export default function ExamEligibleApplicants({
       // Step 4: Filter and map applicants in memory
       const filtered: ExamEligibleApplicant[] = allApplicants
         .filter((app) => passedScreeningRefs.has(app.reference_no))
-        .map((app) => ({
+        .map((app) => {
+          const exam = examMap[app.reference_no];
+          return {
           applicant_id: app.applicant_id,
           reference_no: app.reference_no,
           first_name: app.first_name,
@@ -104,13 +122,15 @@ export default function ExamEligibleApplicants({
           created_at: app.created_at,
           exam_authorized: app.exam_authorized || 'No',
           initialScreeningResult: 'Passed',
-          mathExamResult: '',
+          mathExamResult: exam ? (exam.score >= 8 ? 'Passed' : 'Failed') : '',
+          mathExamScore: exam?.score,
+          mathExamTerminationReason: exam?.termination_reason,
           tableTestResult: '',
           sweatyPalmResult: '',
           finalInterviewResult: '',
           remarks: '',
           stages: [],
-        }));
+        };});
 
       // Filter by allowed departments if not superadmin
       let result = filtered;
@@ -225,7 +245,7 @@ export default function ExamEligibleApplicants({
     }
   };
 
-  const handleSort = (field: 'created_at' | 'reference_no' | 'displayName' | 'initialScreeningResult') => {
+  const handleSort = (field: 'created_at' | 'reference_no' | 'displayName' | 'initialScreeningResult' | 'mathExamResult') => {
     if (sortField === field) {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
     } else {
@@ -349,13 +369,19 @@ export default function ExamEligibleApplicants({
               <th>Experience</th>
               <th>Department</th>
               <th>Status</th>
+              <th
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleSort('mathExamResult')}
+              >
+                Math Score {sortField === 'mathExamResult' && (sortDir === 'asc' ? '↑' : '↓')}
+              </th>
               <th style={{ width: '100px' }}>Exam Auth</th>
             </tr>
           </thead>
           <tbody>
             {filteredApplicants.length === 0 ? (
               <tr>
-                <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#666' }}>
+                <td colSpan={9} style={{ textAlign: 'center', padding: '24px', color: '#666' }}>
                   No exam-eligible applicants found
                 </td>
               </tr>
@@ -386,6 +412,15 @@ export default function ExamEligibleApplicants({
                     >
                       {app.application_status || 'Pending'}
                     </span>
+                  </td>
+                  <td
+                    title={app.mathExamTerminationReason ? `Terminated: ${app.mathExamTerminationReason}` : undefined}
+                  >
+                    {app.mathExamScore !== undefined ? (
+                      <span className={app.mathExamScore >= 8 ? 'text-success fw-bold' : app.mathExamScore < 8 ? 'text-danger fw-bold' : ''}>
+                        {app.mathExamScore}/10
+                      </span>
+                    ) : '-'}
                   </td>
                   <td>
                     <span
