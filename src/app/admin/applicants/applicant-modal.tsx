@@ -516,10 +516,25 @@ export default function ApplicantModal({ referenceNo, isOpen, onClose, onSaved, 
                   </div>
                 </div>
               ) : (
-                <h5 className="modal-title">
-                  {applicant?.last_name?.toUpperCase()}, {applicant?.first_name}{applicant?.middle_name ? ' ' + applicant?.middle_name : ''}
-                  <span className="ms-2 text-muted fw-normal" style={{ fontSize: '14px' }}>
-                    {applicant?.reference_no} · {applicant?.position_applied} · {applicant?.experience_level || '-'}
+                <h5 className="modal-title d-flex align-items-center">
+                  {applicant?.applicant_number && (
+                    <span 
+                      className="me-3 px-2 py-1 fw-bold" 
+                      style={{ 
+                        fontSize: '16px', 
+                        color: '#0d6efd', 
+                        border: '2px solid #000', 
+                        borderRadius: '6px' 
+                      }}
+                    >
+                      #{applicant.applicant_number}
+                    </span>
+                  )}
+                  <span>
+                    {applicant?.last_name?.toUpperCase()}, {applicant?.first_name}{applicant?.middle_name ? ' ' + applicant?.middle_name : ''}
+                    <span className="ms-2 text-muted fw-normal" style={{ fontSize: '14px' }}>
+                      {applicant?.reference_no} · {applicant?.position_applied} · {applicant?.experience_level || '-'}
+                    </span>
                   </span>
                 </h5>
               )}
