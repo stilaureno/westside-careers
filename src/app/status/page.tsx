@@ -284,6 +284,22 @@ const [autoFetched, setAutoFetched] = useState(false);
             border: '1px solid rgba(212,175,55,.22)',
           }}>
             <div style={{ marginBottom: '20px' }}>
+              {result.applicant.photo_url && (
+                <div style={{ marginBottom: '12px', textAlign: 'center' }}>
+                  <img
+                    src={result.applicant.photo_url}
+                    alt="Applicant photo"
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '3px solid #D4AF37',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    }}
+                  />
+                </div>
+              )}
               <h2 style={{ color: '#000080', fontSize: '20px', marginBottom: '4px' }}>
                 {result.applicant.last_name?.toUpperCase()}, {result.applicant.first_name}{result.applicant.middle_name ? ' ' + result.applicant.middle_name : ''}
               </h2>

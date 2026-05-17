@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { submitApplication } from '@/lib/actions/applicant';
 import { EXPERIENCE_LEVELS, ALLOWED_GAMES } from '@/types';
 import Link from 'next/link';
+import { PhotoBooth } from './PhotoBooth';
 import styles from './apply.module.css';
 
 interface Department {
@@ -36,6 +37,7 @@ export default function ApplyPage() {
     currentPosition: '', previousCompanyName: '',
     preferredDepartment: '', applicantNumber: '',
   });
+  const [photoUrl, setPhotoUrl] = useState<string>('');
   const [games, setGames] = useState<string[]>([]);
   const [requiredGamesCount, setRequiredGamesCount] = useState(2);
   const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
@@ -162,6 +164,7 @@ export default function ApplyPage() {
       previousCompanyName: form.previousCompanyName,
       preferredDepartment: form.preferredDepartment,
       applicantNumber: form.applicantNumber ? parseInt(form.applicantNumber, 10) : undefined,
+      photoUrl: photoUrl || undefined,
     });
 
     if (result.success) {
@@ -242,6 +245,11 @@ export default function ApplyPage() {
               {message.text}
             </div>
           )}
+
+          <section className={styles.section}>
+            <h3 className={styles.sectionTitle}>Photo</h3>
+            <PhotoBooth onPhotoCapture={setPhotoUrl} />
+          </section>
 
           <section className={styles.section}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>

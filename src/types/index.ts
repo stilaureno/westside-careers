@@ -42,6 +42,7 @@ export interface Applicant {
   overall_result?: string;
   exam_authorized?: string;
   applicant_number?: number;
+  photo_url?: string;
   remarks?: string;
   created_at?: string;
   updated_at?: string;
@@ -157,6 +158,7 @@ export interface ApplicationFormData {
   previousCompanyName?: string;
   preferredDepartment?: string;
   applicantNumber?: number;
+  photoUrl?: string;
 }
 
 export interface DashboardSummary {

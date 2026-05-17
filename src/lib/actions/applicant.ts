@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+
 import { computeBMI, buildDuplicateKey, generateReferenceNo, generateApplicantId, getStageWorkflow, getStageWorkflowFromDB, getNextStage, checkDuplicateApplicant } from '@/lib/db/applicants';
 import type { ApplicationFormData, Applicant, StageRoadmapItem } from '@/types';
 
@@ -114,6 +115,8 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
     };
   }
 
+  let finalPhotoUrl = formData.photoUrl;
+
   const bmi = formData.heightCm && formData.weightKg ? computeBMI(formData.heightCm, formData.weightKg) : null;
   const duplicateKey = buildDuplicateKey(
     sanitizeName(formData.lastName),
@@ -154,6 +157,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
       current_stage: 'Initial Screening',
       application_status: 'Pending',
       applicant_number: formData.applicantNumber || null,
+      photo_url: finalPhotoUrl || null,
     });
 
   if (error) {

@@ -252,6 +252,203 @@
   flex: 0 0 auto;
 }
 
+/* Photo Booth */
+.photoBooth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 16px;
+  border: 2px dashed #d1d5db;
+}
+
+.photoStart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 20px;
+}
+
+.cameraIcon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 50%;
+  color: #6b7280;
+}
+
+.photoHint {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+  text-align: center;
+}
+
+.startCameraButton {
+  padding: 12px 24px;
+  background: #000080;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.startCameraButton:hover {
+  background: #6f1824;
+}
+
+.videoContainer {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.videoPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.frameOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.frameCorner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: #D4AF37;
+  border-style: solid;
+}
+
+.frameCorner:nth-child(1) {
+  top: 8px;
+  left: 8px;
+  border-width: 3px 0 0 3px;
+  border-radius: 4px 0 0 0;
+}
+
+.frameCorner:nth-child(2) {
+  top: 8px;
+  right: 8px;
+  border-width: 3px 3px 0 0;
+  border-radius: 0 4px 0 0;
+}
+
+.frameCorner:nth-child(3) {
+  bottom: 8px;
+  left: 8px;
+  border-width: 0 0 3px 3px;
+  border-radius: 0 0 0 4px;
+}
+
+.frameCorner:nth-child(4) {
+  bottom: 8px;
+  right: 8px;
+  border-width: 0 3px 3px 0;
+  border-radius: 0 0 4px 0;
+}
+
+.captureButton {
+  padding: 14px 48px;
+  background: #000080;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.captureButton:hover:not(:disabled) {
+  background: #6f1824;
+}
+
+.captureButton:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.captureButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.photoPreviewContainer {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #D4AF37;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.photoPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.retakeButton {
+  padding: 10px 20px;
+  background: #fff;
+  color: #000080;
+  border: 2px solid #000080;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.retakeButton:hover {
+  background: #f3f4f6;
+}
+
+.photoError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.photoError p {
+  color: #991b1b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.retryButton {
+  padding: 10px 20px;
+  background: #000080;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .button {
   display: block;
   width: 100%;
