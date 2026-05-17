@@ -539,14 +539,18 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
   );
 }
 
-export default function DashboardContent() {
+interface DashboardContentProps {
+  isSuperAdmin?: boolean;
+}
+
+export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = false }: DashboardContentProps) {
   const [dashboardData, setDashboardData] = useState<DashboardData>({});
   const [deptPositions, setDeptPositions] = useState<{ [dept: string]: string[] }>({});
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const supabase = createClient();
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(initialSuperAdmin);
   const [allowedDepartments, setAllowedDepartments] = useState<string[]>([]);
   const [heightInFeet, setHeightInFeet] = useState(true);
   const windowSize = useWindowSize();
@@ -800,10 +804,7 @@ export default function DashboardContent() {
   }, [modalAllApplicants]);
 
   useEffect(() => {
-    const superAdminCookie = getCookie('super_admin_session');
     const deptCookie = getCookie('allowed_departments');
-    
-    setIsSuperAdmin(superAdminCookie === 'super');
     
     if (deptCookie) {
       try {
