@@ -43,15 +43,17 @@ export default function ApplyPage() {
   const [requiredGamesCount, setRequiredGamesCount] = useState(2);
   const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
   const [photoUploadEnabled, setPhotoUploadEnabled] = useState(true);
+  const [photoUploadRequired, setPhotoUploadRequired] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [deptRes, configRes, applicantNumRes, photoUploadRes] = await Promise.all([
+        const [deptRes, configRes, applicantNumRes, photoUploadRes, photoUploadReqRes] = await Promise.all([
           fetch('/api/settings/departments'),
           fetch('/api/config/experienced-games-count'),
           fetch('/api/config/applicant-number-required'),
-          createClient().from('config').select('value').eq('key', 'PHOTO_UPLOAD_ENABLED').single()
+          createClient().from('config').select('value').eq('key', 'PHOTO_UPLOAD_ENABLED').single(),
+          createClient().from('config').select('value').eq('key', 'PHOTO_UPLOAD_REQUIRED').single()
         ]);
         const deptData = await deptRes.json();
         const configData = await configRes.json();
@@ -61,6 +63,7 @@ export default function ApplyPage() {
         setRequiredGamesCount(configData.count || 2);
         setApplicantNumberRequired(applicantNumData.required || false);
         setPhotoUploadEnabled(photoUploadRes.data?.value !== 'false');
+        setPhotoUploadRequired(photoUploadReqRes.data?.value === 'true');
       } catch (err) {
         console.error('Failed to fetch departments:', err);
       } finally {
@@ -109,6 +112,12 @@ export default function ApplyPage() {
 
     if (applicantNumberRequired && !form.applicantNumber.trim()) {
       setMessage({ text: 'Applicant Number is required.', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (photoUploadRequired && !photoUrl) {
+      setMessage({ text: 'Photo is required.', type: 'error' });
       setLoading(false);
       return;
     }
