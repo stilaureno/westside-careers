@@ -5,6 +5,7 @@ import { submitApplication } from '@/lib/actions/applicant';
 import { EXPERIENCE_LEVELS, ALLOWED_GAMES } from '@/types';
 import Link from 'next/link';
 import { PhotoBooth } from './PhotoBooth';
+import { createClient } from '@/lib/supabase/client';
 import styles from './apply.module.css';
 
 interface Department {
@@ -41,14 +42,16 @@ export default function ApplyPage() {
   const [games, setGames] = useState<string[]>([]);
   const [requiredGamesCount, setRequiredGamesCount] = useState(2);
   const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
+  const [photoUploadEnabled, setPhotoUploadEnabled] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [deptRes, configRes, applicantNumRes] = await Promise.all([
+        const [deptRes, configRes, applicantNumRes, photoUploadRes] = await Promise.all([
           fetch('/api/settings/departments'),
           fetch('/api/config/experienced-games-count'),
-          fetch('/api/config/applicant-number-required')
+          fetch('/api/config/applicant-number-required'),
+          createClient().from('config').select('value').eq('key', 'PHOTO_UPLOAD_ENABLED').single()
         ]);
         const deptData = await deptRes.json();
         const configData = await configRes.json();
@@ -57,6 +60,7 @@ export default function ApplyPage() {
         setPositions(deptData.positions || []);
         setRequiredGamesCount(configData.count || 2);
         setApplicantNumberRequired(applicantNumData.required || false);
+        setPhotoUploadEnabled(photoUploadRes.data?.value !== 'false');
       } catch (err) {
         console.error('Failed to fetch departments:', err);
       } finally {
@@ -246,10 +250,12 @@ export default function ApplyPage() {
             </div>
           )}
 
-          <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>Photo</h3>
-            <PhotoBooth onPhotoCapture={setPhotoUrl} />
-          </section>
+          {photoUploadEnabled && (
+            <section className={styles.section}>
+              <h3 className={styles.sectionTitle}>Photo</h3>
+              <PhotoBooth onPhotoCapture={setPhotoUrl} />
+            </section>
+          )}
 
           <section className={styles.section}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>

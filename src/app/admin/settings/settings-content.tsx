@@ -61,6 +61,7 @@ export default function SettingsContent() {
   const [experiencedRequiredGames, setExperiencedRequiredGames] = useState(2);
   const [mathExamExperienceFilter, setMathExamExperienceFilter] = useState('all');
   const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
+  const [photoUploadEnabled, setPhotoUploadEnabled] = useState(true);
 
   // Table column visibility state
   const [tableColumns, setTableColumns] = useState<VisibleField[]>([]);
@@ -78,7 +79,7 @@ export default function SettingsContent() {
 
   async function loadData() {
     setLoading(true);
-    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes, gamesConfigRes, mathExamFilterRes, applicantNumRes] = await Promise.all([
+    const [fieldsRes, deptsRes, possRes, adminPassRes, stagesRes, gamesConfigRes, mathExamFilterRes, applicantNumRes, photoUploadRes] = await Promise.all([
       supabase.from('visible_fields').select('*').order('display_order'),
       supabase.from('departments').select('*').order('name'),
       supabase.from('positions').select('*').order('name'),
@@ -87,6 +88,7 @@ export default function SettingsContent() {
       supabase.from('config').select('value').eq('key', 'EXPERIENCED_DEALER_REQUIRED_GAMES').single(),
       supabase.from('config').select('value').eq('key', 'MATH_EXAM_EXPERIENCE_FILTER').single(),
       supabase.from('config').select('value').eq('key', 'APPLICANT_NUMBER_REQUIRED').single(),
+      supabase.from('config').select('value').eq('key', 'PHOTO_UPLOAD_ENABLED').single(),
     ]);
     
     const allFields = fieldsRes.data || [];
@@ -106,6 +108,12 @@ export default function SettingsContent() {
     }
     if (applicantNumRes.data?.value) {
       setApplicantNumberRequired(applicantNumRes.data.value === 'true');
+    }
+    if (photoUploadRes.data?.value) {
+      setPhotoUploadEnabled(photoUploadRes.data.value === 'true');
+    } else {
+      // Default to true if not set
+      setPhotoUploadEnabled(true);
     }
     setLoading(false);
   }
@@ -153,6 +161,21 @@ export default function SettingsContent() {
     if (!error) {
       setApplicantNumberRequired(required);
       setMessage({ text: `Applicant Number is now ${required ? 'required' : 'optional'}`, type: 'success' });
+    } else {
+      setMessage({ text: error.message, type: 'error' });
+    }
+    setSaving(false);
+  }
+
+  async function savePhotoUploadEnabled(enabled: boolean) {
+    setSaving(true);
+    const { error } = await supabase
+      .from('config')
+      .upsert({ key: 'PHOTO_UPLOAD_ENABLED', value: enabled.toString() }, { onConflict: 'key' });
+
+    if (!error) {
+      setPhotoUploadEnabled(enabled);
+      setMessage({ text: `Photo upload is now ${enabled ? 'enabled' : 'disabled'}`, type: 'success' });
     } else {
       setMessage({ text: error.message, type: 'error' });
     }
@@ -914,6 +937,29 @@ export default function SettingsContent() {
                 </div>
                 <small className="text-muted d-block mt-2">
                   When required, applicants must enter their Applicant Number on the application form.
+                </small>
+              </div>
+              <div className="mb-3">
+                <label className="form-label small fw-bold">Photo Upload</label>
+                <div className="d-flex gap-2 align-items-center">
+                  <select
+                    className="form-select form-select-sm"
+                    value={photoUploadEnabled.toString()}
+                    onChange={(e) => setPhotoUploadEnabled(e.target.value === 'true')}
+                  >
+                    <option value="false">Disabled</option>
+                    <option value="true">Enabled</option>
+                  </select>
+                  <button
+                    className="btn btn-sm btn-dark"
+                    onClick={() => savePhotoUploadEnabled(photoUploadEnabled)}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+                <small className="text-muted d-block mt-2">
+                  Enable or disable photo capture on the application form.
                 </small>
               </div>
             </div>
