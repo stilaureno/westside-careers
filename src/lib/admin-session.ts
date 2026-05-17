@@ -27,8 +27,8 @@ export function getSuperAdminSessionCookieOptions(request: Request) {
 
   return {
     path: '/',
-    httpOnly: false, // Allow JavaScript to read this cookie
-    sameSite: 'lax' as const,
+    httpOnly: true,
+    sameSite: 'strict' as const,
     secure: isSecure,
   };
 }
