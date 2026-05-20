@@ -130,6 +130,26 @@ return (
 
         <div style={{ display: 'flex', gap: isMobile ? '6px' : '12px', alignItems: 'center', flexShrink: 0 }}>
           {isSuperAdmin && !isMobile && (
+            <>
+            <a
+              href="/admin/data-export"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '8px 16px', background: '#fff', color: '#4b5563',
+                border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '14px',
+                cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s',
+                textDecoration: 'none',
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.background = '#f9fafb'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = '#fff'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Data Export
+            </a>
             <a
               href="/admin/settings"
               style={{
@@ -148,6 +168,7 @@ return (
               </svg>
               Settings
             </a>
+            </>
           )}
           <form action="/admin/logout" method="post">
             <button type="submit" style={{
