@@ -7,7 +7,12 @@ function objectToCsvRow(obj: Record<string, unknown>): string {
     if (value === null || value === undefined) {
       return '';
     }
-    const str = String(value);
+    let str: string;
+    if (typeof value === 'object') {
+      str = JSON.stringify(value);
+    } else {
+      str = String(value);
+    }
     if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
       return `"${str.replace(/"/g, '""')}"`;
     }
