@@ -1,6 +1,6 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 
 import { computeBMI, buildDuplicateKey, generateReferenceNo, generateApplicantId, getStageWorkflow, getStageWorkflowFromDB, getNextStage, checkDuplicateApplicant } from '@/lib/db/applicants';
@@ -95,6 +95,11 @@ function isCompletedStageResult(stageName: string, resultStatus?: string | null)
 
 export async function submitApplication(formData: ApplicationFormData): Promise<{ success: boolean; referenceNo?: string; error?: string }> {
   const supabase = await createClient();
+  
+  // Get IP address from headers
+  const headersList = await headers();
+  const forwardedFor = headersList.get('x-forwarded-for');
+  const ipAddress = forwardedFor ? forwardedFor.split(',')[0].trim() : headersList.get('x-real-ip') || '';
 
   const age = Math.floor((Date.now() - new Date(formData.birthdate).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
   if (age < 21) {
@@ -185,6 +190,35 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
     visible_to_applicant: 'Yes',
     created_by: 'System',
   });
+
+  // Backup to Google Sheets (non-blocking)
+  if (process.env.GOOGLE_APPS_SCRIPT_URL) {
+    const submittedAt = new Date().toISOString();
+    const payload = {
+      ...formData,
+      referenceNo,
+      submittedAt,
+      ipAddress: ipAddress || '',
+      bmi: bmi ?? null,
+    };
+    
+    // Use URLSearchParams wrapper to handle Google redirect
+    const wrappedPayload = { data: JSON.stringify(payload) };
+    
+    fetch(process.env.GOOGLE_APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(wrappedPayload).toString(),
+    })
+      .then(res => {
+        console.log('Google Sheets backup response:', res.status, res.statusText);
+        return res.text();
+      })
+      .then(text => {
+        console.log('Google Sheets backup response body:', text);
+      })
+      .catch(err => console.error('Google Sheets backup failed:', err));
+  }
 
   return { success: true, referenceNo };
 }
