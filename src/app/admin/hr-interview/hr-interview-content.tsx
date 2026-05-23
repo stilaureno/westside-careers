@@ -27,6 +27,10 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
     secondaryPositionBeingConsidered: '',
     expectedSalary: '',
     dateOfAvailability: '',
+    heightCm: 0,
+    weightKg: 0,
+    bmiValue: 0,
+    bmiResult: '',
   });
 
   async function openForm(referenceNo: string) {
@@ -49,6 +53,10 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
       secondaryPositionBeingConsidered: app.secondary_position_applied || '',
       expectedSalary: app.expected_salary || '',
       dateOfAvailability: app.date_of_availability || '',
+      heightCm: app.height_cm || 0,
+      weightKg: app.weight_kg || 0,
+      bmiValue: app.bmi_value || 0,
+      bmiResult: app.bmi_result || '',
     });
     setMode('form');
   }
@@ -134,8 +142,9 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   value={hrForm.lastName}
                   onChange={(e) => setHrForm({ ...hrForm, lastName: e.target.value })}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    width: '100%', padding: '8px 0', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    outline: 'none', background: 'transparent', boxSizing: 'border-box',
                   }}
                   placeholder="Last Name"
                 />
@@ -146,8 +155,9 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   value={hrForm.firstName}
                   onChange={(e) => setHrForm({ ...hrForm, firstName: e.target.value })}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    width: '100%', padding: '8px 0', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    outline: 'none', background: 'transparent', boxSizing: 'border-box',
                   }}
                   placeholder="First Name"
                 />
@@ -158,8 +168,9 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   value={hrForm.middleName}
                   onChange={(e) => setHrForm({ ...hrForm, middleName: e.target.value })}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    width: '100%', padding: '8px 0', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    outline: 'none', background: 'transparent', boxSizing: 'border-box',
                   }}
                   placeholder="Middle Name"
                 />
@@ -170,8 +181,9 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   value={hrForm.preferredName}
                   onChange={(e) => setHrForm({ ...hrForm, preferredName: e.target.value })}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    width: '100%', padding: '8px 0', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    outline: 'none', background: 'transparent', boxSizing: 'border-box',
                   }}
                   placeholder="Preferred Name"
                 />
@@ -271,6 +283,21 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   Date of availability to start (tentative):
                 </label>
               </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '0', marginTop: '12px' }}>
+            <div>
+              <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Height: </span>
+              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.heightCm ? `${hrForm.heightCm} cm` : '—'}</span>
+            </div>
+            <div>
+              <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Weight: </span>
+              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.weightKg ? `${hrForm.weightKg} kg` : '—'}</span>
+            </div>
+            <div>
+              <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>BMI: </span>
+              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.bmiValue ? `${hrForm.bmiValue} (${hrForm.bmiResult})` : '—'}</span>
             </div>
           </div>
 

@@ -29,6 +29,7 @@ export interface Applicant {
   height_cm?: number;
   weight_kg?: number;
   bmi_value?: number;
+  bmi_result?: string;
   position_applied: string;
   secondary_position_applied?: string;
   experience_level?: string;
