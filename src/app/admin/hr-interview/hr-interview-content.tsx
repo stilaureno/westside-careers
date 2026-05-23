@@ -337,7 +337,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
                       borderBottom: '1px solid #d1d5db',
                     }}
-                    placeholder="None"
                   />
                 </div>
                 <div>
@@ -360,7 +359,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
                       borderBottom: '1px solid #d1d5db',
                     }}
-                    placeholder="None"
                   />
                 </div>
                 <div>
@@ -375,7 +373,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
                       borderBottom: '1px solid #d1d5db',
                     }}
-                    placeholder="None"
                   />
                 </div>
                 <div>
@@ -390,7 +387,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
                       borderBottom: '1px solid #d1d5db',
                     }}
-                    placeholder="None"
                   />
                 </div>
                 <div>
@@ -405,7 +401,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
                       borderBottom: '1px solid #d1d5db',
                     }}
-                    placeholder="None"
                   />
                 </div>
               </div>
@@ -440,7 +435,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
                       borderBottom: '1px solid #d1d5db',
                     }}
-                    placeholder="None"
                   />
                 </div>
               </div>
