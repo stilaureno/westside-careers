@@ -152,6 +152,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
       bmi_value: bmi || null,
       department: formData.department,
       position_applied: formData.positionApplied,
+      secondary_position_applied: formData.secondaryPositionApplied || null,
       experience_level: formData.experienceLevel || null,
       current_company_name: formData.currentCompanyName || null,
       current_position: formData.currentPosition || null,

@@ -33,7 +33,7 @@ export default function ApplyPage() {
     lastName: '', firstName: '', middleName: '',
     birthdate: '', gender: '', contactNumber: '',
     emailAddress: '', heightCm: '', weightKg: '',
-    departmentId: '', positionApplied: '', experienceLevel: '',
+    departmentId: '', positionApplied: '', secondaryPositionApplied: '', experienceLevel: '',
     currentlyEmployed: 'No', currentCompanyName: '',
     currentPosition: '', previousCompanyName: '',
     preferredDepartment: '', applicantNumber: '',
@@ -169,6 +169,7 @@ export default function ApplyPage() {
       weightKg: parseFloat(form.weightKg) || undefined,
       department: selectedDept?.name || '',
       positionApplied: form.positionApplied,
+      secondaryPositionApplied: form.secondaryPositionApplied || undefined,
       experienceLevel: form.experienceLevel,
       games: isExperienced ? games : undefined,
       currentlyEmployed: form.currentlyEmployed,
@@ -437,6 +438,19 @@ export default function ApplyPage() {
                 >
                   <option value="">Select Position</option>
                   {positionOptions.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
+                </select>
+              </Field>
+            </div>
+
+            <div className={styles.grid}>
+              <Field label="Secondary Position (Optional)">
+                <select
+                  className={styles.control}
+                  value={form.secondaryPositionApplied}
+                  onChange={(e) => setForm({ ...form, secondaryPositionApplied: e.target.value })}
+                >
+                  <option value="">None</option>
+                  {positions.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
                 </select>
               </Field>
             </div>

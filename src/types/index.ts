@@ -29,6 +29,7 @@ export interface Applicant {
   weight_kg?: number;
   bmi_value?: number;
   position_applied: string;
+  secondary_position_applied?: string;
   experience_level?: string;
   current_company_name?: string;
   current_position?: string;
@@ -150,6 +151,7 @@ export interface ApplicationFormData {
   weightKg?: number;
   department: string;
   positionApplied: string;
+  secondaryPositionApplied?: string;
   experienceLevel?: string;
   games?: string[];
   currentlyEmployed: string;
