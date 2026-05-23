@@ -234,7 +234,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   transform: 'translateY(-50%)',
                   fontSize: focusedField === 'position' || hrForm.positionBeingConsidered ? '11px' : '14px',
                   color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
-                  lineHeight: 1,
+                  lineHeight: 1, fontWeight: '700',
                 }}>
                   Position being considered for:
                 </label>
@@ -257,7 +257,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   transform: 'translateY(-50%)',
                   fontSize: focusedField === 'secondaryPosition' || hrForm.secondaryPositionBeingConsidered ? '11px' : '14px',
                   color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
-                  lineHeight: 1,
+                  lineHeight: 1, fontWeight: '700',
                 }}>
                   Secondary position being considered:
                 </label>
@@ -280,7 +280,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   transform: 'translateY(-50%)',
                   fontSize: focusedField === 'salary' || hrForm.expectedSalary ? '11px' : '14px',
                   color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
-                  lineHeight: 1,
+                  lineHeight: 1, fontWeight: '700',
                 }}>
                   Expected salary:
                 </label>
@@ -303,7 +303,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   transform: 'none',
                   fontSize: '11px',
                   color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
-                  lineHeight: 1,
+                  lineHeight: 1, fontWeight: '700',
                 }}>
                   Date of availability to start (tentative):
                 </label>
@@ -326,7 +326,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Tattoo</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Tattoo</label>
                   <input
                     type="text"
                     value={hrForm.tattoo}
@@ -341,7 +341,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Birthday</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Birthday</label>
                   <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>
                     {applicant.birthdate ? new Date(applicant.birthdate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}
                   </span>
@@ -349,7 +349,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relative(s) in ECRC</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Relative(s) in ECRC</label>
                   <input
                     type="text"
                     value={hrForm.relativeInEcrc}
@@ -364,7 +364,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relationship</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Relationship</label>
                   <input
                     type="text"
                     value={hrForm.relationshipEcrc}
@@ -379,7 +379,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relative in other Casino</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Relative in other Casino</label>
                   <input
                     type="text"
                     value={hrForm.relativeInOtherCasino}
@@ -394,7 +394,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relationship</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Relationship</label>
                   <input
                     type="text"
                     value={hrForm.relationshipOtherCasino}
@@ -411,7 +411,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Source of Application</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Source of Application</label>
                   <select
                     value={hrForm.sourceOfApplication}
                     onChange={(e) => setHrForm({ ...hrForm, sourceOfApplication: e.target.value })}
@@ -429,7 +429,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Referred by</label>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Referred by</label>
                   <input
                     type="text"
                     value={hrForm.referredBy}
@@ -447,7 +447,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
               <div>
-                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>1st time to apply in ECRC</label>
+                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>1st time to apply in ECRC</label>
                 <input
                   type="text"
                   value={hrForm.firstTimeApplyEcrc}
@@ -462,7 +462,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                 />
               </div>
               <div>
-                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Work Environment</label>
+                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Work Environment</label>
                 <input
                   type="text"
                   value={hrForm.workEnvironment}
@@ -477,7 +477,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                 />
               </div>
               <div>
-                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Schedule</label>
+                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Schedule</label>
                 <input
                   type="text"
                   value={hrForm.schedule}
