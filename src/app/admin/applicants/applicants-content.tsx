@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
 import ExamEligibleApplicants from './exam-eligible';
 import { deleteApplicant } from '@/lib/actions/applicant';
-import DocumentViewer from './document-viewer';
 import type { ApplicantListItem } from '@/lib/db/applicants';
 
 function useWindowSize() {
@@ -134,8 +133,6 @@ export default function ApplicantsContent({
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [deletingRef, setDeletingRef] = useState<string | null>(null);
-  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
-  const [viewerFileName, setViewerFileName] = useState<string>('');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -824,10 +821,7 @@ export default function ApplicantsContent({
                           <button
                             className="btn btn-link p-0 text-decoration-none"
                             style={{ color: '#000080', fontSize: '12px' }}
-                            onClick={() => {
-                              setViewerUrl(app.resume_url!);
-                              setViewerFileName(`${app.displayName} Resume`);
-                            }}
+                            onClick={() => window.open(app.resume_url!, '_blank')}
                           >
                             View CV
                           </button>
@@ -935,9 +929,6 @@ export default function ApplicantsContent({
       </div>
 
       <ApplicantModal key={selectedRefNo || 'applicant-modal-closed'} referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
-      {viewerUrl && (
-        <DocumentViewer url={viewerUrl} fileName={viewerFileName} onClose={() => setViewerUrl(null)} />
-      )}
       </div>
       )}
     </div>
