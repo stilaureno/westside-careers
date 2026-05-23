@@ -107,6 +107,10 @@ export async function allowExam(
 export async function saveHrInterviewFields(
   referenceNo: string,
   fields: {
+    lastName?: string;
+    firstName?: string;
+    middleName?: string;
+    preferredName?: string;
     positionBeingConsidered?: string;
     secondaryPositionBeingConsidered?: string;
     expectedSalary?: string;
@@ -118,6 +122,10 @@ export async function saveHrInterviewFields(
   const { error } = await supabase
     .from('applicants')
     .update({
+      last_name: fields.lastName || null,
+      first_name: fields.firstName || null,
+      middle_name: fields.middleName || null,
+      preferred_name: fields.preferredName || null,
       position_being_considered: fields.positionBeingConsidered || null,
       secondary_position_applied: fields.secondaryPositionBeingConsidered || null,
       expected_salary: fields.expectedSalary || null,

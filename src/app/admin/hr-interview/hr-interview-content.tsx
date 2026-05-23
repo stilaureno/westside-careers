@@ -18,6 +18,10 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const [hrForm, setHrForm] = useState({
+    lastName: '',
+    firstName: '',
+    middleName: '',
+    preferredName: '',
     positionBeingConsidered: '',
     secondaryPositionBeingConsidered: '',
     expectedSalary: '',
@@ -36,6 +40,10 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
     const app = res.data.applicant;
     setApplicantData(res.data);
     setHrForm({
+      lastName: app.last_name || '',
+      firstName: app.first_name || '',
+      middleName: app.middle_name || '',
+      preferredName: app.preferred_name || '',
       positionBeingConsidered: app.position_being_considered || app.position_applied || '',
       secondaryPositionBeingConsidered: app.secondary_position_applied || '',
       expectedSalary: app.expected_salary || '',
@@ -119,10 +127,55 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>Preferred Name</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.last_name || '-'}</p>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.first_name || '-'}</p>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.middle_name || '-'}</p>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>{applicant.preferred_name || '-'}</p>
+              <div>
+                <input
+                  type="text"
+                  value={hrForm.lastName}
+                  onChange={(e) => setHrForm({ ...hrForm, lastName: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                  }}
+                  placeholder="Last Name"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={hrForm.firstName}
+                  onChange={(e) => setHrForm({ ...hrForm, firstName: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                  }}
+                  placeholder="First Name"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={hrForm.middleName}
+                  onChange={(e) => setHrForm({ ...hrForm, middleName: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                  }}
+                  placeholder="Middle Name"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={hrForm.preferredName}
+                  onChange={(e) => setHrForm({ ...hrForm, preferredName: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
+                    borderLeft: '1px solid #d1d5db', paddingLeft: '16px',
+                  }}
+                  placeholder="Preferred Name"
+                />
+              </div>
             </div>
           </div>
 
