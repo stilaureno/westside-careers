@@ -250,7 +250,8 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               </div>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="date"
+                  type="text"
+                  placeholder="MM/DD/YYYY"
                   value={hrForm.dateOfAvailability}
                   onChange={(e) => setHrForm({ ...hrForm, dateOfAvailability: e.target.value })}
                   onFocus={() => setFocusedField('availability')}
@@ -262,9 +263,9 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   }}
                 />
                 <label style={{
-                  position: 'absolute', left: '0', top: focusedField === 'availability' || hrForm.dateOfAvailability ? '4px' : '50%',
-                  transform: 'translateY(-50%)',
-                  fontSize: focusedField === 'availability' || hrForm.dateOfAvailability ? '11px' : '14px',
+                  position: 'absolute', left: '0', top: '4px',
+                  transform: 'none',
+                  fontSize: '11px',
                   color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
                   lineHeight: 1,
                 }}>
