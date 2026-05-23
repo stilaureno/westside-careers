@@ -177,10 +177,8 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                 />
               </div>
             </div>
-          </div>
 
-          <div style={{ marginTop: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 0' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
