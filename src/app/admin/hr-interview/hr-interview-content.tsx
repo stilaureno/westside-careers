@@ -284,20 +284,19 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                 </label>
               </div>
             </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '0', marginTop: '12px' }}>
-            <div>
-              <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Height: </span>
-              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.heightCm ? `${hrForm.heightCm} cm` : '—'}</span>
-            </div>
-            <div>
-              <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Weight: </span>
-              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.weightKg ? `${hrForm.weightKg} kg` : '—'}</span>
-            </div>
-            <div>
-              <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>BMI: </span>
-              <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.bmiValue ? `${hrForm.bmiValue} (${hrForm.bmiResult})` : '—'}</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
+              <div>
+                <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Height: </span>
+                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.heightCm ? `${hrForm.heightCm} cm` : '—'}</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Weight: </span>
+                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.weightKg ? `${hrForm.weightKg} kg` : '—'}</span>
+              </div>
+              <div>
+                <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>BMI: </span>
+                <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.bmiValue ? `${hrForm.bmiValue} (${hrForm.bmiResult})` : '—'}</span>
+              </div>
             </div>
           </div>
 
