@@ -160,14 +160,14 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
 
         <div style={{ padding: '32px' }}>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Name</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>First Name</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Middle Name</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preferred Name</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: '#f3f4f6', borderRadius: '8px 8px 0 0' }}>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '10px 16px' }}>Last Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '10px 16px' }}>First Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '10px 16px', borderRight: '1px solid #000' }}>Middle Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '10px 16px' }}>Preferred Name</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
-              <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderRadius: '0 0 8px 8px' }}>
+              <div style={{ padding: '12px 16px' }}>
                 <input
                   type="text"
                   value={hrForm.lastName}
@@ -180,7 +180,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   placeholder="Last Name"
                 />
               </div>
-              <div>
+              <div style={{ padding: '12px 16px' }}>
                 <input
                   type="text"
                   value={hrForm.firstName}
@@ -193,7 +193,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   placeholder="First Name"
                 />
               </div>
-              <div>
+              <div style={{ padding: '12px 16px', borderRight: '1px solid #000' }}>
                 <input
                   type="text"
                   value={hrForm.middleName}
@@ -206,7 +206,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   placeholder="Middle Name"
                 />
               </div>
-              <div>
+              <div style={{ padding: '12px 16px' }}>
                 <input
                   type="text"
                   value={hrForm.preferredName}
@@ -221,8 +221,8 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
-              <div style={{ position: 'relative' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #e5e7eb' }}>
+              <div style={{ position: 'relative', padding: '12px 16px', borderRight: '1px solid #000' }}>
                 <input
                   type="text"
                   value={hrForm.positionBeingConsidered}
@@ -245,7 +245,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   Position being considered for:
                 </label>
               </div>
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', padding: '12px 16px', borderRight: '1px solid #000' }}>
                 <input
                   type="text"
                   value={hrForm.secondaryPositionBeingConsidered}
@@ -268,7 +268,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   Secondary position being considered:
                 </label>
               </div>
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', padding: '12px 16px', borderRight: '1px solid #000' }}>
                 <input
                   type="text"
                   value={hrForm.expectedSalary}
@@ -291,7 +291,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   Expected salary:
                 </label>
               </div>
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', padding: '12px 16px' }}>
                 <input
                   type="text"
                   value={hrForm.dateOfAvailability}
