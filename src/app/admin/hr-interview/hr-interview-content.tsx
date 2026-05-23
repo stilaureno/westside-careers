@@ -79,38 +79,18 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
             Applicant Information
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            <div>
-              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px', fontWeight: '600' }}>
-                Last Name
-              </label>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>
-                {applicant.last_name || '-'}
-              </p>
+          <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: '#f3f4f6', padding: '10px 16px' }}>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>First Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Middle Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preferred Name</span>
             </div>
-            <div>
-              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px', fontWeight: '600' }}>
-                First Name
-              </label>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>
-                {applicant.first_name || '-'}
-              </p>
-            </div>
-            <div>
-              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px', fontWeight: '600' }}>
-                Middle Name
-              </label>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>
-                {applicant.middle_name || '-'}
-              </p>
-            </div>
-            <div>
-              <label style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginBottom: '4px', fontWeight: '600' }}>
-                Preferred Name
-              </label>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>
-                {applicant.preferred_name || '-'}
-              </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px' }}>
+              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.last_name || '-'}</p>
+              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.first_name || '-'}</p>
+              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.middle_name || '-'}</p>
+              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.preferred_name || '-'}</p>
             </div>
           </div>
         </div>
