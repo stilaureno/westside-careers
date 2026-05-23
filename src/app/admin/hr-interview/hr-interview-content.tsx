@@ -149,10 +149,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
         </div>
 
         <div style={{ padding: '32px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '20px' }}>
-            Applicant Information
-          </h2>
-
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Name</span>
