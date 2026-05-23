@@ -187,13 +187,13 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   onFocus={() => setFocusedField('position')}
                   onBlur={() => setFocusedField(null)}
                   style={{
-                    width: '100%', padding: '16px 10px 4px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', outline: 'none',
-                    boxSizing: 'border-box',
+                    width: '100%', padding: '16px 0 4px', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937', outline: 'none',
+                    boxSizing: 'border-box', background: 'transparent',
                   }}
                 />
                 <label style={{
-                  position: 'absolute', left: '10px', top: focusedField === 'position' || hrForm.positionBeingConsidered ? '4px' : '50%',
+                  position: 'absolute', left: '0', top: focusedField === 'position' || hrForm.positionBeingConsidered ? '4px' : '50%',
                   transform: 'translateY(-50%)',
                   fontSize: focusedField === 'position' || hrForm.positionBeingConsidered ? '11px' : '14px',
                   color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
