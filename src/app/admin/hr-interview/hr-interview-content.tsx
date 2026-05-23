@@ -343,6 +343,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                     type="text"
                     value={hrForm.birthdate}
                     onChange={(e) => setHrForm({ ...hrForm, birthdate: e.target.value })}
+                    placeholder={hrForm.birthdate ? '' : 'YYYY-MM-DD'}
                     style={{
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
