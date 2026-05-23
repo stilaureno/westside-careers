@@ -50,9 +50,21 @@ export interface Applicant {
   position_being_considered?: string;
   expected_salary?: string;
   date_of_availability?: string;
+  tattoo?: string;
+  relative_in_ecrc?: string;
+  relationship_ecrc?: string;
+  relative_in_other_casino?: string;
+  relationship_other_casino?: string;
+  source_of_application?: string;
+  referred_by?: string;
   remarks?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface SourceOfApplicationOption {
+  id: number;
+  name: string;
 }
 
 export interface ApplicantGame {

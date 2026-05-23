@@ -115,6 +115,13 @@ export async function saveHrInterviewFields(
     secondaryPositionBeingConsidered?: string;
     expectedSalary?: string;
     dateOfAvailability?: string;
+    tattoo?: string;
+    relativeInEcrc?: string;
+    relationshipEcrc?: string;
+    relativeInOtherCasino?: string;
+    relationshipOtherCasino?: string;
+    sourceOfApplication?: string;
+    referredBy?: string;
   },
   _adminPassword: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -130,6 +137,13 @@ export async function saveHrInterviewFields(
       secondary_position_applied: fields.secondaryPositionBeingConsidered || null,
       expected_salary: fields.expectedSalary || null,
       date_of_availability: fields.dateOfAvailability || null,
+      tattoo: fields.tattoo || null,
+      relative_in_ecrc: fields.relativeInEcrc || null,
+      relationship_ecrc: fields.relationshipEcrc || null,
+      relative_in_other_casino: fields.relativeInOtherCasino || null,
+      relationship_other_casino: fields.relationshipOtherCasino || null,
+      source_of_application: fields.sourceOfApplication || null,
+      referred_by: fields.referredBy || null,
       updated_at: new Date().toISOString(),
     })
     .eq('reference_no', referenceNo);
@@ -138,4 +152,17 @@ export async function saveHrInterviewFields(
     return { success: false, error: error.message };
   }
   return { success: true };
+}
+
+export async function getSourceOfApplicationOptions(): Promise<{ id: number; name: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('source_of_application_options')
+    .select('id, name')
+    .order('name');
+  if (error) {
+    console.error('Failed to fetch source of application options:', error);
+    return [];
+  }
+  return data || [];
 }

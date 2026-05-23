@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { getApplicant, saveHrInterviewFields } from '@/lib/actions/admin';
+import { useState, useEffect } from 'react';
+import { getApplicant, saveHrInterviewFields, getSourceOfApplicationOptions } from '@/lib/actions/admin';
 
 interface ListApplicant {
   reference_no: string;
@@ -17,6 +17,11 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
   const [saving, setSaving] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [sourceOptions, setSourceOptions] = useState<{ id: number; name: string }[]>([]);
+
+  useEffect(() => {
+    getSourceOfApplicationOptions().then(setSourceOptions);
+  }, []);
 
   const [hrForm, setHrForm] = useState({
     lastName: '',
@@ -31,6 +36,13 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
     weightKg: 0,
     bmiValue: 0,
     bmiResult: '',
+    tattoo: '',
+    relativeInEcrc: '',
+    relationshipEcrc: '',
+    relativeInOtherCasino: '',
+    relationshipOtherCasino: '',
+    sourceOfApplication: '',
+    referredBy: '',
   });
 
   async function openForm(referenceNo: string) {
@@ -57,6 +69,13 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
       weightKg: app.weight_kg || 0,
       bmiValue: app.bmi_value || 0,
       bmiResult: app.bmi_result || '',
+      tattoo: app.tattoo || '',
+      relativeInEcrc: app.relative_in_ecrc || '',
+      relationshipEcrc: app.relationship_ecrc || '',
+      relativeInOtherCasino: app.relative_in_other_casino || '',
+      relationshipOtherCasino: app.relationship_other_casino || '',
+      sourceOfApplication: app.source_of_application || '',
+      referredBy: app.referred_by || '',
     });
     setMode('form');
   }
@@ -296,6 +315,140 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               <div>
                 <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>BMI: </span>
                 <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.bmiValue ? `${hrForm.bmiValue} (${hrForm.bmiResult})` : '—'}</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginTop: '28px', marginBottom: '20px' }}>
+            Additional Information
+          </h2>
+
+          <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Personal Details</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Relatives</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Application Source</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Tattoo</label>
+                  <input
+                    type="text"
+                    value={hrForm.tattoo}
+                    onChange={(e) => setHrForm({ ...hrForm, tattoo: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                      borderBottom: '1px solid #d1d5db',
+                    }}
+                    placeholder="None"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Birthday</label>
+                  <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>
+                    {applicant.birthdate ? new Date(applicant.birthdate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relative(s) in ECRC</label>
+                  <input
+                    type="text"
+                    value={hrForm.relativeInEcrc}
+                    onChange={(e) => setHrForm({ ...hrForm, relativeInEcrc: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                      borderBottom: '1px solid #d1d5db',
+                    }}
+                    placeholder="None"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relationship</label>
+                  <input
+                    type="text"
+                    value={hrForm.relationshipEcrc}
+                    onChange={(e) => setHrForm({ ...hrForm, relationshipEcrc: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                      borderBottom: '1px solid #d1d5db',
+                    }}
+                    placeholder="None"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relative in other Casino</label>
+                  <input
+                    type="text"
+                    value={hrForm.relativeInOtherCasino}
+                    onChange={(e) => setHrForm({ ...hrForm, relativeInOtherCasino: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                      borderBottom: '1px solid #d1d5db',
+                    }}
+                    placeholder="None"
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Relationship</label>
+                  <input
+                    type="text"
+                    value={hrForm.relationshipOtherCasino}
+                    onChange={(e) => setHrForm({ ...hrForm, relationshipOtherCasino: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                      borderBottom: '1px solid #d1d5db',
+                    }}
+                    placeholder="None"
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Source of Application</label>
+                  <select
+                    value={hrForm.sourceOfApplication}
+                    onChange={(e) => setHrForm({ ...hrForm, sourceOfApplication: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                      borderBottom: '1px solid #d1d5db',
+                    }}
+                  >
+                    <option value="">-- Select --</option>
+                    {sourceOptions.map((opt) => (
+                      <option key={opt.id} value={opt.name}>{opt.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Referred by</label>
+                  <input
+                    type="text"
+                    value={hrForm.referredBy}
+                    onChange={(e) => setHrForm({ ...hrForm, referredBy: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                      borderBottom: '1px solid #d1d5db',
+                    }}
+                    placeholder="None"
+                  />
+                </div>
               </div>
             </div>
           </div>
