@@ -57,6 +57,9 @@ export interface Applicant {
   relationship_other_casino?: string;
   source_of_application?: string;
   referred_by?: string;
+  first_time_apply_ecrc?: string;
+  work_environment?: string;
+  schedule?: string;
   remarks?: string;
   created_at?: string;
   updated_at?: string;

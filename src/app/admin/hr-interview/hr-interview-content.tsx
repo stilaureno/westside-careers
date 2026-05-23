@@ -43,6 +43,9 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
     relationshipOtherCasino: '',
     sourceOfApplication: '',
     referredBy: '',
+    firstTimeApplyEcrc: '',
+    workEnvironment: '',
+    schedule: '',
   });
 
   async function openForm(referenceNo: string) {
@@ -76,6 +79,9 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
       relationshipOtherCasino: app.relationship_other_casino || '',
       sourceOfApplication: app.source_of_application || '',
       referredBy: app.referred_by || '',
+      firstTimeApplyEcrc: app.first_time_apply_ecrc || '',
+      workEnvironment: app.work_environment || '',
+      schedule: app.schedule || '',
     });
     setMode('form');
   }
@@ -329,7 +335,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Relatives</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Application Source</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div>
                   <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Tattoo</label>
@@ -448,7 +454,54 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                     }}
                     placeholder="None"
                   />
-                </div>
+              </div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
+              <div>
+                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>1st time to apply in ECRC</label>
+                <input
+                  type="text"
+                  value={hrForm.firstTimeApplyEcrc}
+                  onChange={(e) => setHrForm({ ...hrForm, firstTimeApplyEcrc: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 0', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                    outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                    borderBottom: '1px solid #d1d5db',
+                  }}
+                  placeholder="None"
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Work Environment</label>
+                <input
+                  type="text"
+                  value={hrForm.workEnvironment}
+                  onChange={(e) => setHrForm({ ...hrForm, workEnvironment: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 0', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                    outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                    borderBottom: '1px solid #d1d5db',
+                  }}
+                  placeholder="None"
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Schedule</label>
+                <input
+                  type="text"
+                  value={hrForm.schedule}
+                  onChange={(e) => setHrForm({ ...hrForm, schedule: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 0', border: 'none',
+                    borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                    outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                    borderBottom: '1px solid #d1d5db',
+                  }}
+                  placeholder="None"
+                />
               </div>
             </div>
           </div>

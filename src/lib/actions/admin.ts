@@ -122,6 +122,9 @@ export async function saveHrInterviewFields(
     relationshipOtherCasino?: string;
     sourceOfApplication?: string;
     referredBy?: string;
+    firstTimeApplyEcrc?: string;
+    workEnvironment?: string;
+    schedule?: string;
   },
   _adminPassword: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -144,6 +147,9 @@ export async function saveHrInterviewFields(
       relationship_other_casino: fields.relationshipOtherCasino || null,
       source_of_application: fields.sourceOfApplication || null,
       referred_by: fields.referredBy || null,
+      first_time_apply_ecrc: fields.firstTimeApplyEcrc || null,
+      work_environment: fields.workEnvironment || null,
+      schedule: fields.schedule || null,
       updated_at: new Date().toISOString(),
     })
     .eq('reference_no', referenceNo);
