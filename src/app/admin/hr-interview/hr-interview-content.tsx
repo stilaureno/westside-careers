@@ -335,7 +335,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
-                      borderBottom: '1px solid #d1d5db',
                     }}
                   />
                 </div>
@@ -357,7 +356,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
-                      borderBottom: '1px solid #d1d5db',
                     }}
                   />
                 </div>
@@ -371,7 +369,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
-                      borderBottom: '1px solid #d1d5db',
                     }}
                   />
                 </div>
@@ -385,7 +382,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
-                      borderBottom: '1px solid #d1d5db',
                     }}
                   />
                 </div>
@@ -399,7 +395,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
-                      borderBottom: '1px solid #d1d5db',
                     }}
                   />
                 </div>
@@ -414,7 +409,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
-                      borderBottom: '1px solid #d1d5db',
                     }}
                   >
                     <option value="">-- Select --</option>
@@ -433,7 +427,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                       width: '100%', padding: '8px 0', border: 'none',
                       borderRadius: 0, fontSize: '14px', color: '#1f2937',
                       outline: 'none', background: 'transparent', boxSizing: 'border-box',
-                      borderBottom: '1px solid #d1d5db',
                     }}
                   />
                 </div>
