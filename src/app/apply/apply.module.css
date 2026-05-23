@@ -166,22 +166,41 @@
   gap: 14px;
 }
 
+.grid + .grid {
+  margin-top: 14px;
+}
+
 .compactGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 14px;
 }
 
-.field {
+.floatingWrap {
+  position: relative;
   min-width: 0;
 }
 
-.label {
-  display: block;
-  font-size: 12px;
+.floatingLabel {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #9ca3af;
+  pointer-events: none;
+  transition: all 0.15s ease;
+  line-height: 1;
+  background: #fff;
+  padding: 0 3px;
+  white-space: nowrap;
+}
+
+.floated .floatingLabel {
+  top: -1px;
+  transform: translateY(-50%);
+  font-size: 11px;
   color: #6b7280;
-  margin-bottom: 6px;
-  font-weight: 600;
 }
 
 .control {
@@ -189,7 +208,7 @@
   min-height: 48px;
   border: 1px solid #d8dfeb;
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 14px 14px 10px;
   font-size: 16px;
   color: #1f2937;
   background: #fff;
@@ -518,7 +537,7 @@
   }
 
   .compactGrid {
-    gap: 8px;
+    gap: 10px;
   }
 
   .gameGrid {

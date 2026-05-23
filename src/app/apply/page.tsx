@@ -291,131 +291,107 @@ export default function ApplyPage() {
               </div>
             </div>
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Last Name" required>
-                <input
-                  className={styles.control}
-                  value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  autoComplete="family-name"
-                  autoCapitalize="words"
-                  required
-                />
-              </Field>
-              <Field label="First Name" required>
-                <input
-                  className={styles.control}
-                  value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                  autoComplete="given-name"
-                  autoCapitalize="words"
-                  required
-                />
-              </Field>
+              <FloatingInput
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                autoComplete="family-name"
+                autoCapitalize="words"
+                placeholder="Last Name"
+                required
+              />
+              <FloatingInput
+                value={form.firstName}
+                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                autoComplete="given-name"
+                autoCapitalize="words"
+                placeholder="First Name"
+                required
+              />
             </div>
 
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Middle Name">
-                <input
-                  className={styles.control}
-                  value={form.middleName}
-                  onChange={(e) => setForm({ ...form, middleName: e.target.value })}
-                  autoComplete="additional-name"
-                  autoCapitalize="words"
-                />
-              </Field>
-              <Field label="Birthdate" required>
-                <input
-                  className={styles.control}
-                  type="date"
-                  value={form.birthdate}
-                  onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
-                  autoComplete="bday"
-                  required
-                />
-              </Field>
+              <FloatingInput
+                value={form.middleName}
+                onChange={(e) => setForm({ ...form, middleName: e.target.value })}
+                autoComplete="additional-name"
+                autoCapitalize="words"
+                placeholder="Middle Name"
+              />
+              <FloatingInput
+                type="date"
+                value={form.birthdate}
+                onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
+                autoComplete="bday"
+                placeholder="Birthdate"
+                required
+              />
             </div>
 
             <div className={styles.grid}>
-              <Field label="Preferred Name">
-                <input
-                  className={styles.control}
-                  value={form.preferredName}
-                  onChange={(e) => setForm({ ...form, preferredName: e.target.value })}
-                  autoCapitalize="words"
-                />
-              </Field>
+              <FloatingInput
+                value={form.preferredName}
+                onChange={(e) => setForm({ ...form, preferredName: e.target.value })}
+                autoCapitalize="words"
+                placeholder="Preferred Name"
+              />
             </div>
 
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Gender" required>
-                <select
-                  className={styles.control}
-                  value={form.gender}
-                  onChange={(e) => setForm({ ...form, gender: e.target.value })}
-                  required
-                >
-                  <option value="">Select Gender</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-              </Field>
-              <Field label="Contact Number" required>
-                <input
-                  className={styles.control}
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  value={form.contactNumber}
-                  onChange={(e) => setForm({ ...form, contactNumber: e.target.value })}
-                  required
-                  placeholder="09XXXXXXXXX"
-                />
-              </Field>
+              <FloatingSelect
+                value={form.gender}
+                onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                placeholder="Gender"
+                required
+              >
+                <option>Male</option>
+                <option>Female</option>
+              </FloatingSelect>
+              <FloatingInput
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={form.contactNumber}
+                onChange={(e) => setForm({ ...form, contactNumber: e.target.value })}
+                placeholder="Contact Number"
+                required
+              />
             </div>
 
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Email Address" required>
-                <input
-                  className={styles.control}
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  value={form.emailAddress}
-                  onChange={(e) => setForm({ ...form, emailAddress: e.target.value })}
-                  required
-                />
-              </Field>
+              <FloatingInput
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={form.emailAddress}
+                onChange={(e) => setForm({ ...form, emailAddress: e.target.value })}
+                placeholder="Email Address"
+                required
+              />
               <div className={styles.compactGrid}>
-                <Field label="Height (cm)" required>
-                  <input
-                    className={styles.control}
-                    type="number"
-                    inputMode="numeric"
-                    step="0.1"
-                    min="100"
-                    max="250"
-                    value={form.heightCm}
-                    onChange={(e) => {
-                      (e.target as HTMLInputElement).setCustomValidity('');
-                      setForm({ ...form, heightCm: e.target.value });
-                    }}
-                    onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('Your height must be in centimeters')}
-                    placeholder="cm"
-                    required
-                  />
-                </Field>
-                <Field label="Weight (kg)" required>
-                  <input
-                    className={styles.control}
-                    type="number"
-                    inputMode="numeric"
-                    step="0.1"
-                    value={form.weightKg}
-                    onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
-                    placeholder="kg"
-                    required
-                  />
-                </Field>
+                <FloatingInput
+                  type="number"
+                  inputMode="numeric"
+                  step="0.1"
+                  min="100"
+                  max="250"
+                  value={form.heightCm}
+                  onChange={(e) => {
+                    (e.target as HTMLInputElement).setCustomValidity('');
+                    setForm({ ...form, heightCm: e.target.value });
+                  }}
+                  onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('Your height must be in centimeters')}
+                  placeholder="Height (cm)"
+                  required
+                />
+                <FloatingInput
+                  type="number"
+                  inputMode="numeric"
+                  step="0.1"
+                  value={form.weightKg}
+                  onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
+                  placeholder="Weight (kg)"
+                  required
+                />
               </div>
             </div>
           </section>
@@ -423,68 +399,57 @@ export default function ApplyPage() {
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Job Details</h3>
             <div className={`${styles.grid} ${styles.gridTwo}`}>
-              <Field label="Department" required>
-                <select
-                  className={styles.control}
-                  value={form.departmentId}
-                  onChange={(e) => {
-                    setForm({ ...form, departmentId: e.target.value, positionApplied: '', experienceLevel: '' });
-                    setGames([]);
-                  }}
-                  required
-                >
-                  <option value="">Select Department</option>
-                  {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </select>
-              </Field>
-              <Field label="Position Applied" required>
-                <select
-                  className={styles.control}
-                  value={form.positionApplied}
-                  onChange={(e) => {
-                    setForm({ ...form, positionApplied: e.target.value, experienceLevel: '' });
-                    setGames([]);
-                  }}
-                  required
-                  disabled={!form.departmentId}
-                >
-                  <option value="">Select Position</option>
-                  {positionOptions.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
-                </select>
-              </Field>
+              <FloatingSelect
+                value={form.departmentId}
+                onChange={(e) => {
+                  setForm({ ...form, departmentId: e.target.value, positionApplied: '', experienceLevel: '' });
+                  setGames([]);
+                }}
+                placeholder="Department"
+                required
+              >
+                {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </FloatingSelect>
+              <FloatingSelect
+                value={form.positionApplied}
+                onChange={(e) => {
+                  setForm({ ...form, positionApplied: e.target.value, experienceLevel: '' });
+                  setGames([]);
+                }}
+                placeholder="Position Applied"
+                required
+                disabled={!form.departmentId}
+              >
+                {positionOptions.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
+              </FloatingSelect>
             </div>
 
             <div className={styles.grid}>
-              <Field label="Secondary Position (Optional)">
-                <select
-                  className={styles.control}
-                  value={form.secondaryPositionApplied}
-                  onChange={(e) => setForm({ ...form, secondaryPositionApplied: e.target.value })}
-                >
-                  <option value="">None</option>
-                  {positions.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
-                </select>
-              </Field>
+              <FloatingSelect
+                value={form.secondaryPositionApplied}
+                onChange={(e) => setForm({ ...form, secondaryPositionApplied: e.target.value })}
+                placeholder="Secondary Position (Optional)"
+              >
+                <option value="">None</option>
+                {positions.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
+              </FloatingSelect>
             </div>
 
             {isDealer && (
               <div className={styles.grid}>
-                <Field label="Experience Level" required>
-                  <select
-                    className={styles.control}
-                    value={form.experienceLevel}
-                    onChange={(e) => {
-                      setForm({ ...form, experienceLevel: e.target.value });
-                      if (e.target.value !== 'Experienced Dealer') {
-                        setGames([]);
-                      }
-                    }}
-                    required
-                  >
-                    <option value="">Select Experience</option>
-                    {EXPERIENCE_LEVELS.map((experience) => <option key={experience} value={experience}>{experience}</option>)}
-                  </select>
-                </Field>
+                <FloatingSelect
+                  value={form.experienceLevel}
+                  onChange={(e) => {
+                    setForm({ ...form, experienceLevel: e.target.value });
+                    if (e.target.value !== 'Experienced Dealer') {
+                      setGames([]);
+                    }
+                  }}
+                  placeholder="Experience Level"
+                  required
+                >
+                  {EXPERIENCE_LEVELS.map((experience) => <option key={experience} value={experience}>{experience}</option>)}
+                </FloatingSelect>
               </div>
             )}
 
@@ -513,49 +478,41 @@ export default function ApplyPage() {
 
           <section className={styles.section}>
             <div className={styles.grid}>
-              <Field label="Are you currently employed?" required>
-                <select
-                  className={styles.control}
-                  value={form.currentlyEmployed}
-                  onChange={(e) => setForm({ ...form, currentlyEmployed: e.target.value })}
-                  required
-                >
-                  <option value="No">No</option>
-                  <option value="Yes">Yes</option>
-                </select>
-              </Field>
+              <FloatingSelect
+                value={form.currentlyEmployed}
+                onChange={(e) => setForm({ ...form, currentlyEmployed: e.target.value })}
+                placeholder="Are you currently employed?"
+                required
+              >
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </FloatingSelect>
             </div>
 
             {isEmployed && (
               <div className={`${styles.grid} ${styles.gridTwo}`}>
-                <Field label="Current Company">
-                  <input
-                    className={styles.control}
-                    value={form.currentCompanyName}
-                    onChange={(e) => setForm({ ...form, currentCompanyName: e.target.value })}
-                    autoComplete="organization"
-                  />
-                </Field>
-                <Field label="Current Position">
-                  <input
-                    className={styles.control}
-                    value={form.currentPosition}
-                    onChange={(e) => setForm({ ...form, currentPosition: e.target.value })}
-                    autoComplete="organization-title"
-                  />
-                </Field>
+                <FloatingInput
+                  value={form.currentCompanyName}
+                  onChange={(e) => setForm({ ...form, currentCompanyName: e.target.value })}
+                  autoComplete="organization"
+                  placeholder="Current Company"
+                />
+                <FloatingInput
+                  value={form.currentPosition}
+                  onChange={(e) => setForm({ ...form, currentPosition: e.target.value })}
+                  autoComplete="organization-title"
+                  placeholder="Current Position"
+                />
               </div>
             )}
 
             <div className={styles.grid}>
-              <Field label="Previous Company">
-                <input
-                  className={styles.control}
-                  value={form.previousCompanyName}
-                  onChange={(e) => setForm({ ...form, previousCompanyName: e.target.value })}
-                  autoComplete="organization"
-                />
-              </Field>
+              <FloatingInput
+                value={form.previousCompanyName}
+                onChange={(e) => setForm({ ...form, previousCompanyName: e.target.value })}
+                autoComplete="organization"
+                placeholder="Previous Company"
+              />
             </div>
           </section>
 
@@ -572,13 +529,99 @@ export default function ApplyPage() {
   );
 }
 
-function Field({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
+function FloatingInput({
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  required,
+  autoComplete,
+  autoCapitalize,
+  inputMode,
+  step,
+  min,
+  max,
+  onInvalid,
+  disabled,
+}: {
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
+  required?: boolean;
+  autoComplete?: string;
+  autoCapitalize?: string;
+  inputMode?: 'text' | 'search' | 'numeric' | 'email' | 'tel' | 'url' | 'none' | 'decimal';
+  step?: string;
+  min?: number | string;
+  max?: number | string;
+  onInvalid?: (e: React.FormEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}) {
+  const [focused, setFocused] = useState(false);
+  const float = focused || !!value || type === 'date';
+
   return (
-    <div className={styles.field}>
-      <label className={styles.label}>
-        {label}{required ? ' *' : ''}
+    <div className={`${styles.floatingWrap} ${float ? styles.floated : ''}`}>
+      <input
+        className={styles.control}
+        type={type}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={float ? '' : placeholder}
+        required={required}
+        autoComplete={autoComplete}
+        autoCapitalize={autoCapitalize}
+        inputMode={inputMode}
+        step={step}
+        min={min}
+        max={max}
+        onInvalid={onInvalid}
+        disabled={disabled}
+      />
+      <label className={styles.floatingLabel}>
+        {placeholder}{required ? ' *' : ''}
       </label>
-      {children}
     </div>
   );
 }
+
+function FloatingSelect({
+  value,
+  onChange,
+  placeholder,
+  required,
+  disabled,
+  children,
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  placeholder: string;
+  required?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  const [focused, setFocused] = useState(false);
+  const float = focused || !!value;
+
+  return (
+    <div className={`${styles.floatingWrap} ${float ? styles.floated : ''}`}>
+      <select
+        className={styles.control}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        required={required}
+        disabled={disabled}
+      >
+        <option value=""></option>
+        {children}
+      </select>
+      <label className={styles.floatingLabel}>{placeholder}</label>
+    </div>
+  );
+}
+
