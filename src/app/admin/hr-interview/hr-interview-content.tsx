@@ -15,6 +15,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
   const [applicantData, setApplicantData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const [hrForm, setHrForm] = useState({
@@ -179,59 +180,98 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
           </div>
 
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', marginTop: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position being considered for:</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Secondary position being considered:</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected salary:</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date of availability to start (tentative):</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
-              <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 16px' }}>
+              <div style={{ position: 'relative' }}>
                 <input
                   type="text"
                   value={hrForm.positionBeingConsidered}
                   onChange={(e) => setHrForm({ ...hrForm, positionBeingConsidered: e.target.value })}
+                  onFocus={() => setFocusedField('position')}
+                  onBlur={() => setFocusedField(null)}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                    width: '100%', padding: '16px 10px 4px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', outline: 'none',
+                    boxSizing: 'border-box',
                   }}
-                  placeholder="Position"
                 />
+                <label style={{
+                  position: 'absolute', left: '10px', top: focusedField === 'position' || hrForm.positionBeingConsidered ? '4px' : '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: focusedField === 'position' || hrForm.positionBeingConsidered ? '11px' : '14px',
+                  color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
+                  lineHeight: 1,
+                }}>
+                  Position being considered for:
+                </label>
               </div>
-              <div>
+              <div style={{ position: 'relative' }}>
                 <input
                   type="text"
                   value={hrForm.secondaryPositionBeingConsidered}
                   onChange={(e) => setHrForm({ ...hrForm, secondaryPositionBeingConsidered: e.target.value })}
+                  onFocus={() => setFocusedField('secondaryPosition')}
+                  onBlur={() => setFocusedField(null)}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                    width: '100%', padding: '16px 10px 4px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', outline: 'none',
+                    boxSizing: 'border-box',
                   }}
-                  placeholder="Secondary position"
                 />
+                <label style={{
+                  position: 'absolute', left: '10px', top: focusedField === 'secondaryPosition' || hrForm.secondaryPositionBeingConsidered ? '4px' : '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: focusedField === 'secondaryPosition' || hrForm.secondaryPositionBeingConsidered ? '11px' : '14px',
+                  color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
+                  lineHeight: 1,
+                }}>
+                  Secondary position being considered:
+                </label>
               </div>
-              <div>
+              <div style={{ position: 'relative' }}>
                 <input
                   type="text"
                   value={hrForm.expectedSalary}
                   onChange={(e) => setHrForm({ ...hrForm, expectedSalary: e.target.value })}
+                  onFocus={() => setFocusedField('salary')}
+                  onBlur={() => setFocusedField(null)}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                    width: '100%', padding: '16px 10px 4px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', outline: 'none',
+                    boxSizing: 'border-box',
                   }}
-                  placeholder="Salary"
                 />
+                <label style={{
+                  position: 'absolute', left: '10px', top: focusedField === 'salary' || hrForm.expectedSalary ? '4px' : '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: focusedField === 'salary' || hrForm.expectedSalary ? '11px' : '14px',
+                  color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
+                  lineHeight: 1,
+                }}>
+                  Expected salary:
+                </label>
               </div>
-              <div>
+              <div style={{ position: 'relative' }}>
                 <input
                   type="date"
                   value={hrForm.dateOfAvailability}
                   onChange={(e) => setHrForm({ ...hrForm, dateOfAvailability: e.target.value })}
+                  onFocus={() => setFocusedField('availability')}
+                  onBlur={() => setFocusedField(null)}
                   style={{
-                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
-                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                    width: '100%', padding: '16px 10px 4px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937', outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                 />
+                <label style={{
+                  position: 'absolute', left: '10px', top: focusedField === 'availability' || hrForm.dateOfAvailability ? '4px' : '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: focusedField === 'availability' || hrForm.dateOfAvailability ? '11px' : '14px',
+                  color: '#6b7280', pointerEvents: 'none', transition: 'all 0.15s ease',
+                  lineHeight: 1,
+                }}>
+                  Date of availability to start (tentative):
+                </label>
               </div>
             </div>
           </div>
