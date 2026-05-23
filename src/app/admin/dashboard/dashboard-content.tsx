@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import styles from './dashboard.module.css';
-import PlotlyTrendChart from './plotly-chart';
+import PlotlyTrendChart, { PlotlyKpiDonut } from './plotly-chart';
 
 interface ApplicantListItem {
   reference_no: string;
@@ -1331,21 +1331,38 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
         </div>
       </div>
 
-      {/* Global KPI Strip */}
-      {deptNames.length > 0 && (
-        <div className={`${styles.kpiStrip} ${isMobile ? styles.kpiStripMobile : styles.kpiStripDesktop}`}>
-          <SummaryCard label="Total Applicants" value={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} color="#1E40AF" />
-          <SummaryCard label="Pending" value={Object.values(dashboardData).reduce((s, d) => s + d.pending, 0)} color={CARD_COLORS.pending} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Pending', dept); }} />
-          <SummaryCard label="Ongoing" value={Object.values(dashboardData).reduce((s, d) => s + d.ongoing, 0)} color={CARD_COLORS.ongoing} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Ongoing', dept); }} />
-          <SummaryCard label="Qualified" value={Object.values(dashboardData).reduce((s, d) => s + d.qualified, 0)} color={CARD_COLORS.qualified} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Passed', dept); }} />
-          <SummaryCard label="Reprofile" value={Object.values(dashboardData).reduce((s, d) => s + d.reprofile, 0)} color={CARD_COLORS.reprofile} />
-          <SummaryCard label="Pooling" value={Object.values(dashboardData).reduce((s, d) => s + d.pooling, 0)} color={CARD_COLORS.pooling} />
-          <SummaryCard label="Failed" value={Object.values(dashboardData).reduce((s, d) => s + d.failed, 0)} color={CARD_COLORS.failed} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Failed', dept); }} />
-        </div>
-      )}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+        gap: '20px',
+        marginBottom: '20px',
+      }}>
+        {/* Global KPI Donut */}
+        {deptNames.length > 0 && (
+          <div className={styles.trendSection}>
+            <div className={styles.trendHeader}>
+              <div>
+                <h3 className={styles.trendTitle}>Applicant Overview</h3>
+                <p className={styles.trendSubtitle}>Breakdown by application status</p>
+              </div>
+            </div>
+            <PlotlyKpiDonut
+              data={{
+                pending: Object.values(dashboardData).reduce((s, d) => s + d.pending, 0),
+                ongoing: Object.values(dashboardData).reduce((s, d) => s + d.ongoing, 0),
+                qualified: Object.values(dashboardData).reduce((s, d) => s + d.qualified, 0),
+                reprofile: Object.values(dashboardData).reduce((s, d) => s + d.reprofile, 0),
+                pooling: Object.values(dashboardData).reduce((s, d) => s + d.pooling, 0),
+                failed: Object.values(dashboardData).reduce((s, d) => s + d.failed, 0),
+              }}
+              total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)}
+            />
+          </div>
+        )}
 
-      {/* Trend Bar Chart */}
-      {!trendLoading && <TrendChart data={trendData} />}
+        {/* Trend Bar Chart */}
+        {!trendLoading && <TrendChart data={trendData} />}
+      </div>
 
       {deptNames.length === 0 && (
         <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>

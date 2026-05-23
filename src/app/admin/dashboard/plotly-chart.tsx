@@ -21,6 +21,95 @@ interface TrendDataPoint {
   date: string;
 }
 
+interface KpiDonutData {
+  pending: number;
+  ongoing: number;
+  qualified: number;
+  reprofile: number;
+  pooling: number;
+  failed: number;
+}
+
+export function PlotlyKpiDonut({ data, total }: { data: KpiDonutData; total: number }) {
+  const traces = useMemo(() => {
+    const labels: string[] = [];
+    const values: number[] = [];
+    const colors: string[] = [];
+    const items: [string, number, string][] = [
+      ['Pending', data.pending, '#6B7280'],
+      ['Ongoing', data.ongoing, '#F59E0B'],
+      ['Qualified', data.qualified, '#10B981'],
+      ['Reprofile', data.reprofile, '#8B5CF6'],
+      ['For Pooling', data.pooling, '#06B6D4'],
+      ['Not Recommended', data.failed, '#EF4444'],
+    ];
+    items.forEach(([label, value, color]) => {
+      if (value > 0) {
+        labels.push(label);
+        values.push(value);
+        colors.push(color);
+      }
+    });
+    return [{
+      type: 'pie' as const,
+      labels,
+      values,
+      marker: { colors },
+      hole: 0.5,
+      sort: false,
+      direction: 'clockwise' as const,
+      textinfo: 'label+percent' as const,
+      textposition: 'outside' as const,
+      textfont: { size: 11, color: '#6b7280', family: 'Arial, sans-serif' },
+      hoverinfo: 'label+value+percent' as const,
+      hovertemplate: '%{label}: %{value} (%{percent})<extra></extra>',
+      showlegend: false,
+    }];
+  }, [data]);
+
+  const layout = useMemo(() => ({
+    height: 260,
+    margin: { t: 30, r: 10, b: 10, l: 10 },
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    font: { family: 'Arial, sans-serif', size: 11, color: '#6b7280' },
+    annotations: [
+      {
+        text: `${total}`,
+        showarrow: false,
+        font: { size: 28, color: '#1E40AF', family: 'Arial, sans-serif' },
+        x: 0.5, y: 0.5,
+        xref: 'paper' as const, yref: 'paper' as const,
+      },
+      {
+        text: 'Total',
+        showarrow: false,
+        font: { size: 12, color: '#6b7280', family: 'Arial, sans-serif' },
+        x: 0.5, y: 0.4,
+        xref: 'paper' as const, yref: 'paper' as const,
+      },
+    ],
+  }), [total]);
+
+  if (total === 0) {
+    return (
+      <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 13 }}>
+        No applicant data available
+      </div>
+    );
+  }
+
+  return (
+    <Plot
+      data={traces}
+      layout={layout}
+      config={{ displayModeBar: false, responsive: true }}
+      style={{ width: '100%', height: 260 }}
+      useResizeHandler
+    />
+  );
+}
+
 export default function PlotlyTrendChart({ data }: { data: TrendDataPoint[] }) {
   const layout = useMemo(() => ({
     height: 200,
