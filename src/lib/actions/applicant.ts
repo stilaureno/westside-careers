@@ -165,6 +165,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
       application_status: 'Pending',
       applicant_number: formData.applicantNumber || null,
       photo_url: finalPhotoUrl || null,
+      resume_url: formData.resumeUrl || null,
     });
 
   if (error) {

@@ -5,6 +5,7 @@ import { submitApplication } from '@/lib/actions/applicant';
 import { EXPERIENCE_LEVELS, ALLOWED_GAMES } from '@/types';
 import Link from 'next/link';
 import { PhotoBooth } from './PhotoBooth';
+import { CVUploader } from './CVUploader';
 import { createClient } from '@/lib/supabase/client';
 import styles from './apply.module.css';
 
@@ -39,6 +40,7 @@ export default function ApplyPage() {
     preferredDepartment: '', applicantNumber: '',
   });
   const [photoUrl, setPhotoUrl] = useState<string>('');
+  const [resumeUrl, setResumeUrl] = useState<string>('');
   const [games, setGames] = useState<string[]>([]);
   const [requiredGamesCount, setRequiredGamesCount] = useState(2);
   const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
@@ -180,6 +182,7 @@ export default function ApplyPage() {
       preferredDepartment: form.preferredDepartment,
       applicantNumber: form.applicantNumber ? parseInt(form.applicantNumber, 10) : undefined,
       photoUrl: photoUrl || undefined,
+      resumeUrl: resumeUrl || undefined,
     });
 
     if (result.success) {
@@ -267,6 +270,11 @@ export default function ApplyPage() {
               <PhotoBooth onPhotoCapture={setPhotoUrl} />
             </section>
           )}
+
+          <section className={styles.section}>
+            <h3 className={styles.sectionTitle}>Resume / CV</h3>
+            <CVUploader onUpload={setResumeUrl} />
+          </section>
 
           <section className={styles.section}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
