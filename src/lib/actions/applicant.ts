@@ -142,6 +142,7 @@ export async function submitApplication(formData: ApplicationFormData): Promise<
       last_name: sanitizeName(formData.lastName),
       first_name: sanitizeBasic(formData.firstName),
       middle_name: sanitizeBasic(formData.middleName) || null,
+      preferred_name: formData.preferredName || null,
       birthdate: formData.birthdate,
       age,
       gender: formData.gender,

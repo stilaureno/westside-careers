@@ -30,7 +30,7 @@ export default function ApplyPage() {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    lastName: '', firstName: '', middleName: '',
+    lastName: '', firstName: '', middleName: '', preferredName: '',
     birthdate: '', gender: '', contactNumber: '',
     emailAddress: '', heightCm: '', weightKg: '',
     departmentId: '', positionApplied: '', secondaryPositionApplied: '', experienceLevel: '',
@@ -161,6 +161,7 @@ export default function ApplyPage() {
       lastName: form.lastName,
       firstName: form.firstName,
       middleName: form.middleName,
+      preferredName: form.preferredName || undefined,
       birthdate: form.birthdate,
       gender: form.gender,
       contactNumber: form.contactNumber,
@@ -330,6 +331,17 @@ export default function ApplyPage() {
                   onChange={(e) => setForm({ ...form, birthdate: e.target.value })}
                   autoComplete="bday"
                   required
+                />
+              </Field>
+            </div>
+
+            <div className={styles.grid}>
+              <Field label="Preferred Name">
+                <input
+                  className={styles.control}
+                  value={form.preferredName}
+                  onChange={(e) => setForm({ ...form, preferredName: e.target.value })}
+                  autoCapitalize="words"
                 />
               </Field>
             </div>

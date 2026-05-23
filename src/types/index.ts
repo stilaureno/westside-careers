@@ -20,6 +20,7 @@ export interface Applicant {
   last_name: string;
   first_name: string;
   middle_name?: string;
+  preferred_name?: string;
   birthdate: string;
   age?: number;
   gender: string;
@@ -143,6 +144,7 @@ export interface ApplicationFormData {
   lastName: string;
   firstName: string;
   middleName?: string;
+  preferredName?: string;
   birthdate: string;
   gender: string;
   contactNumber: string;
