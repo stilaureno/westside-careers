@@ -84,13 +84,13 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Name</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>First Name</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Middle Name</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preferred Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>Preferred Name</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px' }}>
               <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.last_name || '-'}</p>
               <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.first_name || '-'}</p>
               <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.middle_name || '-'}</p>
-              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.preferred_name || '-'}</p>
+              <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>{applicant.preferred_name || '-'}</p>
             </div>
           </div>
         </div>
