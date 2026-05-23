@@ -163,8 +163,14 @@ export default function ApplicantsContent({
       
       if (data) {
         const visible = new Set<string>();
+        const dbKeys = new Set<string>();
         data.forEach((f: any) => {
+          dbKeys.add(f.field_key);
           if (f.is_visible) visible.add(f.field_key);
+        });
+        // Include any COLUMN_KEY_MAP entries not yet in visible_fields
+        Object.keys(COLUMN_KEY_MAP).forEach((key) => {
+          if (!dbKeys.has(key)) visible.add(key);
         });
         setVisibleColumns(visible);
       }
