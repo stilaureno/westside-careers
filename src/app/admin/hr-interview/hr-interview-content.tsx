@@ -119,7 +119,8 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
   if (mode === 'form' && applicantData) {
     const applicant = applicantData.applicant;
     return (
-      <div style={{ margin: '-24px', width: 'calc(100% + 48px)', minHeight: 'calc(100vh - 72px)', background: '#fff' }}>
+      <div className="hr-form" style={{ margin: '-24px', width: 'calc(100% + 48px)', minHeight: 'calc(100vh - 72px)', background: '#fff' }}>
+        <style>{`.hr-form input[type="text"]:hover, .hr-form select:hover { box-shadow: 0 0 0 1px #d1d5db; border-radius: 4px; }`}</style>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '16px 32px', borderBottom: '1px solid #e5e7eb',
