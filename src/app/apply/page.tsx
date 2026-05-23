@@ -40,7 +40,7 @@ export default function ApplyPage() {
     preferredDepartment: '', applicantNumber: '',
   });
   const [photoUrl, setPhotoUrl] = useState<string>('');
-  const [resumeUrl, setResumeUrl] = useState<string>('');
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [games, setGames] = useState<string[]>([]);
   const [requiredGamesCount, setRequiredGamesCount] = useState(2);
   const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
@@ -159,6 +159,16 @@ export default function ApplyPage() {
       return;
     }
 
+    let resumeUrl = '';
+    if (resumeFile) {
+      const fd = new FormData();
+      fd.append('file', resumeFile);
+      fd.append('folder', 'resumes');
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd });
+      const uploadData = await uploadRes.json();
+      if (uploadRes.ok) resumeUrl = uploadData.url;
+    }
+
     const result = await submitApplication({
       lastName: form.lastName,
       firstName: form.firstName,
@@ -273,7 +283,7 @@ export default function ApplyPage() {
 
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Resume / CV</h3>
-            <CVUploader onUpload={setResumeUrl} />
+            <CVUploader onFile={setResumeFile} />
           </section>
 
           <section className={styles.section}>

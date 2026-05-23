@@ -1,21 +1,18 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import styles from './apply.module.css';
 
 interface CVUploaderProps {
-  onUpload: (url: string) => void;
+  onFile: (file: File | null) => void;
 }
 
 type Mode = 'file' | 'camera';
 
-export function CVUploader({ onUpload }: CVUploaderProps) {
+export function CVUploader({ onFile }: CVUploaderProps) {
   const [mode, setMode] = useState<Mode>('file');
-  const [file, setFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [hasCamera, setHasCamera] = useState<boolean | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
@@ -52,6 +49,10 @@ export function CVUploader({ onUpload }: CVUploaderProps) {
     };
   }, [stream]);
 
+  const notifyFile = useCallback((f: File | null) => {
+    onFile(f);
+  }, [onFile]);
+
   async function startCamera() {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -59,10 +60,8 @@ export function CVUploader({ onUpload }: CVUploaderProps) {
       });
       setStream(mediaStream);
       setHasCamera(true);
-      setError(null);
     } catch {
       setHasCamera(false);
-      setError('Unable to access camera. Please allow camera permissions and try again.');
     }
   }
 
@@ -86,91 +85,41 @@ export function CVUploader({ onUpload }: CVUploaderProps) {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-    setCapturedPhoto(dataUrl);
-    stopCamera();
-    setIsProcessing(false);
+    canvas.toBlob((blob) => {
+      if (!blob) { setIsProcessing(false); return; }
+      const file = new File([blob], `cv-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      setCapturedPhoto(URL.createObjectURL(blob));
+      setSelectedFile(file);
+      notifyFile(file);
+      stopCamera();
+      setIsProcessing(false);
+    }, 'image/jpeg', 0.85);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-    setFile(selected);
-    setError(null);
+    const f = e.target.files?.[0];
+    if (!f) return;
 
-    if (selected.type.startsWith('image/')) {
-      setPreview(URL.createObjectURL(selected));
+    setSelectedFile(f);
+    setCapturedPhoto(null);
+
+    if (f.type.startsWith('image/')) {
+      setPreview(URL.createObjectURL(f));
     } else {
       setPreview(null);
     }
+
+    notifyFile(f);
   }
 
-  async function handleUpload(dataUrl?: string) {
-    setUploading(true);
-    setError(null);
-
-    try {
-      let uploadFile: File;
-
-      if (dataUrl) {
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-        uploadFile = new File([blob], `cv-${Date.now()}.jpg`, { type: 'image/jpeg' });
-      } else if (file) {
-        uploadFile = file;
-      } else {
-        throw new Error('No file selected');
-      }
-
-      const fd = new FormData();
-      fd.append('file', uploadFile);
-      fd.append('folder', 'resumes');
-
-      const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd });
-      const data = await uploadRes.json();
-
-      if (!uploadRes.ok) throw new Error(data.error || 'Upload failed');
-
-      setUploadedUrl(data.url);
-      onUpload(data.url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  function reset() {
-    setFile(null);
+  function clearSelection() {
+    setSelectedFile(null);
     setPreview(null);
-    setUploadedUrl(null);
     setCapturedPhoto(null);
-    setError(null);
     setMode('file');
     stopCamera();
     if (fileInputRef.current) fileInputRef.current.value = '';
-  }
-
-  if (uploadedUrl) {
-    return (
-      <div className={styles.photoBooth}>
-        <div className={styles.photoPreviewContainer}>
-          {file && file.type.startsWith('image/') ? (
-            <img src={preview || ''} alt="CV" className={styles.photoPreview} />
-          ) : capturedPhoto ? (
-            <img src={capturedPhoto} alt="CV" className={styles.photoPreview} />
-          ) : (
-            <div style={{ padding: 20, textAlign: 'center', color: '#6b7280', fontSize: 14 }}>
-              {file?.name} uploaded
-            </div>
-          )}
-        </div>
-        <p style={{ fontSize: 13, color: '#166534', margin: 0 }}>Resume uploaded successfully</p>
-        <button type="button" className={styles.retakeButton} onClick={reset}>
-          Replace Resume
-        </button>
-      </div>
-    );
+    notifyFile(null);
   }
 
   if (mode === 'camera') {
@@ -180,17 +129,15 @@ export function CVUploader({ onUpload }: CVUploaderProps) {
           <div className={styles.photoPreviewContainer}>
             <img src={capturedPhoto} alt="Captured CV" className={styles.photoPreview} />
           </div>
-          <button
-            type="button"
-            className={styles.captureButton}
-            onClick={() => handleUpload(capturedPhoto)}
-            disabled={uploading}
-          >
-            {uploading ? 'Uploading...' : 'Upload Photo'}
-          </button>
-          <button type="button" className={styles.retakeButton} onClick={() => { setCapturedPhoto(null); startCamera(); }}>
-            Retake Photo
-          </button>
+          <p style={{ fontSize: 13, color: '#166534', margin: '0 0 8px' }}>Photo captured</p>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <button type="button" className={styles.retakeButton} onClick={() => { setCapturedPhoto(null); setSelectedFile(null); notifyFile(null); startCamera(); }}>
+              Retake
+            </button>
+            <button type="button" className={styles.retakeButton} onClick={() => { setMode('file'); clearSelection(); }}>
+              Upload File Instead
+            </button>
+          </div>
         </div>
       );
     }
@@ -199,9 +146,9 @@ export function CVUploader({ onUpload }: CVUploaderProps) {
       return (
         <div className={styles.photoBooth}>
           <div className={styles.photoError}>
-            <p>{error || 'Camera not available'}</p>
+            <p>Camera not available</p>
             <button type="button" className={styles.retryButton} onClick={startCamera}>Try Again</button>
-            <button type="button" className={styles.retakeButton} onClick={() => { setMode('file'); setError(null); }}>
+            <button type="button" className={styles.retakeButton} onClick={() => { setMode('file'); }}>
               Upload File Instead
             </button>
           </div>
@@ -279,7 +226,7 @@ export function CVUploader({ onUpload }: CVUploaderProps) {
         style={{ display: 'none' }}
       />
 
-      {!file ? (
+      {!selectedFile ? (
         <div className={styles.photoStart}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -305,21 +252,17 @@ export function CVUploader({ onUpload }: CVUploaderProps) {
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
-              <p style={{ fontSize: 13, color: '#6b7280', margin: '8px 0 0' }}>{file.name}</p>
+              <p style={{ fontSize: 13, color: '#6b7280', margin: '8px 0 0' }}>{selectedFile.name}</p>
             </div>
           )}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            <button type="button" className={styles.captureButton} onClick={() => handleUpload()} disabled={uploading}>
-              {uploading ? 'Uploading...' : 'Upload Resume'}
-            </button>
-            <button type="button" className={styles.retakeButton} onClick={() => { setFile(null); setPreview(null); }}>
-              Remove
-            </button>
-          </div>
+          <p style={{ fontSize: 13, color: '#6b7280', margin: '8px 0 0' }}>
+            File will be uploaded when you submit
+          </p>
+          <button type="button" className={styles.retakeButton} onClick={clearSelection} style={{ marginTop: 8 }}>
+            Remove
+          </button>
         </div>
       )}
-
-      {error && <p style={{ fontSize: 13, color: '#991b1b', margin: '8px 0 0' }}>{error}</p>}
     </div>
   );
 }
