@@ -120,13 +120,13 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
           </h2>
 
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Name</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>First Name</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Middle Name</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>Preferred Name</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preferred Name</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
               <div>
                 <input
                   type="text"
@@ -171,7 +171,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   style={{
                     width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
                     borderRadius: '6px', fontSize: '14px', color: '#1f2937', fontWeight: '500',
-                    borderLeft: '1px solid #d1d5db', paddingLeft: '16px',
                   }}
                   placeholder="Preferred Name"
                 />
@@ -180,13 +179,13 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
           </div>
 
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', marginTop: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position being considered for:</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Secondary position being considered:</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected salary:</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>Date of availability to start (tentative):</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date of availability to start (tentative):</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
               <div>
                 <input
                   type="text"
@@ -231,7 +230,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                   style={{
                     width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
                     borderRadius: '6px', fontSize: '14px', color: '#1f2937',
-                    borderLeft: '1px solid #d1d5db', paddingLeft: '16px',
                   }}
                 />
               </div>
