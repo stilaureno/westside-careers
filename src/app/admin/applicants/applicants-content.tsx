@@ -820,10 +820,11 @@ export default function ApplicantsContent({
                         {app.resume_url ? (
                           <button
                             className="btn btn-link p-0 text-decoration-none"
-                            style={{ color: '#000080', fontSize: '12px' }}
+                            style={{ color: '#000080', fontSize: '14px', cursor: 'pointer' }}
                             onClick={() => window.open(app.resume_url!, '_blank')}
+                            title="View CV"
                           >
-                            View CV
+                            👁️
                           </button>
                         ) : (
                           <span className="text-muted">-</span>
