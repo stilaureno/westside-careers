@@ -26,6 +26,7 @@ export function AdminHeader({ isSuperAdmin, adminLabel }: { isSuperAdmin: boolea
   
   const isApplicantsRoute = pathname.startsWith('/admin/applicants');
   const isDashboardRoute = pathname === '/admin' || pathname.startsWith('/admin/dashboard');
+  const isHrInterviewRoute = pathname.startsWith('/admin/hr-interview');
 
   const portalLabel = isSuperAdmin ? 'Super Admin' : (adminLabel || 'Admin Portal');
 
@@ -103,6 +104,28 @@ return (
           >
             {isPending && isDashboardRoute ? <Spinner /> : null}
             {isPending && isDashboardRoute ? 'Loading...' : (isMobile ? 'Dash' : 'Dashboard')}
+          </button>
+          <button
+            onClick={() => navigate('/admin/hr-interview')}
+            disabled={isPending}
+            style={{
+              padding: isMobile ? '6px 12px' : '8px 20px',
+              background: isHrInterviewRoute ? '#fff' : 'transparent',
+              color: isHrInterviewRoute ? '#000080' : '#4b5563',
+              borderRadius: '8px',
+              fontSize: isMobile ? '12px' : '14px',
+              fontWeight: '600',
+              cursor: isPending ? 'wait' : 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              textDecoration: 'none',
+              border: 'none',
+              boxShadow: isHrInterviewRoute ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            {isPending && isHrInterviewRoute ? <Spinner /> : null}
+            {isPending && isHrInterviewRoute ? 'Loading...' : (isMobile ? 'HR' : 'HR Interview')}
           </button>
           <button
             onClick={() => navigate('/admin/applicants')}
