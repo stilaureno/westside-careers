@@ -33,7 +33,10 @@ export async function POST(request: Request) {
     const ext = file.name.split('.').pop() || 'bin';
     const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    const blob = await put(filename, file, { access: 'public' });
+    const blob = await put(filename, file, {
+      access: 'public',
+      token: process.env.CV_READ_WRITE_TOKEN,
+    });
 
     return NextResponse.json({ url: blob.url });
   } catch (err) {
