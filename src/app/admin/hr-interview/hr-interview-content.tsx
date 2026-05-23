@@ -79,14 +79,14 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
             Applicant Information
           </h2>
 
-          <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: '#f3f4f6', padding: '10px 16px' }}>
+          <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Last Name</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>First Name</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Middle Name</span>
               <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>Preferred Name</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
               <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.last_name || '-'}</p>
               <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.first_name || '-'}</p>
               <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500' }}>{applicant.middle_name || '-'}</p>
