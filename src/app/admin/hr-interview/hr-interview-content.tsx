@@ -251,7 +251,6 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
-                  placeholder="MM/DD/YYYY"
                   value={hrForm.dateOfAvailability}
                   onChange={(e) => setHrForm({ ...hrForm, dateOfAvailability: e.target.value })}
                   onFocus={() => setFocusedField('availability')}
