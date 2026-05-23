@@ -46,6 +46,9 @@ export interface Applicant {
   applicant_number?: number;
   photo_url?: string;
   resume_url?: string;
+  position_being_considered?: string;
+  expected_salary?: string;
+  date_of_availability?: string;
   remarks?: string;
   created_at?: string;
   updated_at?: string;

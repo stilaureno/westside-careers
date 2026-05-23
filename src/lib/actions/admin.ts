@@ -103,3 +103,31 @@ export async function allowExam(
   }
   return { success: true };
 }
+
+export async function saveHrInterviewFields(
+  referenceNo: string,
+  fields: {
+    positionBeingConsidered?: string;
+    secondaryPositionBeingConsidered?: string;
+    expectedSalary?: string;
+    dateOfAvailability?: string;
+  },
+  _adminPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('applicants')
+    .update({
+      position_being_considered: fields.positionBeingConsidered || null,
+      secondary_position_applied: fields.secondaryPositionBeingConsidered || null,
+      expected_salary: fields.expectedSalary || null,
+      date_of_availability: fields.dateOfAvailability || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('reference_no', referenceNo);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}

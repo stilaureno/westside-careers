@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { getApplicant } from '@/lib/actions/admin';
+import { getApplicant, saveHrInterviewFields } from '@/lib/actions/admin';
 
 interface ListApplicant {
   reference_no: string;
@@ -14,7 +14,15 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
   const [mode, setMode] = useState<'list' | 'form'>('list');
   const [applicantData, setApplicantData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const [hrForm, setHrForm] = useState({
+    positionBeingConsidered: '',
+    secondaryPositionBeingConsidered: '',
+    expectedSalary: '',
+    dateOfAvailability: '',
+  });
 
   async function openForm(referenceNo: string) {
     setLoading(true);
@@ -25,13 +33,37 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
       setMessage({ text: res.error || 'Failed to load applicant.', type: 'error' });
       return;
     }
+    const app = res.data.applicant;
     setApplicantData(res.data);
+    setHrForm({
+      positionBeingConsidered: app.position_being_considered || app.position_applied || '',
+      secondaryPositionBeingConsidered: app.secondary_position_applied || '',
+      expectedSalary: app.expected_salary || '',
+      dateOfAvailability: app.date_of_availability || '',
+    });
     setMode('form');
   }
 
   function closeForm() {
     setMode('list');
     setApplicantData(null);
+  }
+
+  async function handleSave() {
+    if (!applicantData) return;
+    setSaving(true);
+    setMessage(null);
+    const res = await saveHrInterviewFields(
+      applicantData.applicant.reference_no,
+      hrForm,
+      ''
+    );
+    setSaving(false);
+    if (res.success) {
+      setMessage({ text: 'HR Interview fields saved successfully!', type: 'success' });
+    } else {
+      setMessage({ text: res.error || 'Failed to save.', type: 'error' });
+    }
   }
 
   if (loading) {
@@ -93,6 +125,89 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
               <p style={{ fontSize: '15px', color: '#1f2937', margin: 0, fontWeight: '500', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>{applicant.preferred_name || '-'}</p>
             </div>
           </div>
+
+          <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', marginTop: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position being considered for:</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Secondary position being considered:</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected salary:</span>
+              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', borderLeft: '1px solid #d1d5db', paddingLeft: '16px' }}>Date of availability to start (tentative):</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', padding: '12px 16px', borderRadius: '0 0 8px 8px' }}>
+              <div>
+                <input
+                  type="text"
+                  value={hrForm.positionBeingConsidered}
+                  onChange={(e) => setHrForm({ ...hrForm, positionBeingConsidered: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                  }}
+                  placeholder="Position"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={hrForm.secondaryPositionBeingConsidered}
+                  onChange={(e) => setHrForm({ ...hrForm, secondaryPositionBeingConsidered: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                  }}
+                  placeholder="Secondary position"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={hrForm.expectedSalary}
+                  onChange={(e) => setHrForm({ ...hrForm, expectedSalary: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                  }}
+                  placeholder="Salary"
+                />
+              </div>
+              <div>
+                <input
+                  type="date"
+                  value={hrForm.dateOfAvailability}
+                  onChange={(e) => setHrForm({ ...hrForm, dateOfAvailability: e.target.value })}
+                  style={{
+                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db',
+                    borderRadius: '6px', fontSize: '14px', color: '#1f2937',
+                    borderLeft: '1px solid #d1d5db', paddingLeft: '16px',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {message && (
+            <div style={{
+              padding: '14px', borderRadius: '12px', marginTop: '16px',
+              background: message.type === 'success' ? '#ecfdf3' : '#fef2f2',
+              border: `1px solid ${message.type === 'success' ? '#86efac' : '#fecaca'}`,
+              color: message.type === 'success' ? '#166534' : '#991b1b', fontSize: '14px',
+            }}>
+              {message.text}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            style={{
+              marginTop: '16px', padding: '12px 32px', background: '#000080', color: '#fff',
+              border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700',
+              cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.65 : 1,
+            }}
+          >
+            {saving ? 'Saving...' : 'Save'}
+          </button>
         </div>
       </div>
     );
