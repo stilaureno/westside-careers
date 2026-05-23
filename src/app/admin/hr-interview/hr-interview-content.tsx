@@ -323,19 +323,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                 <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{hrForm.bmiValue ? `${hrForm.bmiValue} (${hrForm.bmiResult})` : '—'}</span>
               </div>
             </div>
-          </div>
-
-          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginTop: '28px', marginBottom: '20px' }}>
-            Additional Information
-          </h2>
-
-          <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', background: '#f3f4f6', padding: '10px 16px', borderRadius: '8px 8px 0 0' }}>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Personal Details</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Relatives</span>
-              <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Application Source</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div>
                   <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', display: 'block', marginBottom: '2px' }}>Tattoo</label>
@@ -454,7 +442,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                     }}
                     placeholder="None"
                   />
-              </div>
+                </div>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '12px 16px', borderTop: '1px solid #e5e7eb' }}>
