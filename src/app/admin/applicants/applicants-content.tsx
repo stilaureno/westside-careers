@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import ApplicantModal from './applicant-modal';
 import ExamEligibleApplicants from './exam-eligible';
 import { deleteApplicant } from '@/lib/actions/applicant';
+import DocumentViewer from './document-viewer';
 import type { ApplicantListItem } from '@/lib/db/applicants';
 
 function useWindowSize() {
@@ -21,7 +22,7 @@ function useWindowSize() {
   return size;
 }
 
-type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'mathExamScore' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks' | 'applicant_number';
+type SortField = 'created_at' | 'reference_no' | 'displayName' | 'position_applied' | 'experience_level' | 'current_stage' | 'application_status' | 'height_cm' | 'initialScreeningResult' | 'mathExamResult' | 'mathExamScore' | 'tableTestResult' | 'sweatyPalmResult' | 'finalInterviewResult' | 'remarks' | 'applicant_number' | 'resume_url';
 type SortDir = 'asc' | 'desc';
 
 // Map config field_key to data key
@@ -41,6 +42,7 @@ const COLUMN_KEY_MAP: Record<string, keyof ApplicantListItem | 'displayName'> = 
   'applicants_table_sweatyPalmResult': 'sweatyPalmResult',
   'applicants_table_finalInterviewResult': 'finalInterviewResult',
   'applicants_table_remarks': 'remarks',
+  'applicants_table_cv': 'resume_url',
   'applicants_table_applicant_number': 'applicant_number',
 };
 
@@ -132,6 +134,8 @@ export default function ApplicantsContent({
   const [selectedRefNo, setSelectedRefNo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [deletingRef, setDeletingRef] = useState<string | null>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerFileName, setViewerFileName] = useState<string>('');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -488,6 +492,7 @@ export default function ApplicantsContent({
     { key: 'sweatyPalmResult', label: 'Sweaty Palm', fieldKey: 'applicants_table_sweatyPalmResult' },
     { key: 'finalInterviewResult', label: 'Final Interview', fieldKey: 'applicants_table_finalInterviewResult' },
     { key: 'remarks', label: 'Remarks', fieldKey: 'applicants_table_remarks' },
+    { key: 'resume_url', label: 'CV', fieldKey: 'applicants_table_cv' },
   ];
 
   const handleDelete = async (referenceNo: string) => {
@@ -807,6 +812,24 @@ export default function ApplicantsContent({
                         {renderFormattedMessage(app.remarks)}
                       </td>
                     )}
+                    {visibleColumns.has('applicants_table_cv') && (
+                      <td style={{ fontSize: '12px' }}>
+                        {app.resume_url ? (
+                          <button
+                            className="btn btn-link p-0 text-decoration-none"
+                            style={{ color: '#000080', fontSize: '12px' }}
+                            onClick={() => {
+                              setViewerUrl(app.resume_url!);
+                              setViewerFileName(`${app.displayName} Resume`);
+                            }}
+                          >
+                            View CV
+                          </button>
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
+                      </td>
+                    )}
                     {isSuperAdmin && (
                       <td>
                         <button
@@ -906,6 +929,9 @@ export default function ApplicantsContent({
       </div>
 
       <ApplicantModal key={selectedRefNo || 'applicant-modal-closed'} referenceNo={selectedRefNo} isOpen={modalOpen} onClose={closeModal} onSaved={loadApplicants} isSuperAdmin={isSuperAdmin} modalSectionVisibility={modalSectionVisibility} />
+      {viewerUrl && (
+        <DocumentViewer url={viewerUrl} fileName={viewerFileName} onClose={() => setViewerUrl(null)} />
+      )}
       </div>
       )}
     </div>
