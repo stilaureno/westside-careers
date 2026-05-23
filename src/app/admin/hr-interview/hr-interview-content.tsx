@@ -17,10 +17,17 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
   const [saving, setSaving] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const [sourceOptions, setSourceOptions] = useState<{ id: number; name: string }[]>([]);
+  const DEFAULT_SOURCE_OPTIONS = ['Online Ad', 'Friend/Family', 'Job Fair', 'Walk-in', 'Social Media', 'Agency', 'Others'];
+  const [sourceOptions, setSourceOptions] = useState<string[]>([]);
 
   useEffect(() => {
-    getSourceOfApplicationOptions().then(setSourceOptions);
+    getSourceOfApplicationOptions().then((data) => {
+      if (data && data.length > 0) {
+        setSourceOptions(data.map((o) => o.name));
+      } else {
+        setSourceOptions(DEFAULT_SOURCE_OPTIONS);
+      }
+    });
   }, []);
 
   const [hrForm, setHrForm] = useState({
@@ -419,8 +426,8 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                     }}
                   >
                     <option value="">-- Select --</option>
-                    {sourceOptions.map((opt) => (
-                      <option key={opt.id} value={opt.name}>{opt.name}</option>
+                    {sourceOptions.map((opt, i) => (
+                      <option key={i} value={opt}>{opt}</option>
                     ))}
                   </select>
                 </div>
