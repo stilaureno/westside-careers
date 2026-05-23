@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import styles from './dashboard.module.css';
+import PlotlyTrendChart from './plotly-chart';
 
 interface ApplicantListItem {
   reference_no: string;
@@ -122,6 +124,13 @@ interface MathExamAttempt {
   created_at?: string | null;
 }
 
+interface TrendDataPoint {
+  label: string;
+  count: number;
+  qualified: number;
+  date: string;
+}
+
 function getMathAttemptTimestamp(attempt: MathExamAttempt): number {
   const ts = attempt.submitted_at || attempt.started_at || attempt.created_at;
   if (!ts) return 0;
@@ -167,48 +176,39 @@ function getMathRetakeRefs(attempts: MathExamAttempt[]): Set<string> {
   );
 }
 
-function SummaryCard({ label, value, color = '#000080', padding = '12px', valueSize = '20px', labelSize = '11px', onClick, filterType, filterValue, department, position }: { label: string; value: number; color?: string; padding?: string; valueSize?: string; labelSize?: string; onClick?: () => void; filterType?: string; filterValue?: string; department?: string; position?: string }) {
+const CARD_COLORS: Record<string, string> = {
+  default: '#1E40AF',
+  pending: '#6B7280',
+  ongoing: '#F59E0B',
+  qualified: '#10B981',
+  reprofile: '#8B5CF6',
+  pooling: '#06B6D4',
+  failed: '#EF4444',
+};
+
+function SummaryCard({ label, value, color = '#1E40AF', total, onClick }: { label: string; value: number; color?: string; total?: number; onClick?: () => void }) {
   const isClickable = onClick && value > 0;
+  const pct = total && total > 0 ? (value / total) * 100 : 0;
+
   return (
     <div
       onClick={isClickable ? onClick : undefined}
-      style={{
-        background: '#f8f9fa',
-        border: '1px solid #FFD700',
-        borderRadius: '14px',
-        padding,
-        textAlign: 'center',
-        minHeight: '88px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        cursor: isClickable ? 'pointer' : 'default',
-        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-        ...(isClickable ? {
-          boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
-        } : {}),
-      }}
-      onMouseEnter={(e) => {
-        if (isClickable) {
-          e.currentTarget.style.transform = 'scale(1.03)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-          e.currentTarget.style.background = '#fff';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (isClickable) {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.08)';
-          e.currentTarget.style.background = '#f8f9fa';
-        }
-      }}
+      className={`${styles.kpiCard} ${isClickable ? styles.kpiClickable : ''}`}
       title={isClickable ? `Click to view ${label} applicants` : undefined}
     >
-      <p style={{ fontSize: labelSize, color: '#6b7280', margin: '0 0 6px', lineHeight: 1.3 }}>{label}</p>
-      <strong style={{ fontSize: valueSize, color, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+      <div className={styles.kpiLabel}>{label}</div>
+      <div className={styles.kpiValue} style={{ color }}>
         {value}
-        {isClickable && <span style={{ fontSize: '10px', opacity: 0.6 }}>↩</span>}
-      </strong>
+        {isClickable && <span className={styles.kpiArrow}>→</span>}
+      </div>
+      {total !== undefined && total > 0 && (
+        <div className={styles.kpiBar}>
+          <div className={styles.kpiBarTrack}>
+            <div className={styles.kpiBarFill} style={{ width: `${pct}%`, backgroundColor: color }} />
+          </div>
+          <span className={styles.kpiBarLabel}>{Math.round(pct)}%</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -216,33 +216,32 @@ function SummaryCard({ label, value, color = '#000080', padding = '12px', valueS
 function PositionSection({ title, summary, onStatusClick }: { title: string; summary: PositionSummary; onStatusClick?: (status: string) => void }) {
   return (
     <div style={{ marginBottom: '20px' }}>
-      <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#000080' }}>{title}</h3>
+      <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px', color: '#1E40AF' }}>{title}</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-        <SummaryCard label="Total" value={summary.total} />
-        <SummaryCard label="Pending" value={summary.pending} color="#6b7280" onClick={onStatusClick ? () => onStatusClick('Pending') : undefined} filterType="status" filterValue="Pending" />
-        <SummaryCard label="Ongoing" value={summary.ongoing} color="#d97706" onClick={onStatusClick ? () => onStatusClick('Ongoing') : undefined} filterType="status" filterValue="Ongoing" />
-        <SummaryCard label="Qualified" value={summary.qualified} color="#DAA520" onClick={onStatusClick ? () => onStatusClick('Passed') : undefined} filterType="status" filterValue="Passed" />
-        <SummaryCard label="Reprofile" value={summary.reprofile} color="#7c3aed" onClick={onStatusClick ? () => onStatusClick('Reprofile') : undefined} filterType="status" filterValue="Reprofile" />
-        <SummaryCard label="Pooling" value={summary.pooling} color="#0891b2" onClick={onStatusClick ? () => onStatusClick('For Pooling') : undefined} filterType="status" filterValue="For Pooling" />
-        <SummaryCard label="Failed" value={summary.failed} color="#991b1b" onClick={onStatusClick ? () => onStatusClick('Failed') : undefined} filterType="status" filterValue="Failed" />
+        <SummaryCard label="Total" value={summary.total} total={summary.total} />
+        <SummaryCard label="Pending" value={summary.pending} color={CARD_COLORS.pending} total={summary.total} onClick={onStatusClick ? () => onStatusClick('Pending') : undefined} />
+        <SummaryCard label="Ongoing" value={summary.ongoing} color={CARD_COLORS.ongoing} total={summary.total} onClick={onStatusClick ? () => onStatusClick('Ongoing') : undefined} />
+        <SummaryCard label="Qualified" value={summary.qualified} color={CARD_COLORS.qualified} total={summary.total} onClick={onStatusClick ? () => onStatusClick('Passed') : undefined} />
+        <SummaryCard label="Reprofile" value={summary.reprofile} color={CARD_COLORS.reprofile} total={summary.total} onClick={onStatusClick ? () => onStatusClick('Reprofile') : undefined} />
+        <SummaryCard label="Pooling" value={summary.pooling} color={CARD_COLORS.pooling} total={summary.total} onClick={onStatusClick ? () => onStatusClick('For Pooling') : undefined} />
+        <SummaryCard label="Failed" value={summary.failed} color={CARD_COLORS.failed} total={summary.total} onClick={onStatusClick ? () => onStatusClick('Failed') : undefined} />
       </div>
     </div>
   );
 }
 
 function StageSection({ title, summary, onStageClick }: { title: string; summary: StageSummary; onStageClick?: (stage: string, result: string) => void }) {
-  const stageName = title.replace(' ', '_').replace('Test', '_Test');
   const showRetakes = title === 'Math Exam';
   return (
     <div style={{ marginTop: '14px' }}>
       <h4 style={{ fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: '#6b7280' }}>{title}</h4>
       <div style={{ display: 'grid', gridTemplateColumns: showRetakes ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: '8px' }}>
-        <SummaryCard label="Taken" value={summary.taken} />
-        <SummaryCard label="Pending" value={summary.pending} color="#6b7280" onClick={onStageClick ? () => onStageClick(title, 'Pending') : undefined} filterType="stage" filterValue={`${title}|Pending`} />
-        <SummaryCard label="Passed" value={summary.passed} color="#166534" onClick={onStageClick ? () => onStageClick(title, 'Passed') : undefined} filterType="stage" filterValue={`${title}|Passed`} />
-        <SummaryCard label="Failed" value={summary.failed} color="#991b1b" onClick={onStageClick ? () => onStageClick(title, 'Failed') : undefined} filterType="stage" filterValue={`${title}|Failed`} />
+        <SummaryCard label="Taken" value={summary.taken} total={summary.taken + summary.pending || 1} />
+        <SummaryCard label="Pending" value={summary.pending} color={CARD_COLORS.pending} total={summary.taken + summary.pending || 1} onClick={onStageClick ? () => onStageClick(title, 'Pending') : undefined} />
+        <SummaryCard label="Passed" value={summary.passed} color={CARD_COLORS.qualified} total={summary.taken || 1} onClick={onStageClick ? () => onStageClick(title, 'Passed') : undefined} />
+        <SummaryCard label="Failed" value={summary.failed} color={CARD_COLORS.failed} total={summary.taken || 1} onClick={onStageClick ? () => onStageClick(title, 'Failed') : undefined} />
         {showRetakes && (
-          <SummaryCard label="Retakes" value={summary.retakes} color="#7c3aed" onClick={onStageClick ? () => onStageClick(title, 'Retake') : undefined} filterType="stage" filterValue={`${title}|Retake`} />
+          <SummaryCard label="Retakes" value={summary.retakes} color={CARD_COLORS.reprofile} total={summary.taken || 1} onClick={onStageClick ? () => onStageClick(title, 'Retake') : undefined} />
         )}
       </div>
     </div>
@@ -252,10 +251,10 @@ function StageSection({ title, summary, onStageClick }: { title: string; summary
 function GenderRow({ label, male, female }: { label: string; male: number; female: number }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
-      <span style={{ fontSize: '13px', color: '#000080' }}>{label}</span>
+      <span style={{ fontSize: '13px', color: '#1E40AF' }}>{label}</span>
       <span style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', fontWeight: '600' }}>
-        <span style={{ color: '#FFD700' }}>M {male}</span>
-        <span style={{ color: '#FFA07A' }}>F {female}</span>
+        <span style={{ color: '#3B82F6' }}>M {male}</span>
+        <span style={{ color: '#EC4899' }}>F {female}</span>
       </span>
     </div>
   );
@@ -264,8 +263,8 @@ function GenderRow({ label, male, female }: { label: string; male: number; femal
 function AgeBandRow({ label, value, isLast = false }: { label: string; value: number; isLast?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: isLast ? 'none' : '1px solid #e5e7eb' }}>
-      <span style={{ fontSize: '13px', color: '#000080' }}>{label}</span>
-      <span style={{ fontSize: '13px', fontWeight: '600', color: '#000080' }}>{value}</span>
+      <span style={{ fontSize: '13px', color: '#1E40AF' }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '600', color: '#1E40AF' }}>{value}</span>
     </div>
   );
 }
@@ -273,8 +272,8 @@ function AgeBandRow({ label, value, isLast = false }: { label: string; value: nu
 function HeightBandRow({ label, value, isLast = false }: { label: string; value: number; isLast?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: isLast ? 'none' : '1px solid #e5e7eb' }}>
-      <span style={{ fontSize: '13px', color: '#000080' }}>{label}</span>
-      <span style={{ fontSize: '13px', fontWeight: '600', color: '#000080' }}>{value}</span>
+      <span style={{ fontSize: '13px', color: '#1E40AF' }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '600', color: '#1E40AF' }}>{value}</span>
     </div>
   );
 }
@@ -323,21 +322,21 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
   const headerCellStyle: React.CSSProperties = {
     ...cellStyle,
     fontWeight: '700',
-    background: '#f8f9fa',
-    color: '#000080',
+    background: '#f8fafc',
+    color: '#1E40AF',
   };
 
   const footerCellStyle: React.CSSProperties = {
     ...cellStyle,
     fontWeight: '700',
-    background: '#fff9e6',
-    borderTop: '2px solid #FFD700',
-    color: '#000080',
+    background: '#fefce8',
+    borderTop: '2px solid #F59E0B',
+    color: '#1E40AF',
   };
   
   return (
     <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize, minWidth: isMobile ? '280px' : 'auto' }}>
+      <table className={styles.matrixTable} style={{ fontSize, minWidth: isMobile ? '280px' : 'auto' }}>
         <thead>
           <tr>
             <th style={{ ...headerCellStyle, textAlign: 'left', width: posWidth }}>Position</th>
@@ -370,18 +369,18 @@ function AgeGenderMatrix({ data }: { data: AgeGenderByPosition }) {
             
             return (
               <tr key={pos}>
-                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080', fontSize: isMobile ? '10px' : '12px' }}>{pos}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age20s.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age20s.female}</td>
+                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#1E40AF', fontSize: isMobile ? '10px' : '12px' }}>{pos}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.age20s.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.age20s.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age20s.male + p.age20s.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age30s.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age30s.female}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.age30s.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.age30s.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age30s.male + p.age30s.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age40s.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age40s.female}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.age40s.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.age40s.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age40s.male + p.age40s.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.age50Plus.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.age50Plus.female}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.age50Plus.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.age50Plus.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.age50Plus.male + p.age50Plus.female}</td>
               </tr>
             );
@@ -451,16 +450,16 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
   const headerCellStyle: React.CSSProperties = {
     ...cellStyle,
     fontWeight: '700',
-    background: '#f8f9fa',
-    color: '#000080',
+    background: '#f8fafc',
+    color: '#1E40AF',
   };
 
   const footerCellStyle: React.CSSProperties = {
     ...cellStyle,
     fontWeight: '700',
-    background: '#fff9e6',
-    borderTop: '2px solid #FFD700',
-    color: '#000080',
+    background: '#fefce8',
+    borderTop: '2px solid #F59E0B',
+    color: '#1E40AF',
   };
   
   const heightLabels = useFeet
@@ -469,7 +468,7 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
 
   return (
     <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize, minWidth: isMobile ? '280px' : 'auto' }}>
+      <table className={styles.matrixTable} style={{ fontSize, minWidth: isMobile ? '280px' : 'auto' }}>
         <thead>
           <tr>
             <th style={{ ...headerCellStyle, textAlign: 'left', width: posWidth }}>Position</th>
@@ -502,18 +501,18 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
             
             return (
               <tr key={pos}>
-                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#000080', fontSize: isMobile ? '10px' : '12px' }}>{pos}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.below160.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.below160.female}</td>
+                <td style={{ ...cellStyle, textAlign: 'left', fontWeight: '600', color: '#1E40AF', fontSize: isMobile ? '10px' : '12px' }}>{pos}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.below160.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.below160.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.below160.male + p.below160.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height160170.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height160170.female}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.height160170.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.height160170.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height160170.male + p.height160170.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height170180.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height170180.female}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.height170180.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.height170180.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height170180.male + p.height170180.female}</td>
-                <td style={{ ...cellStyle, color: '#FFD700' }}>{p.height180Plus.male}</td>
-                <td style={{ ...cellStyle, color: '#FFA07A' }}>{p.height180Plus.female}</td>
+                <td style={{ ...cellStyle, color: '#3B82F6' }}>{p.height180Plus.male}</td>
+                <td style={{ ...cellStyle, color: '#EC4899' }}>{p.height180Plus.female}</td>
                 <td style={{ ...cellStyle, fontWeight: '600' }}>{p.height180Plus.male + p.height180Plus.female}</td>
               </tr>
             );
@@ -539,6 +538,90 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
   );
 }
 
+function TrendChart({ data }: { data: TrendDataPoint[] }) {
+  const [mode, setMode] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+
+  const grouped = useMemo(() => {
+    if (mode === 'daily') {
+      return data.map(d => ({
+        ...d,
+        label: d.date.length === 10 ? d.date.slice(5) : d.label,
+      }));
+    }
+
+    if (mode === 'weekly') {
+      const weekMap: Record<string, TrendDataPoint> = {};
+      data.forEach(d => {
+        const dObj = new Date(d.date);
+        const year = dObj.getFullYear();
+        const start = new Date(year, 0, 1);
+        const diff = (dObj.getTime() - start.getTime() + (start.getTimezoneOffset() - dObj.getTimezoneOffset()) * 60000) / 86400000;
+        const week = Math.ceil((diff + start.getDay() + 1) / 7);
+        const key = `${year}-W${week}`;
+        if (!weekMap[key]) {
+          weekMap[key] = { label: `W${week}`, count: 0, qualified: 0, date: key };
+        }
+        weekMap[key].count += d.count;
+        weekMap[key].qualified += d.qualified;
+      });
+      return Object.values(weekMap).sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    const monthly: Record<string, TrendDataPoint> = {};
+    data.forEach(d => {
+      const monthKey = d.date.slice(0, 7);
+      if (!monthly[monthKey]) {
+        monthly[monthKey] = { label: monthKey, count: 0, qualified: 0, date: monthKey };
+      }
+      monthly[monthKey].count += d.count;
+      monthly[monthKey].qualified += d.qualified;
+    });
+    return Object.values(monthly).sort((a, b) => a.date.localeCompare(b.date));
+  }, [data, mode]);
+
+  if (data.length === 0) {
+    return (
+      <div className={styles.trendSection}>
+        <div className={styles.trendEmpty}>No application trend data available</div>
+      </div>
+    );
+  }
+
+  const subtitle = mode === 'daily' ? 'day' : mode === 'weekly' ? 'week' : 'month';
+
+  return (
+    <div className={styles.trendSection}>
+      <div className={styles.trendHeader}>
+        <div>
+          <h3 className={styles.trendTitle}>Applications Over Time</h3>
+          <p className={styles.trendSubtitle}>Applications submitted per {subtitle}</p>
+        </div>
+        <div className={styles.trendToggle}>
+          <button
+            className={`${styles.trendToggleBtn} ${mode === 'daily' ? styles.trendToggleBtnActive : ''}`}
+            onClick={() => setMode('daily')}
+          >
+            Daily
+          </button>
+          <button
+            className={`${styles.trendToggleBtn} ${mode === 'weekly' ? styles.trendToggleBtnActive : ''}`}
+            onClick={() => setMode('weekly')}
+          >
+            Weekly
+          </button>
+          <button
+            className={`${styles.trendToggleBtn} ${mode === 'monthly' ? styles.trendToggleBtnActive : ''}`}
+            onClick={() => setMode('monthly')}
+          >
+            Monthly
+          </button>
+        </div>
+      </div>
+      <PlotlyTrendChart key={mode} data={grouped} />
+    </div>
+  );
+}
+
 interface DashboardContentProps {
   isSuperAdmin?: boolean;
 }
@@ -560,6 +643,8 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
   const [mathExamExperienceFilter, setMathExamExperienceFilter] = useState('all');
 
+  const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
+  const [trendLoading, setTrendLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalApplicants, setModalApplicants] = useState<ApplicantListItem[]>([]);
@@ -908,7 +993,7 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
     // Query applicants
     let appQuery = supabase
       .from('applicants')
-      .select('reference_no, application_status, current_stage, position_applied, gender, birthdate, experience_level, department, height_cm')
+      .select('reference_no, application_status, current_stage, position_applied, gender, birthdate, experience_level, department, height_cm, created_at')
       .in('department', deptsToShow.map(d => d.name));
     
     if (startDate) appQuery = appQuery.gte('created_at', startDate);
@@ -1105,6 +1190,30 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
       data['Table Games'].stageTable.pending = Math.max(0, expDealer - data['Table Games'].stageTable.taken);
     }
     
+    // Compute trend data from created_at dates
+    const dateCounts: Record<string, { total: number; qualified: number }> = {};
+    (appRows || []).forEach((r: any) => {
+      if (r.created_at) {
+        const d = r.created_at.slice(0, 10);
+        if (!dateCounts[d]) dateCounts[d] = { total: 0, qualified: 0 };
+        dateCounts[d].total++;
+        const status = r.application_status || '';
+        if (status === 'Passed' || status === 'Completed') {
+          dateCounts[d].qualified++;
+        }
+      }
+    });
+
+    const sortedDates = Object.keys(dateCounts).sort();
+    const dailyData: TrendDataPoint[] = sortedDates.map(dateStr => ({
+      label: dateStr.slice(5),
+      count: dateCounts[dateStr].total,
+      qualified: dateCounts[dateStr].qualified,
+      date: dateStr,
+    }));
+    setTrendData(dailyData);
+    setTrendLoading(false);
+
     setDeptPositions(positionsMap);
     setDashboardData(data);
     setLoading(false);
@@ -1123,10 +1232,6 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
     });
   };
 
-  const cardPadding = isMobile ? '8px' : (isTablet ? '10px' : '12px');
-  const cardValueSize = isMobile ? '16px' : '20px';
-  const cardLabelSize = isMobile ? '9px' : '11px';
-
   if (loading) {
     return <div style={{ padding: '24px', textAlign: 'center' }}>Loading...</div>;
   }
@@ -1144,7 +1249,7 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
         marginBottom: isMobile ? '12px' : '20px',
         gap: isMobile ? '10px' : '0'
       }}>
-        <h1 style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '700', color: '#000080', margin: 0 }}>Dashboard</h1>
+        <h1 style={{ fontSize: isMobile ? '18px' : '24px', fontWeight: '700', color: '#1E40AF', margin: 0 }}>Dashboard</h1>
         
         {isMobile && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1171,15 +1276,15 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
             placeholder="Start date"
             className={!showDateFilters && isMobile ? 'd-none' : ''}
             style={{ 
-              padding: isMobile ? '6px 8px' : '8px 12px', 
-              border: '1px solid #FFD700', 
-              borderRadius: '8px', 
-              fontSize: isMobile ? '11px' : '13px', 
-              background: '#fff',
-              width: isMobile ? '100%' : 'auto'
-            }}
-          />
-          {!showDateFilters && isMobile && <span style={{ color: '#FFD700', fontSize: '11px' }}>to</span>}
+                    padding: isMobile ? '6px 8px' : '8px 12px', 
+                    border: '1px solid #e5e7eb', 
+                    borderRadius: '8px', 
+                    fontSize: isMobile ? '11px' : '13px', 
+                    background: '#fff',
+                    width: isMobile ? '100%' : 'auto'
+                  }}
+            />
+            {!showDateFilters && isMobile && <span style={{ color: '#F59E0B', fontSize: '11px' }}>to</span>}
           {(!showDateFilters || !isMobile) && (
             <input
               type="date"
@@ -1188,29 +1293,45 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
               placeholder="End date"
               className={!showDateFilters && isMobile ? 'd-none' : ''}
               style={{ 
-                padding: isMobile ? '6px 8px' : '8px 12px', 
-                border: '1px solid #FFD700', 
-                borderRadius: '8px', 
-                fontSize: isMobile ? '11px' : '13px', 
-                background: '#fff',
-                width: isMobile ? '100%' : 'auto'
-              }}
-            />
-          )}
-          {(startDate || endDate) && (
-            <button
-              onClick={clearFilters}
-              style={{
-                padding: isMobile ? '6px 10px' : '8px 14px', 
-                background: '#fff', color: '#000080', border: '1px solid #000080',
-                borderRadius: '8px', fontSize: isMobile ? '11px' : '13px', cursor: 'pointer', fontWeight: '500',
-              }}
-            >
-              Clear
-            </button>
-          )}
+                  padding: isMobile ? '6px 8px' : '8px 12px', 
+                  border: '1px solid #e5e7eb', 
+                  borderRadius: '8px', 
+                  fontSize: isMobile ? '11px' : '13px', 
+                  background: '#fff',
+                  width: isMobile ? '100%' : 'auto'
+                }}
+              />
+            )}
+            {(startDate || endDate) && (
+              <button
+                onClick={clearFilters}
+                style={{
+                  padding: isMobile ? '6px 10px' : '8px 14px', 
+                  background: '#fff', color: '#1E40AF', border: '1px solid #1E40AF',
+                  borderRadius: '8px', fontSize: isMobile ? '11px' : '13px', cursor: 'pointer', fontWeight: '500',
+                }}
+              >
+                Clear
+              </button>
+            )}
         </div>
       </div>
+
+      {/* Global KPI Strip */}
+      {deptNames.length > 0 && (
+        <div className={`${styles.kpiStrip} ${isMobile ? styles.kpiStripMobile : styles.kpiStripDesktop}`}>
+          <SummaryCard label="Total Applicants" value={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} color="#1E40AF" />
+          <SummaryCard label="Pending" value={Object.values(dashboardData).reduce((s, d) => s + d.pending, 0)} color={CARD_COLORS.pending} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Pending', dept); }} />
+          <SummaryCard label="Ongoing" value={Object.values(dashboardData).reduce((s, d) => s + d.ongoing, 0)} color={CARD_COLORS.ongoing} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Ongoing', dept); }} />
+          <SummaryCard label="Qualified" value={Object.values(dashboardData).reduce((s, d) => s + d.qualified, 0)} color={CARD_COLORS.qualified} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Passed', dept); }} />
+          <SummaryCard label="Reprofile" value={Object.values(dashboardData).reduce((s, d) => s + d.reprofile, 0)} color={CARD_COLORS.reprofile} />
+          <SummaryCard label="Pooling" value={Object.values(dashboardData).reduce((s, d) => s + d.pooling, 0)} color={CARD_COLORS.pooling} />
+          <SummaryCard label="Failed" value={Object.values(dashboardData).reduce((s, d) => s + d.failed, 0)} color={CARD_COLORS.failed} total={Object.values(dashboardData).reduce((s, d) => s + d.total, 0)} onClick={() => { const dept = deptNames[0]; handleStatusClick('Failed', dept); }} />
+        </div>
+      )}
+
+      {/* Trend Bar Chart */}
+      {!trendLoading && <TrendChart data={trendData} />}
 
       {deptNames.length === 0 && (
         <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>
@@ -1226,37 +1347,22 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
         const toggleCard = () => { if (isMobile) toggleDept(deptName); };
         
         return (
-          <div key={deptName} style={{
-            background: '#f0f4f8', border: '1px solid #FFD700', 
-            borderRadius: isMobile ? '12px' : '18px', 
-            padding: isMobile ? '12px' : '20px', 
-            marginBottom: isMobile ? '12px' : '20px',
-          }}>
+          <div key={deptName} className={styles.deptCard}>
             {/* Department Header - clickable on mobile */}
             <div 
+              className={`${styles.deptHeader} ${isMobile ? styles.deptHeaderMobile : ''}`}
               style={{
-                background: deptHeaderColor, color: '#FFD700', borderRadius: '12px', 
-                padding: isMobile ? '10px' : '16px',
-                marginBottom: isMobile ? '10px' : '20px', 
-                display: 'flex', 
-                flexDirection: isMobile ? 'column' : 'row',
-                justifyContent: 'space-between', 
-                alignItems: isMobile ? 'stretch' : 'center',
+                background: deptHeaderColor,
+                color: deptName === 'Table Games' || deptName === 'Business Development' ? '#FFD700' : deptName === 'Slots' || deptName === 'Slots/E-Gaming' ? '#000' : '#FFD700',
                 cursor: isMobile ? 'pointer' : 'default',
               }}
               onClick={toggleCard}
             >
-              <h2 style={{ 
-                fontSize: isMobile ? '14px' : '18px', 
-                fontWeight: '700', 
-                margin: 0, 
+              <h2 className={styles.deptTitle} style={{ 
                 color: deptName === 'Table Games' ? '#fff' : deptName === 'Business Development' ? '#fff' : (deptName === 'Slots' || deptName === 'Slots/E-Gaming') ? '#000' : '#FFD700',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
               }}>
                 {deptName}
-                {isMobile && <span style={{ fontSize: '10px', color: '#FFD700' }}>{isExpanded ? '▲' : '▼'}</span>}
+                {isMobile && <span style={{ fontSize: '10px' }}>{isExpanded ? '▲' : '▼'}</span>}
               </h2>
               <div style={{ 
                 display: 'grid', 
@@ -1265,69 +1371,34 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
                 marginTop: isMobile ? '8px' : '0',
                 width: isMobile ? '100%' : 'auto'
               }}>
-                <SummaryCard label="Total" value={deptData.total} padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                <SummaryCard label="Pending" value={deptData.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.pending > 0 ? () => handleStatusClick('Pending', deptName) : undefined} />
-                <SummaryCard label="Ongoing" value={deptData.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.ongoing > 0 ? () => handleStatusClick('Ongoing', deptName) : undefined} />
-                <SummaryCard label="Qual" value={deptData.qualified} color="#FFD700" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.qualified > 0 ? () => handleStatusClick('Passed', deptName) : undefined} />
-                {!isMobile && <SummaryCard label="Reprofile" value={deptData.reprofile} color="#d8b4fe" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.reprofile > 0 ? () => handleStatusClick('Reprofile', deptName) : undefined} />}
-                {!isMobile && <SummaryCard label="Pool" value={deptData.pooling} color="#67e8f9" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.pooling > 0 ? () => handleStatusClick('For Pooling', deptName) : undefined} />}
-                {!isMobile && <SummaryCard label="Fail" value={deptData.failed} color="#fca5a5" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={deptData.failed > 0 ? () => handleStatusClick('Failed', deptName) : undefined} />}
+                <SummaryCard label="Total" value={deptData.total} total={deptData.total} />
+                <SummaryCard label="Pending" value={deptData.pending} color={CARD_COLORS.pending} total={deptData.total} onClick={deptData.pending > 0 ? () => handleStatusClick('Pending', deptName) : undefined} />
+                <SummaryCard label="Ongoing" value={deptData.ongoing} color={CARD_COLORS.ongoing} total={deptData.total} onClick={deptData.ongoing > 0 ? () => handleStatusClick('Ongoing', deptName) : undefined} />
+                <SummaryCard label="Qualified" value={deptData.qualified} color={CARD_COLORS.qualified} total={deptData.total} onClick={deptData.qualified > 0 ? () => handleStatusClick('Passed', deptName) : undefined} />
+                {!isMobile && <SummaryCard label="Reprofile" value={deptData.reprofile} color={CARD_COLORS.reprofile} total={deptData.total} onClick={deptData.reprofile > 0 ? () => handleStatusClick('Reprofile', deptName) : undefined} />}
+                {!isMobile && <SummaryCard label="Pooling" value={deptData.pooling} color={CARD_COLORS.pooling} total={deptData.total} onClick={deptData.pooling > 0 ? () => handleStatusClick('For Pooling', deptName) : undefined} />}
+                {!isMobile && <SummaryCard label="Failed" value={deptData.failed} color={CARD_COLORS.failed} total={deptData.total} onClick={deptData.failed > 0 ? () => handleStatusClick('Failed', deptName) : undefined} />}
               </div>
             </div>
 
-            {/* Stage Breakdown - moved to top, after status cards */}
+            {/* Stage Breakdown - by current stage */}
             {Object.keys(deptData.stageCounts).length > 0 && (
-              <div style={{
-                marginTop: isMobile ? '12px' : '20px',
-                padding: isMobile ? '12px' : '16px',
-                background: '#f0f9ff',
-                borderRadius: isMobile ? '12px' : '16px',
-                border: '1px solid #bae6fd',
-              }}>
-                <h3 style={{ 
-                  fontSize: isMobile ? '13px' : '15px', 
-                  fontWeight: '700', 
-                  color: '#0369a1',
-                  marginBottom: isMobile ? '10px' : '14px',
-                }}>
-                  Stage Breakdown (by current stage)
+              <div className={styles.sectionCard} style={{ padding: isMobile ? '12px' : '16px' }}>
+                <h3 className={styles.sectionTitle} style={{ fontSize: isMobile ? '13px' : '15px', marginBottom: isMobile ? '10px' : '14px' }}>
+                  Stage Breakdown
                 </h3>
-                <div style={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: isMobile ? '8px' : '12px' 
-                }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '8px' : '10px' }}>
                   {Object.entries(deptData.stageCounts)
                     .sort((a, b) => b[1] - a[1])
                     .map(([stageName, count]) => (
                       <button
                         key={stageName}
-                        onClick={() => handleStageBreakdownClick(stageName, deptName)}
-                        style={{
-                          padding: isMobile ? '6px 12px' : '8px 16px',
-                          fontSize: isMobile ? '12px' : '13px',
-                          border: '1px solid #0284c7',
-                          borderRadius: '20px',
-                          background: '#fff',
-                          color: '#0369a1',
-                          cursor: count > 0 ? 'pointer' : 'default',
-                          opacity: count > 0 ? 1 : 0.5,
-                          fontWeight: '600',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                        }}
+                        onClick={count > 0 ? () => handleStageBreakdownClick(stageName, deptName) : undefined}
+                        className={styles.stagePill}
+                        style={{ opacity: count > 0 ? 1 : 0.5, cursor: count > 0 ? 'pointer' : 'default' }}
                       >
                         <span>{stageName}</span>
-                        <span style={{
-                          background: '#0284c7',
-                          color: '#fff',
-                          borderRadius: '10px',
-                          padding: '2px 8px',
-                          fontSize: isMobile ? '10px' : '11px',
-                        }}>
-                          {count}
-                        </span>
+                        <span className={styles.stagePillCount}>{count}</span>
                       </button>
                     ))}
                 </div>
@@ -1348,20 +1419,20 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
                         fontSize: isMobile ? '12px' : '14px', 
                         fontWeight: '700', 
                         marginBottom: isMobile ? '6px' : '10px', 
-                        color: '#000080' 
+                        color: '#1E40AF' 
                       }}>{posName}</h3>
                       <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(7, 1fr)', 
                         gap: isMobile ? '4px' : '8px' 
                       }}>
-                        <SummaryCard label="Total" value={posSummary.total} padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} />
-                        <SummaryCard label="Pend" value={posSummary.pending} color="#6b7280" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.pending > 0 ? () => handleStatusClick('Pending', deptName, posName) : undefined} />
-                        <SummaryCard label="Ongoing" value={posSummary.ongoing} color="#d97706" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.ongoing > 0 ? () => handleStatusClick('Ongoing', deptName, posName) : undefined} />
-                        <SummaryCard label="Qual" value={posSummary.qualified} color="#DAA520" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.qualified > 0 ? () => handleStatusClick('Passed', deptName, posName) : undefined} />
-                        {!isMobile && <SummaryCard label="Repro" value={posSummary.reprofile} color="#7c3aed" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.reprofile > 0 ? () => handleStatusClick('Reprofile', deptName, posName) : undefined} />}
-                        {!isMobile && <SummaryCard label="Pool" value={posSummary.pooling} color="#0891b2" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.pooling > 0 ? () => handleStatusClick('For Pooling', deptName, posName) : undefined} />}
-                        {!isMobile && <SummaryCard label="Fail" value={posSummary.failed} color="#991b1b" padding={cardPadding} valueSize={cardValueSize} labelSize={cardLabelSize} onClick={posSummary.failed > 0 ? () => handleStatusClick('Failed', deptName, posName) : undefined} />}
+                        <SummaryCard label="Total" value={posSummary.total} total={posSummary.total} />
+                        <SummaryCard label="Pending" value={posSummary.pending} color={CARD_COLORS.pending} total={posSummary.total} onClick={posSummary.pending > 0 ? () => handleStatusClick('Pending', deptName, posName) : undefined} />
+                        <SummaryCard label="Ongoing" value={posSummary.ongoing} color={CARD_COLORS.ongoing} total={posSummary.total} onClick={posSummary.ongoing > 0 ? () => handleStatusClick('Ongoing', deptName, posName) : undefined} />
+                        <SummaryCard label="Qualified" value={posSummary.qualified} color={CARD_COLORS.qualified} total={posSummary.total} onClick={posSummary.qualified > 0 ? () => handleStatusClick('Passed', deptName, posName) : undefined} />
+                        {!isMobile && <SummaryCard label="Reprofile" value={posSummary.reprofile} color={CARD_COLORS.reprofile} total={posSummary.total} onClick={posSummary.reprofile > 0 ? () => handleStatusClick('Reprofile', deptName, posName) : undefined} />}
+                        {!isMobile && <SummaryCard label="Pooling" value={posSummary.pooling} color={CARD_COLORS.pooling} total={posSummary.total} onClick={posSummary.pooling > 0 ? () => handleStatusClick('For Pooling', deptName, posName) : undefined} />}
+                        {!isMobile && <SummaryCard label="Failed" value={posSummary.failed} color={CARD_COLORS.failed} total={posSummary.total} onClick={posSummary.failed > 0 ? () => handleStatusClick('Failed', deptName, posName) : undefined} />}
                       </div>
                       
                       {/* Stage sections only for Dealer in Table Games */}
@@ -1382,29 +1453,23 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
                   gap: isMobile ? '10px' : '20px',
                   marginTop: isMobile ? '12px' : '20px',
                 }}>
-                  <div style={{
-                    background: '#fff', border: '1px solid #e5e7eb', borderRadius: isMobile ? '12px' : '18px', 
-                    padding: isMobile ? '12px' : '20px',
-                  }}>
-                    <h3 style={{ fontSize: isMobile ? '13px' : '16px', fontWeight: '700', marginBottom: '14px' }}>Age & Gender by Position</h3>
+                  <div className={styles.sectionCard}>
+                    <h3 className={styles.sectionTitle}>Age & Gender by Position</h3>
                     <AgeGenderMatrix data={deptData.ageGenderByPosition} />
                   </div>
 
-                  <div style={{
-                    background: '#fff', border: '1px solid #e5e7eb', borderRadius: isMobile ? '12px' : '18px', 
-                    padding: isMobile ? '12px' : '20px',
-                  }}>
+                  <div className={styles.sectionCard}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                      <h3 style={{ fontSize: isMobile ? '13px' : '16px', fontWeight: '700', margin: 0 }}>Height & Gender</h3>
+                      <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Height & Gender</h3>
                       <button
                         onClick={() => setHeightInFeet(!heightInFeet)}
                         style={{
                           padding: isMobile ? '4px 8px' : '6px 12px',
                           fontSize: isMobile ? '10px' : '12px',
-                          border: '1px solid #000080',
+                          border: '1px solid #1E40AF',
                           borderRadius: '6px',
-                          background: heightInFeet ? '#000080' : '#fff',
-                          color: heightInFeet ? '#fff' : '#000080',
+                          background: heightInFeet ? '#1E40AF' : '#fff',
+                          color: heightInFeet ? '#fff' : '#1E40AF',
                           cursor: 'pointer',
                         }}
                       >
@@ -1422,46 +1487,13 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
 
       {/* Modal for showing applicants list */}
       {modalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: isMobile ? '10px' : '20px',
-        }} onClick={closeModal}>
-          <div style={{
-            backgroundColor: '#fff',
-            borderRadius: isMobile ? '12px' : '18px',
-            padding: isMobile ? '16px' : '24px',
-            width: '100%',
-            maxWidth: '800px',
-            maxHeight: '80vh',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-          }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: isMobile ? '16px' : '20px', fontWeight: '700', color: '#000080', margin: 0 }}>
+        <div className={styles.modalBackdrop} style={{ padding: isMobile ? '10px' : '20px' }} onClick={closeModal}>
+          <div className={styles.modalCard} style={{ padding: isMobile ? '16px' : '24px' }} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader} style={{ marginBottom: '16px' }}>
+              <h3 className={styles.modalTitle} style={{ fontSize: isMobile ? '16px' : '18px' }}>
                 {modalTitle}
               </h3>
-              <button
-                onClick={closeModal}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#6b7280',
-                  padding: '0',
-                  lineHeight: 1,
-                }}
-              >
+              <button onClick={closeModal} className={styles.modalClose}>
                 ×
               </button>
             </div>
@@ -1472,34 +1504,31 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
               <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>No applicants found</div>
             ) : (
               <div style={{ overflow: 'auto', flex: 1 }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                  <thead style={{ position: 'sticky', top: 0, background: '#f8f9fa' }}>
+                <table className={styles.tableStyled}>
+                  <thead>
                     <tr>
-                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Reference No</th>
-                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Name</th>
-                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Position</th>
-                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Status</th>
-                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Current Stage</th>
-                      <th style={{ textAlign: 'left', padding: '10px 8px', borderBottom: '2px solid #FFD700', color: '#000080', fontWeight: '600' }}>Date</th>
+                      <th>Reference No</th>
+                      <th>Name</th>
+                      <th>Position</th>
+                      <th>Status</th>
+                      <th>Current Stage</th>
+                      <th>Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {modalApplicants.map((app) => (
-                      <tr key={app.reference_no} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                        <td style={{ padding: '10px 8px', color: '#000080', fontWeight: '600' }}>{app.reference_no}</td>
+                      <tr key={app.reference_no}>
+                        <td style={{ fontWeight: '600', color: '#1E40AF' }}>{app.reference_no}</td>
                         <td style={{ padding: '10px 8px' }}>{app.last_name?.toUpperCase()}, {app.first_name}{app.middle_name ? ' ' + app.middle_name : ''}</td>
                         <td style={{ padding: '10px 8px', color: '#6b7280' }}>{app.position_applied}</td>
-                        <td style={{ padding: '10px 8px' }}>
-                          <span style={{
-                            padding: '4px 8px',
-                            borderRadius: '12px',
-                            fontSize: '11px',
+                        <td>
+                          <span className={styles.statusBadge} style={{
                             backgroundColor: app.application_status === 'Passed' || app.application_status === 'Completed' ? '#d1fae5' : 
                               app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? '#fee2e2' :
-                              app.application_status === 'Reprofile' ? '#fef3c7' : '#dbeafe',
+                              app.application_status === 'Reprofile' ? '#fef3c7' : app.application_status === 'For Pooling' ? '#cffafe' : '#dbeafe',
                             color: app.application_status === 'Passed' || app.application_status === 'Completed' ? '#065f46' : 
                               app.application_status === 'Failed' || app.application_status === 'Not Recommended' ? '#991b1b' :
-                              app.application_status === 'Reprofile' ? '#92400e' : '#1e40af',
+                              app.application_status === 'Reprofile' ? '#92400e' : app.application_status === 'For Pooling' ? '#155e75' : '#1e40af',
                           }}>
                             {app.application_status}
                           </span>
@@ -1513,12 +1542,12 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
               </div>
             )}
             
-            <div style={{ marginTop: '16px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-              <div style={{ color: '#6b7280', fontSize: '13px' }}>
+            <div className={styles.modalFooter} style={{ flexDirection: isMobile ? 'column' : 'row', gap: '12px' }}>
+              <div className={styles.modalInfo}>
                 Showing {((modalPage - 1) * MODAL_PAGE_SIZE) + 1} - {Math.min(modalPage * MODAL_PAGE_SIZE, modalTotalCount)} of {modalTotalCount} applicant{modalTotalCount !== 1 ? 's' : ''}
               </div>
               {modalTotalCount > MODAL_PAGE_SIZE && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className={styles.pagination}>
                   <button
                     onClick={() => {
                       if (modalAllApplicants.length > 0) {
@@ -1528,15 +1557,7 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
                       }
                     }}
                     disabled={modalPage === 1}
-                    style={{
-                      padding: '6px 12px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '6px',
-                      background: modalPage === 1 ? '#f3f4f6' : '#fff',
-                      color: modalPage === 1 ? '#9ca3af' : '#374151',
-                      cursor: modalPage === 1 ? 'not-allowed' : 'pointer',
-                      fontSize: '13px',
-                    }}
+                    className={styles.pageBtn}
                   >
                     Prev
                   </button>
@@ -1557,17 +1578,7 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
                             handleStatusPageChange(p, modalTitle.includes('Passed') ? 'Passed' : modalTitle.includes('Failed') ? 'Failed' : modalTitle.includes('Pending') ? 'Pending' : modalTitle.includes('Ongoing') ? 'Ongoing' : modalTitle.includes('Reprofile') ? 'Reprofile' : modalTitle.includes('Pooling') ? 'For Pooling' : 'Pending', modalTitle.split(' in ')[1] || '', undefined);
                           }
                         }}
-                        style={{
-                          padding: '6px 10px',
-                          border: '1px solid',
-                          borderColor: modalPage === p ? '#000080' : '#e5e7eb',
-                          borderRadius: '6px',
-                          background: modalPage === p ? '#000080' : '#fff',
-                          color: modalPage === p ? '#fff' : '#374151',
-                          cursor: 'pointer',
-                          fontSize: '13px',
-                          fontWeight: modalPage === p ? '600' : '400',
-                        }}
+                        className={`${styles.pageBtn} ${modalPage === p ? styles.pageBtnActive : ''}`}
                       >
                         {p}
                       </button>
@@ -1583,15 +1594,7 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
                       }
                     }}
                     disabled={modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE)}
-                    style={{
-                      padding: '6px 12px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '6px',
-                      background: modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE) ? '#f3f4f6' : '#fff',
-                      color: modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE) ? '#9ca3af' : '#374151',
-                      cursor: modalPage >= Math.ceil(modalTotalCount / MODAL_PAGE_SIZE) ? 'not-allowed' : 'pointer',
-                      fontSize: '13px',
-                    }}
+                    className={styles.pageBtn}
                   >
                     Next
                   </button>
