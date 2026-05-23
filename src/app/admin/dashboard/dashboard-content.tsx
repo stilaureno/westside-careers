@@ -128,6 +128,8 @@ interface TrendDataPoint {
   label: string;
   count: number;
   qualified: number;
+  failed: number;
+  pooling: number;
   date: string;
 }
 
@@ -539,7 +541,7 @@ function HeightGenderMatrix({ data, useFeet = false }: { data: HeightGenderByPos
 }
 
 function TrendChart({ data }: { data: TrendDataPoint[] }) {
-  const [mode, setMode] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [mode, setMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
 
   const grouped = useMemo(() => {
     if (mode === 'daily') {
@@ -559,10 +561,12 @@ function TrendChart({ data }: { data: TrendDataPoint[] }) {
         const week = Math.ceil((diff + start.getDay() + 1) / 7);
         const key = `${year}-W${week}`;
         if (!weekMap[key]) {
-          weekMap[key] = { label: `W${week}`, count: 0, qualified: 0, date: key };
+          weekMap[key] = { label: `W${week}`, count: 0, qualified: 0, failed: 0, pooling: 0, date: key };
         }
         weekMap[key].count += d.count;
         weekMap[key].qualified += d.qualified;
+        weekMap[key].failed += d.failed;
+        weekMap[key].pooling += d.pooling;
       });
       return Object.values(weekMap).sort((a, b) => a.date.localeCompare(b.date));
     }
@@ -571,10 +575,12 @@ function TrendChart({ data }: { data: TrendDataPoint[] }) {
     data.forEach(d => {
       const monthKey = d.date.slice(0, 7);
       if (!monthly[monthKey]) {
-        monthly[monthKey] = { label: monthKey, count: 0, qualified: 0, date: monthKey };
+        monthly[monthKey] = { label: monthKey, count: 0, qualified: 0, failed: 0, pooling: 0, date: monthKey };
       }
       monthly[monthKey].count += d.count;
       monthly[monthKey].qualified += d.qualified;
+      monthly[monthKey].failed += d.failed;
+      monthly[monthKey].pooling += d.pooling;
     });
     return Object.values(monthly).sort((a, b) => a.date.localeCompare(b.date));
   }, [data, mode]);
@@ -1191,15 +1197,21 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
     }
     
     // Compute trend data from created_at dates
-    const dateCounts: Record<string, { total: number; qualified: number }> = {};
+    const dateCounts: Record<string, { total: number; qualified: number; failed: number; pooling: number }> = {};
     (appRows || []).forEach((r: any) => {
       if (r.created_at) {
         const d = r.created_at.slice(0, 10);
-        if (!dateCounts[d]) dateCounts[d] = { total: 0, qualified: 0 };
+        if (!dateCounts[d]) dateCounts[d] = { total: 0, qualified: 0, failed: 0, pooling: 0 };
         dateCounts[d].total++;
         const status = r.application_status || '';
         if (status === 'Passed' || status === 'Completed') {
           dateCounts[d].qualified++;
+        }
+        if (status === 'Not Recommended') {
+          dateCounts[d].failed++;
+        }
+        if (status === 'For Pooling') {
+          dateCounts[d].pooling++;
         }
       }
     });
@@ -1209,6 +1221,8 @@ export default function DashboardContent({ isSuperAdmin: initialSuperAdmin = fal
       label: dateStr.slice(5),
       count: dateCounts[dateStr].total,
       qualified: dateCounts[dateStr].qualified,
+      failed: dateCounts[dateStr].failed,
+      pooling: dateCounts[dateStr].pooling,
       date: dateStr,
     }));
     setTrendData(dailyData);

@@ -16,6 +16,8 @@ interface TrendDataPoint {
   label: string;
   count: number;
   qualified: number;
+  failed: number;
+  pooling: number;
   date: string;
 }
 
@@ -73,6 +75,22 @@ export default function PlotlyTrendChart({ data }: { data: TrendDataPoint[] }) {
         y: data.map(d => d.qualified),
         marker: { color: '#10B981', line: { color: '#10B981', width: 0 } },
         hovertemplate: '%{y} qualified<extra></extra>',
+      },
+      {
+        type: 'bar' as const,
+        name: 'For Pooling',
+        x: labels,
+        y: data.map(d => d.pooling),
+        marker: { color: '#F59E0B', line: { color: '#F59E0B', width: 0 } },
+        hovertemplate: '%{y} for pooling<extra></extra>',
+      },
+      {
+        type: 'bar' as const,
+        name: 'Not Recommended',
+        x: labels,
+        y: data.map(d => d.failed),
+        marker: { color: '#EF4444', line: { color: '#EF4444', width: 0 } },
+        hovertemplate: '%{y} not recommended<extra></extra>',
       },
     ];
   }, [data]);
