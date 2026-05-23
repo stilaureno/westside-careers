@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { getDashboardSummary, getApplicantSummaryData, getApplicantByReference, getApplicantStageRoadmap } from '@/lib/db/applicants';
+import { getDashboardSummary, getApplicantSummaryData, getApplicantByReference, getApplicantStageRoadmap, computeAge } from '@/lib/db/applicants';
 import { upsertStageResult } from '@/lib/db/stages';
 import type { DashboardSummary, Applicant, StageRoadmapItem } from '@/types';
 
@@ -125,6 +125,7 @@ export async function saveHrInterviewFields(
     firstTimeApplyEcrc?: string;
     workEnvironment?: string;
     schedule?: string;
+    birthdate?: string;
   },
   _adminPassword: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -150,6 +151,8 @@ export async function saveHrInterviewFields(
       first_time_apply_ecrc: fields.firstTimeApplyEcrc || null,
       work_environment: fields.workEnvironment || null,
       schedule: fields.schedule || null,
+      birthdate: fields.birthdate || null,
+      age: fields.birthdate ? computeAge(fields.birthdate) : null,
       updated_at: new Date().toISOString(),
     })
     .eq('reference_no', referenceNo);

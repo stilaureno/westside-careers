@@ -46,6 +46,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
     firstTimeApplyEcrc: '',
     workEnvironment: '',
     schedule: '',
+    birthdate: '',
   });
 
   async function openForm(referenceNo: string) {
@@ -82,6 +83,7 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
       firstTimeApplyEcrc: app.first_time_apply_ecrc || '',
       workEnvironment: app.work_environment || '',
       schedule: app.schedule || '',
+      birthdate: app.birthdate || '',
     });
     setMode('form');
   }
@@ -337,9 +339,16 @@ export default function HrInterviewContent({ initialApplicants }: { initialAppli
                 </div>
                 <div>
                   <label style={{ fontSize: '11px', color: '#111827', fontWeight: '700', display: 'block', marginBottom: '2px' }}>Birthday</label>
-                  <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>
-                    {applicant.birthdate ? new Date(applicant.birthdate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}
-                  </span>
+                  <input
+                    type="text"
+                    value={hrForm.birthdate}
+                    onChange={(e) => setHrForm({ ...hrForm, birthdate: e.target.value })}
+                    style={{
+                      width: '100%', padding: '8px 0', border: 'none',
+                      borderRadius: 0, fontSize: '14px', color: '#1f2937',
+                      outline: 'none', background: 'transparent', boxSizing: 'border-box',
+                    }}
+                  />
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
