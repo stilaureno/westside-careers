@@ -46,6 +46,7 @@ export default function ApplyPage() {
   const [applicantNumberRequired, setApplicantNumberRequired] = useState(false);
   const [photoUploadEnabled, setPhotoUploadEnabled] = useState(true);
   const [photoUploadRequired, setPhotoUploadRequired] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -280,11 +281,6 @@ export default function ApplyPage() {
               <PhotoBooth onPhotoCapture={setPhotoUrl} />
             </section>
           )}
-
-          <section className={styles.section}>
-            <h3 className={styles.sectionTitle}>Resume / CV</h3>
-            <CVUploader onFile={setResumeFile} />
-          </section>
 
           <section className={styles.section}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -533,6 +529,31 @@ export default function ApplyPage() {
               />
             </div>
           </section>
+
+          <div className={styles.resumeTrigger} onClick={() => setShowResumeModal(true)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+            </svg>
+            <span>{resumeFile ? 'Resume attached' : 'Attach Resume / CV'}</span>
+            {resumeFile && <span className={styles.resumeBadge}>✓</span>}
+          </div>
+
+          {showResumeModal && (
+            <div className={styles.modalOverlay} onClick={() => setShowResumeModal(false)}>
+              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
+                  <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Resume / CV</h3>
+                  <button type="button" className={styles.modalClose} onClick={() => setShowResumeModal(false)} aria-label="Close">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+                <CVUploader onFile={setResumeFile} />
+              </div>
+            </div>
+          )}
 
           <button type="submit" disabled={loading} className={`${styles.button} ${styles.primaryButton}`}>
             {loading ? 'Submitting...' : 'Submit Application'}
